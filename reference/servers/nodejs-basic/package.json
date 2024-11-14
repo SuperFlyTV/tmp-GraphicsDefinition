@@ -1,0 +1,25 @@
+{
+  "name": "html-graphics-nodejs-server-basic",
+  "version": "0.0.0",
+  "main": "src/main.ts",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon src/main.ts"
+  },
+  "dependencies": {
+    "html-graphics-definition": "file:../../../definition/derived/typescript",
+    "koa": "^2.15.3",
+    "koa-bodyparser": "^4.4.1",
+    "koa-router": "^13.0.1",
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.15.0",
+    "@types/koa-bodyparser": "^4.3.12",
+    "@types/koa-router": "^7.4.8",
+    "@types/mime-types": "^2.1.4",
+    "typescript": "^5.6.3",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2"
+  }
+}

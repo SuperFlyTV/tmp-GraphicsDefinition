@@ -1,0 +1,4 @@
+{
+    "name": "Minimal Test Graphic",
+    "entrypoint": "graphic.js"
+}

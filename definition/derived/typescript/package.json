@@ -1,0 +1,13 @@
+{
+  "name": "html-graphics-definition",
+  "version": "0.0.0",
+  "main": "dist/main.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
