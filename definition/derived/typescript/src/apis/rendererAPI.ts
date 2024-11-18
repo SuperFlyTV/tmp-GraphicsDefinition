@@ -9,66 +9,45 @@ import {
     RenderTargetStatus
 } from "../definitions/renderer"
 
+/*
+ * ================================================================================================
+ *
+ * The Renderer API is a bi-directional API over WebSocket,
+ * based on JSON-RPC 2.0, https://www.jsonrpc.org/specification
+ *
+ *
+ * ================================================================================================
+*/
 
-/** Methods called by the Server (sent to the Renderer) */
-interface MethodsOnRenderer {
-    getManifest: (payload: EmptyPayload) => RendererManifest | ErrorResponse
-    listGraphicsInstances: (payload: EmptyPayload) => GraphicInstance[] | ErrorResponse
-    getStatus: (payload: EmptyPayload) => RendererStatus | ErrorResponse
-    getTargetStatus: (payload: { renderTargetId: string } & EmptyPayload) => RenderTargetStatus | ErrorResponse
+
+/**
+ * Methods called by the Server (sent to the Renderer)
+ * The methods are invoked using JSON-RPC 2.0 over WebSocket
+*/
+export interface MethodsOnRenderer {
+    getManifest: (params: EmptyPayload) => RendererManifest
+    listGraphicsInstances: (params: EmptyPayload) => GraphicInstance[]
+    getStatus: (params: EmptyPayload) => RendererStatus
+    getTargetStatus: (params: { renderTargetId: string } & EmptyPayload) => RenderTargetStatus
     /** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
-    loadGraphic: (payload: { renderTargetId: string } & RenderTargetLoadGraphicPayload) => undefined | ErrorResponse
+    loadGraphic: (params: { renderTargetId: string } & RenderTargetLoadGraphicPayload) => undefined
     /** Clear/unloads a GraphicInstance on a RenderTarget */
-    clearGraphic: (payload: { renderTargetId: string } & RenderTargetClearGraphicPayload) => undefined | ErrorResponse
+    clearGraphic: (params: { renderTargetId: string } & RenderTargetClearGraphicPayload) => undefined
     /** Invokes an action on the graphic */
-    invokeGraphic: (payload: { renderTargetId: string } & GraphicInvokePayload) => unknown | ErrorResponse
+    invokeGraphic: (params: { renderTargetId: string } & GraphicInvokePayload) => unknown
 }
 
-/** Methods called by the Renderer (sent to the Server) */
-interface MethodsOnServer {
+/**
+ * Methods called by the Renderer (sent to the Server)
+ * The methods are invoked using JSON-RPC 2.0 over WebSocket
+ */
+export interface MethodsOnServer {
     /** MUST be emitted when the Renderer has spawned and is ready to receive commands. */
-    register: (payload: {rendererIn?: string}) => undefined | ErrorResponse
+    register: (payload: {rendererIn?: string}) => undefined
     /** CAN be emitted when a Renderer is about to shut down. */
-    unregister: () => undefined | ErrorResponse
+    unregister: () => undefined
     /** CAN be emitted when the status changes */
-    status: (payload: { status: RendererStatus}) => undefined | ErrorResponse
+    status: (payload: { status: RendererStatus}) => undefined
     /** CAN be emitted with debugging info (for developers) */
-    debug: (payload: {message: string }) => undefined | ErrorResponse
-}
-
-
-export interface ErrorResponse {
-    errorCode: number
-    errorMessage: string
-}
-
-
-/** The message sent over WebSocket, from the Server to the Renderer */
-export type MessagesToRenderer<Action extends keyof MethodsOnRenderer> = {
-    /** A unique command id */
-    cmd: number
-    action: Action
-    payload: Parameters<MethodsOnRenderer[Action]>[0]
-} | {
-    // A Reply to a message
-    /** The command we're replying to */
-    replyTo: number
-    replyAction: Action
-    /**  */
-    reply: ReturnType<MethodsOnRenderer[Action]>
-}
-
-/** The message sent over WebSocket, from the Renderer to the Server */
-export type MessagesToServer<Action extends keyof MethodsOnServer> = {
-    /** A unique command id */
-    cmd: number
-    action: Action
-    payload: Parameters<MethodsOnServer[Action]>[0]
-} | {
-    // A Reply to a message
-    /** The command we're replying to */
-    replyTo: number
-    replyAction: Action
-    /**  */
-    reply: ReturnType<MethodsOnServer[Action]>
+    debug: (payload: {message: string }) => undefined
 }
