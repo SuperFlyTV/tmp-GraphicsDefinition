@@ -55,7 +55,9 @@ The **Graphics Definition** is created using the following principles:
 * The Definition should allow for vendors to extend the defined APIs to provide vendor-specific functionality while still being compatible with the Definition.
 * The Definition strives to be forwards and backwards compatible.
 
+### About the definitions
 
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 
 ### API Definitions
