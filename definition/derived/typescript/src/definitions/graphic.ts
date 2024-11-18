@@ -43,6 +43,16 @@ export interface GraphicManifest
 }
 
 /** Payload when invoking an action in a GraphicInstance */
+export interface GraphicLoadPayload {
+    /** A url where to find any Graphics resources */
+    baseUrl: string
+
+    /** Whether the rendering is done in realtime or non-realtime */
+    renderType: "realtime" | "non-realtime"
+
+    [vendorSpecific: VendorSpecific]: unknown
+}
+/** Payload when invoking an action in a GraphicInstance */
 export interface GraphicInvokePayload {
     /** Graphic method, as defined by the Graphic manifest*/
     method: string

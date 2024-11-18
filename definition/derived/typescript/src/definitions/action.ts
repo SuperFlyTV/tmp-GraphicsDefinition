@@ -1,2 +1,7 @@
 
-export type ActionSchema = Record<string, any>  // TBD, JSON Schema
+export type ActionSchema = {
+    label: string
+    description: string
+
+    schema: Record<string, any>  // TBD, JSON Schema
+}

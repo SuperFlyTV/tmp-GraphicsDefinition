@@ -30,11 +30,11 @@ export interface MethodsOnRenderer {
     getStatus: (params: EmptyPayload) => RendererStatus
     getTargetStatus: (params: { renderTargetId: string } & EmptyPayload) => RenderTargetStatus
     /** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
-    loadGraphic: (params: { renderTargetId: string } & RenderTargetLoadGraphicPayload) => undefined
+    loadGraphic: (params: { renderTargetId: string } & RenderTargetLoadGraphicPayload) => void
     /** Clear/unloads a GraphicInstance on a RenderTarget */
-    clearGraphic: (params: { renderTargetId: string } & RenderTargetClearGraphicPayload) => undefined
+    clearGraphic: (params: { renderTargetId: string } & RenderTargetClearGraphicPayload) => void
     /** Invokes an action on the graphic */
-    invokeGraphic: (params: { renderTargetId: string } & GraphicInvokePayload) => unknown
+    invokeGraphic: (params: { renderTargetId: string } & GraphicInvokePayload) => void
 }
 
 /**
@@ -43,11 +43,11 @@ export interface MethodsOnRenderer {
  */
 export interface MethodsOnServer {
     /** MUST be emitted when the Renderer has spawned and is ready to receive commands. */
-    register: (payload: {rendererIn?: string}) => undefined
+    register: (payload: {rendererIn?: string}) => void
     /** CAN be emitted when a Renderer is about to shut down. */
-    unregister: () => undefined
+    unregister: () => void
     /** CAN be emitted when the status changes */
-    status: (payload: { status: RendererStatus}) => undefined
+    status: (payload: { status: RendererStatus}) => void
     /** CAN be emitted with debugging info (for developers) */
-    debug: (payload: {message: string }) => undefined
+    debug: (payload: {message: string }) => void
 }

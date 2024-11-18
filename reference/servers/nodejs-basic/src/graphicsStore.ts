@@ -1,32 +1,32 @@
 import fs from "fs"
 import mime from 'mime-types'
-import { ParameterizedContext } from "koa"
-import * as HTMLGraphicsDefinition from "html-graphics-definition"
 import path from "path"
-import Router from "koa-router"
+import {
+    ServerAPI,
+    GraphicInfo,
+    GraphicManifest
+} from "html-graphics-definition"
+import { CTX, literal } from "./lib"
+import decompress from "decompress"
 
-
-class GraphicsStoreSingleTon {
-
+class GraphicsStoreSingleton {
 
     private FILE_PATH = path.resolve('./localGraphicsStorage')
 
-
     constructor () {
-
         // Ensure the directory exists
         fs.mkdirSync(this.FILE_PATH, { recursive: true })
     }
 
-    async listGraphics(): Promise<HTMLGraphicsDefinition.ServerAPI.GetGraphicsListReturnValue> {
+    async listGraphics(ctx: CTX): Promise<void> {
 
         const folderList = (await fs.promises.readdir(this.FILE_PATH))
 
-        const graphics: HTMLGraphicsDefinition.GraphicInfo[] = []
+        const graphics: GraphicInfo[] = []
         for (const folder of folderList) {
             const {id, version} = this.fromFileName(folder)
 
-            const manifest = JSON.parse(await fs.promises.readFile(path.join(this.FILE_PATH, folder, 'manifest.json'), 'utf8')) as HTMLGraphicsDefinition.GraphicManifest & HTMLGraphicsDefinition.GraphicInfo
+            const manifest = JSON.parse(await fs.promises.readFile(path.join(this.FILE_PATH, folder, 'manifest.json'), 'utf8')) as GraphicManifest & GraphicInfo
 
             // Ensure the id and version match:
             if (id !== manifest.id || version !== `${manifest.version}`) {
@@ -42,33 +42,44 @@ class GraphicsStoreSingleTon {
                 author: manifest.author
             })
         }
-        return {
-            graphics
-        }
+        ctx.body = literal<ServerAPI.GetGraphicsListReturnValue>({ graphics })
     }
-    async getGraphicManifest(id: string, version: string): Promise<HTMLGraphicsDefinition.ServerAPI.GetGraphicManifestReturnValue | undefined> {
+    async getGraphicManifest(ctx: CTX): Promise<void> {
+        const id = ctx.params.id
+        const version = ctx.params.version
+
         const manifestPath = path.join(this.FILE_PATH, this.toFileName(id, version), 'manifest.json')
-        if (!await this.fileExists(manifestPath)) {
-            return undefined
+
+        if (await this.fileExists(manifestPath)) {
+
+
+            const graphicManifest = JSON.parse(await fs.promises.readFile(manifestPath, 'utf8')) as GraphicManifest & GraphicInfo
+
+            if (graphicManifest) {
+                ctx.status = 200
+                ctx.body = literal<ServerAPI.GetGraphicManifestReturnValue>({ graphicManifest })
+                return
+            }
         }
-        const manifest = JSON.parse(await fs.promises.readFile(manifestPath, 'utf8')) as HTMLGraphicsDefinition.GraphicManifest & HTMLGraphicsDefinition.GraphicInfo
-        return {
-            graphicManifest: manifest
-        }
+        // else:
+        ctx.status = 404
+        ctx.body = literal<ServerAPI.ErrorReturnValue>({ code: 404, message: `Graphic ${ctx.params.id}-${ctx.params.version} not found` })
+        return
     }
-    async getGraphicResource(
-        ctx: ParameterizedContext<any, Router.IRouterParamContext<any, {}>, any>,
-        id: string,
-        version: string,
-        localPath: string
-    ): Promise<HTMLGraphicsDefinition.ServerAPI.GetGraphicManifestReturnValue | undefined> {
+    async getGraphicResource(ctx: CTX): Promise<void> {
+
+        const id: string = ctx.params.id
+        const version: string = ctx.params.version
+        const localPath: string = ctx.params.localPath
+
+
         const filePath = path.join(this.FILE_PATH, this.toFileName(id, version), localPath)
 
         const info = await this.getFileInfo(filePath)
 
         if (!info.found) {
             ctx.status = 404
-            ctx.body = 'File not found'
+            ctx.body = literal<ServerAPI.ErrorReturnValue>({code: 404, message: 'File not found'})
             return
         }
 
@@ -77,7 +88,57 @@ class GraphicsStoreSingleTon {
         ctx.lastModified = info.lastModified
 
         const readStream = fs.createReadStream(filePath)
-        ctx.body = readStream
+        ctx.body = readStream as any
+
+        // ServerAPI.GetGraphicManifestReturnValue | undefined
+    }
+    async uploadGraphic(ctx: CTX): Promise<void> {
+        const id = ctx.params.id
+        const version = ctx.params.version
+
+        console.log('uploadGraphic')
+
+        // ctx.status = 501
+        // ctx.body = literal<ServerAPI.ErrorReturnValue>({code: 501, message: 'Not implemented yet'})
+
+        // Expect a zipped file that contains the Graphic
+        const file =  ctx.request.file
+        // console.log('file', ctx.request.file)
+        // console.log('files', ctx.request.files)
+        // console.log('body', ctx.request.body)
+
+        console.log('Uploaded file',file.originalname, file.size)
+
+        if (file.mimetype !== 'application/x-zip-compressed') {
+            ctx.status = 400
+            ctx.body = literal<ServerAPI.ErrorReturnValue>({code: 400, message: 'Expected a zip file'})
+            return
+        }
+
+        const tempZipPath = file.path
+
+        const files = await decompress(tempZipPath, 'tmpGraphic')
+        console.log('files', files)
+
+        const manifest = files.find(f => f.path.endsWith('manifest.json'))
+        if (!manifest) throw new Error('No manifest.json found in zip file')
+
+        const manifestData = JSON.parse(manifest.data.toString('utf8')) as GraphicManifest & GraphicInfo
+
+        const fileName = path.join(this.FILE_PATH, this.toFileName(manifestData.id, `${manifestData.version}`))
+
+
+
+
+        // Store the files in a folder named after the id and version
+        // for (const file of files) {
+
+        //     const filePath =
+
+        // }
+        // console.log('request', ctx.request)
+        // const fileExtension = mime.extension(type)
+
     }
 
 
@@ -129,4 +190,4 @@ class GraphicsStoreSingleTon {
     }
 }
 
-export const GraphicsStore = new GraphicsStoreSingleTon()
+export const GraphicsStore = new GraphicsStoreSingleton()

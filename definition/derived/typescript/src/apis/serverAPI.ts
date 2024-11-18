@@ -14,8 +14,10 @@ import { VendorSpecific } from "../definitions/vendor"
 export const ServerApiPaths = {
     GetListGraphics: () => `/graphics/list`,
     GetGraphicManifest: (id: string, version: string) => `/graphics/graphic/${id}/${version}/manifest`,
+    DELETEGraphic: (id: string, version: string) => `/graphics/graphic/${id}/${version}`,
     GetGraphicResource: (id: string, version: string, localPath: string) => `/graphics/graphic/${id}/${version}/resource/${localPath}`,
-    PutGraphicUpload: (id: string, version: string) => `/graphics/graphic/${id}/${version}`,
+    POSTGraphicUpload: () => `/graphics/graphic`,
+
     GetRenderersList: () => `/renderers/list`,
     GetRendererManifest: (id: string) => `/renderers/renderer/${id}/manifest`,
     GetRenderTargetListGraphicInstances: (id: string) => `/renderers/renderer/${id}/graphicsInstances`,
@@ -24,7 +26,22 @@ export const ServerApiPaths = {
     PutGraphicLoad: (id: string, target: string) => `/renderers/renderer/${id}/target/${target}/load`,
     PutGraphicClear: (id: string) => `/renderers/renderer/${id}/clear`,
     PutGraphicInvoke: (id: string, target: string) => `/renderers/renderer/${id}/target/${target}/invoke`,
+
 }
+
+/**
+ * If there was an error when invoking a method, the body will be a JSON containing this structure.
+ * @see https://www.jsonrpc.org/specification#error_object
+ */
+export interface ErrorReturnValue {
+    code: number
+    message: string
+    data?: any
+}
+
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 /**
  * A list of available graphics
@@ -46,7 +63,11 @@ export interface GetGraphicManifestReturnValue {
     [vendorSpecific: VendorSpecific]: unknown
 }
 // GET /graphics/graphic/${id}/${version}/resource/${localPath} → The actual Graphic
-// PUT /graphics/graphic/${id}/${version}   (upload a Graphic)
+// POST /graphics/graphic/${id}/${version}   (upload a Graphic)
+/*
+   Graphic is uploaded as a zip file, containing the graphic.
+*/
+
 
 /**
  * A list of Renderers
