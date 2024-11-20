@@ -4,7 +4,9 @@
         <script type="module">
 
 
-
+            /*
+             * This simulates what a Renderer would do to load a Graphic.
+             */
             let graphicInstance = null
 
             window.loadTheGraphic = () => {
@@ -17,7 +19,6 @@
                 graphicInstance?.dispose().catch(console.error).finally(() => {
                     document.getElementById('render-target').innerHTML = ''
 
-                    document.getElementById('controls').innerHTML = ''
                     graphicInstance = null
                 })
             }
@@ -27,7 +28,7 @@
 
                 console.log(`Loading Graphic "${graphicPath}"`)
 
-                const invalidateCache= `?a=${Math.round(Math.random()*10000).toString(16)}` // Useful for development, to avoid caching issues
+                const invalidateCache = `?a=${Math.round(Math.random()*10000).toString(16)}` // Useful for development, to avoid caching issues
                 const manifestPath = `${graphicPath}/manifest.json`+ invalidateCache
                 const entrypointPath  = `${graphicPath}/graphic.mjs`+invalidateCache
 
@@ -44,21 +45,7 @@
                 console.log(`Done!`)
 
 
-                // Add controls:
 
-                document.getElementById('controls').innerHTML = ''
-                { // Play button
-                    const button = document.createElement('button')
-                    button.onclick = () => graphicInstance.invoke({ method: 'play' })
-                    button.innerText = 'Play'
-                    document.getElementById('controls').appendChild(button)
-                }
-                { // Stop button
-                    const button = document.createElement('button')
-                    button.onclick = () => graphicInstance.invoke({ method: 'stop' })
-                    button.innerText = 'Stop'
-                    document.getElementById('controls').appendChild(button)
-                }
 
             }
 
@@ -128,9 +115,7 @@
                 <button onclick="loadTheGraphic()">Load Graphic</button>
                 <button onclick="unloadTheGraphic()">Clear Graphic</button>
             </div>
-            <div id="controls">
 
-            </div>
 
 
         </div>

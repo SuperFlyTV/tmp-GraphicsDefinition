@@ -4,24 +4,7 @@
     "version": 1,
     "entrypoint": "graphic.js",
 
-    "actions": {
-        "play": {
-            "label": "Play",
-
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "stop": {
-            "label": "Stop",
-            "schema": null
-        }
-    },
+    "actions": {},
     "rendering": {
         "supportsRealTime": true,
         "supportsNonRealTime": false
