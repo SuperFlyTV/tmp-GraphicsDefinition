@@ -22,20 +22,55 @@ import { VendorSpecific } from "../definitions/vendor"
 */
 
 export const ServerApiPaths = {
+
     GetListGraphics: () => `/serverApi/v1/graphics/list`,
     GetGraphicManifest: (id: string, version: string) => `/serverApi/v1/graphics/graphic/${id}/${version}/manifest`,
     DELETEGraphic: (id: string, version: string) => `/serverApi/v1/graphics/graphic/${id}/${version}`,
-    GetGraphicResource: (id: string, version: string, localPath: string) => `/serverApi/v1/graphics/graphic/${id}/${version}/resource/${localPath}`,
+    GetGraphicResource: (id: string, version: string, localPath: string) => `/serverApi/v1/graphics/graphic/${id}/${version}/resources/${localPath}`,
     POSTGraphicUpload: () => `/serverApi/v1/graphics/graphic`,
+
 
     GetRenderersList: () => `/serverApi/v1/renderers/list`,
     GetRendererManifest: (id: string) => `/serverApi/v1/renderers/renderer/${id}/manifest`,
     GetRenderTargetListGraphicInstances: (id: string) => `/serverApi/v1/renderers/renderer/${id}/graphicInstances`,
     GetRendererStatus: (id: string) => `/serverApi/v1/renderers/renderer/${id}/status`,
     GetRenderTargetStatus: (id: string, target: string) => `/serverApi/v1/renderers/renderer/${id}/target/${target}/status`,
+
+    // PutRendererInvoke: (id: string, target: string) => `/serverApi/v1/renderers/renderer/${id}/invoke`,
+
+    //
     PutGraphicLoad: (id: string, target: string) => `/serverApi/v1/renderers/renderer/${id}/target/${target}/load`,
     PutGraphicClear: (id: string) => `/serverApi/v1/renderers/renderer/${id}/clear`,
     PutGraphicInvoke: (id: string, target: string) => `/serverApi/v1/renderers/renderer/${id}/target/${target}/invoke`,
+
+}
+export interface AllEndpoints {
+    listGraphics
+    'GET /serverApi/v1/graphics/list': (body: GetGraphicsListBody) => PromiseLike<GetGraphicsListReturnValue>
+    getGraphicManifest
+    'GET /serverApi/v1/graphics/graphic/:id/:version/manifest': (body: GetGraphicManifestBody) => PromiseLike<GetGraphicManifestReturnValue>
+    DeleteGraphic
+    'DELETE /serverApi/v1/graphics/graphic/:id/:version': (body: EmptyPayload) => PromiseLike<any | ErrorReturnValue>
+    getGraphicResource
+    'GET /serverApi/v1/graphics/graphic/:id/:version/resources/:localPath': (body: EmptyPayload) => PromiseLike<any | ErrorReturnValue>
+
+    'POST /serverApi/v1/graphics/graphic': (body: any) => PromiseLike<any | ErrorReturnValue>
+
+    'GET /serverApi/v1/renderers/list': (body: GetRenderersListBody) => PromiseLike<GetRenderersListReturnValue>
+
+    'GET /serverApi/v1/renderers/renderer/:id/manifest': (body: GetRendererManifestBody) => PromiseLike<GetRendererManifestReturnValue>
+
+    'GET /serverApi/v1/renderers/renderer/:id/graphicInstances': (body: GetRendererGraphicInstancesBody) => PromiseLike<GetRendererGraphicInstancesReturnValue>
+
+    'GET /serverApi/v1/renderers/renderer/:id/status': (body: GetRendererStatusBody) => PromiseLike<GetRendererStatusReturnValue>
+
+    'GET /serverApi/v1/renderers/renderer/:id/target/:target/status': (body: GetRendererTargetStatusBody) => PromiseLike<GetRendererTargetStatusReturnValue>
+
+    'PUT /serverApi/v1/renderers/renderer/:id/target/:target/load': (body: PutRendererTargetLoadBody) => PromiseLike<PutRendererTargetLoadReturnValue>
+
+    'PUT /serverApi/v1/renderers/renderer/:id/clear': (body: PutRendererTargetClearBody) => PromiseLike<PutRendererTargetClearReturnValue>
+
+    'PUT /serverApi/v1/renderers/renderer/:id/target/:target/invoke': (body: PutRendererTargetInvokeBody) => PromiseLike<PutRendererTargetInvokeReturnValue>
 
 }
 
@@ -68,22 +103,7 @@ export interface ErrorReturnValue {
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-export interface AllEndpoints {
-    'GET /serverApi/v1/graphics/list': (body: GetGraphicsListBody) => PromiseLike<GetGraphicsListReturnValue>
-    'GET /serverApi/v1/graphics/graphic/:id/:version/manifest': (body: GetGraphicManifestBody) => PromiseLike<GetGraphicManifestReturnValue>
-    'DELETE /serverApi/v1/graphics/graphic/:id/:version': (body: EmptyPayload) => PromiseLike<any | ErrorReturnValue>
-    'GET /serverApi/v1/graphics/graphic/:id/:version/resource/:localPath': (body: EmptyPayload) => PromiseLike<any | ErrorReturnValue>
-    'POST /serverApi/v1/graphics/graphic': (body: any) => PromiseLike<any | ErrorReturnValue>
-    'GET /serverApi/v1/renderers/list': (body: GetRenderersListBody) => PromiseLike<GetRenderersListReturnValue>
-    'GET /serverApi/v1/renderers/renderer/:id/manifest': (body: GetRendererManifestBody) => PromiseLike<GetRendererManifestReturnValue>
-    'GET /serverApi/v1/renderers/renderer/:id/graphicInstances': (body: GetRendererGraphicInstancesBody) => PromiseLike<GetRendererGraphicInstancesReturnValue>
-    'GET /serverApi/v1/renderers/renderer/:id/status': (body: GetRendererStatusBody) => PromiseLike<GetRendererStatusReturnValue>
-    'GET /serverApi/v1/renderers/renderer/:id/target/:target/status': (body: GetRendererTargetStatusBody) => PromiseLike<GetRendererTargetStatusReturnValue>
-    'PUT /serverApi/v1/renderers/renderer/:id/target/:target/load': (body: PutRendererTargetLoadBody) => PromiseLike<PutRendererTargetLoadReturnValue>
-    'PUT /serverApi/v1/renderers/renderer/:id/clear': (body: PutRendererTargetClearBody) => PromiseLike<PutRendererTargetClearReturnValue>
-    'PUT /serverApi/v1/renderers/renderer/:id/target/:target/invoke': (body: PutRendererTargetInvokeBody) => PromiseLike<PutRendererTargetInvokeReturnValue>
 
-}
 /**
  * A list of available graphics
  * /graphics/list

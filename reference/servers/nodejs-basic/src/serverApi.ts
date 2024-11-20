@@ -49,9 +49,9 @@ export function setupServerApi(router: Router, graphicsStore: GraphicsStore, ren
 
     router.get('/serverApi/v1/renderers/list', handleError(async (ctx) => rendererManager.listRenderers(ctx)))
     router.get('/serverApi/v1/renderers/renderer/:id/manifest',
-        handleError(async (ctx) => rendererManager.getRendererManifest(ctx.params.id))
+        handleError(async (ctx) => rendererManager.getRendererManifest(ctx))
     )
-    // router.get('/serverApi/v1/renderers/renderer/:id/graphicInstances', handleError(async (ctx) => ))
+    router.get('/serverApi/v1/renderers/renderer/:id/graphicInstances', handleError(async (ctx) => rendererManager.listGraphicInstances(ctx)))
     // router.get('/serverApi/v1/renderers/renderer/:id/status', handleError(async (ctx) => ))
     // router.get('/serverApi/v1/renderers/renderer/:id/target/:target/status', handleError(async (ctx) => ))
     // router.put('/renderers/renderer/:id/target/:target/load', handleError(async (ctx) => ))

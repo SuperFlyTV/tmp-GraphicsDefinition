@@ -36,6 +36,27 @@ export interface GraphicsApi {
     }) => Promise<EmptyPayload>
 }
 
+
+- load()
+- invoke(play)      time: 0
+-tick()             time: 1
+-takeScreenshot()
+-tick()             time: 2
+-takeScreenshot()
+-tick()             time: 3
+-takeScreenshot()
+-tick()
+-takeScreenshot()
+
+
+Predefined Timeline?
+0: play
+15: gotoNextPage()
+22: gotoNextPage()
+35: takeout()
+
+
+
 /**
  * Methods called on a Renderer by the GraphicInstance
  * @throws GraphicsError

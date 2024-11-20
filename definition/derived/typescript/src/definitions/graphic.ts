@@ -7,14 +7,14 @@ export interface GraphicInfo
     id: string
     version: number
     name: string
-    description: string
-    author: string
+    description?: string
+    author?: string
 
     /**
      * true if the Graphic is a work-in-progress.
      * The intention is that the Graphic should not be used on-air.
      */
-    draft: boolean
+    draft?: boolean
 
     [vendorSpecific: VendorSpecific]: unknown
 }

@@ -2,7 +2,6 @@
     "name": "Minimal Test Graphic",
     "id": "minimal",
     "version": 1,
-    "entrypoint": "graphic.js",
 
     "actions": {},
     "rendering": {

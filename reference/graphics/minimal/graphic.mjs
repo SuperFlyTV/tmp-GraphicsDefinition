@@ -15,6 +15,10 @@ class Graphic extends HTMLElement {
     image.src = loadParams.baseUrl + '/resources/thumbs-up.jpg'
     this.appendChild(image)
 
+    const iframe = document.createElement('iframe')
+    iframe.src = loadParams.baseUrl + '/resources/myIframe.html'
+    this.appendChild(iframe)
+
     // When everything is loaded we can return:
     return
   }
@@ -26,6 +30,7 @@ class Graphic extends HTMLElement {
   }
   async invoke (payload) {
     // No actions are implemented in this minimal example
+
   }
   async tick (_payload) {
     throw new Error('Non-realtime not supported!')

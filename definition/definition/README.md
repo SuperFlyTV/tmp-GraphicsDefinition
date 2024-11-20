@@ -42,6 +42,8 @@ There are three main components in the **Graphics Definition**:
 * Is a "Web page"
 * Holds the state of the Graphics
 
+*
+
 _Note: Some vendors may choose to bundle a Renderer / Server into a single system._
 
 
