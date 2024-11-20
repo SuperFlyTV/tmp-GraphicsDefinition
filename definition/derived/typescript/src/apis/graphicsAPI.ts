@@ -5,7 +5,7 @@ import { EmptyPayload } from "../definitions/renderer"
 
 
 /**
- * Methods called on a GraphicsInstance by the Renderer
+ * Methods called on a GraphicInstance by the Renderer
  * @throws GraphicsError
  */
 export interface GraphicsApi {
@@ -37,16 +37,16 @@ export interface GraphicsApi {
 }
 
 /**
- * Methods called on a Renderer by the GraphicsInstance
+ * Methods called on a Renderer by the GraphicInstance
  * @throws GraphicsError
 */
 export interface GraphicsRendererApi {
 
     /** Called when the GI has loaded all its resources and is ready to receive commands  */
     loaded: () => void
-    /** Request to the Renderer to unload/kill the GraphicsInstance */
+    /** Request to the Renderer to unload/kill the GraphicInstance */
     unload: () => void
-    /** Inform the Renderer that the GraphicsInstance status has changed */
+    /** Inform the Renderer that the GraphicInstance status has changed */
     status: (status: GraphicInstanceStatus) => void
     /** Debugging information (for developers) */
     debug: (debugMessage: string) => void

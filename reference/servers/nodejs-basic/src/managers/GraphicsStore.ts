@@ -6,10 +6,10 @@ import {
     GraphicInfo,
     GraphicManifest
 } from "html-graphics-definition"
-import { CTX, literal } from "./lib"
+import { CTX, literal } from "../lib/lib"
 import decompress from "decompress"
 
-class GraphicsStoreSingleton {
+export class GraphicsStore {
 
     private FILE_PATH = path.resolve('./localGraphicsStorage')
 
@@ -39,7 +39,8 @@ class GraphicsStoreSingleton {
                 version: manifest.version,
                 name: manifest.name,
                 description: manifest.description,
-                author: manifest.author
+                author: manifest.author,
+                draft: manifest.draft,
             })
         }
         ctx.body = literal<ServerAPI.GetGraphicsListReturnValue>({ graphics })
@@ -130,6 +131,8 @@ class GraphicsStoreSingleton {
 
 
 
+
+
         // Store the files in a folder named after the id and version
         // for (const file of files) {
 
@@ -160,34 +163,34 @@ class GraphicsStoreSingleton {
     private fromFileName(filename: string): {id: string, version: string} {
         const p = filename.split('-')
         if (p.length !== 2) throw new Error(`Invalid filename ${filename}`)
-        return {id: p[0], version: p[1]}
+            return {id: p[0], version: p[1]}
     }
 
     private async  getFileInfo(filePath: string): Promise<{
         found: false} | {
-        found: true,
-        mimeType: string,
-        length: number,
-        lastModified: Date
-    }> {
-        if (!(await this.fileExists(filePath))) {
-            return { found: false }
-        }
-        let mimeType = mime.lookup(filePath)
-        if (!mimeType) {
-            // Fallback to "unknown binary":
-            mimeType = 'application/octet-stream'
-        }
-
-        const stat = await fs.promises.stat(filePath)
-
-        return {
             found: true,
-            mimeType,
-            length: stat.size,
-            lastModified: stat.mtime,
+            mimeType: string,
+            length: number,
+            lastModified: Date
+        }> {
+            if (!(await this.fileExists(filePath))) {
+                return { found: false }
+            }
+            let mimeType = mime.lookup(filePath)
+            if (!mimeType) {
+                // Fallback to "unknown binary":
+                mimeType = 'application/octet-stream'
+            }
+
+            const stat = await fs.promises.stat(filePath)
+
+            return {
+                found: true,
+                mimeType,
+                length: stat.size,
+                lastModified: stat.mtime,
+            }
         }
     }
-}
 
-export const GraphicsStore = new GraphicsStoreSingleton()
+

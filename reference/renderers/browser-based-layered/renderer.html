@@ -3,6 +3,71 @@
     <body>
         <script type="module">
 
+            setTimeout(() => setup().catch(console.error), 1)
+
+            async function setup() {
+                /** URL to send server requests to: */
+                const serverApiUrl = 'http://localhost:8080/serverApi/v1'
+                /** URL to open websocket connection to */
+                // const rendererApiUrl = 'ws://localhost:8080/rendererApi/v1'
+                const rendererApiUrl = 'ws://localhost:8080/rendererApi/v1'
+                // const rendererApiUrl = 'ws://google.com'
+
+
+                const rendererApi = new RendererApiHandler()
+                // Connect to Server:
+                await rendererApi.connect(rendererApiUrl)
+            }
+
+
+
+
+
+            class RendererApiHandler {
+
+
+                connect(rendererApiUrl) {
+
+                    console.log('connecting to Renderer API at', rendererApiUrl)
+                    this.ws = new WebSocket(rendererApiUrl)
+
+                    this.ws.onopen = (ev) => {
+                        console.log('Connected to Renderer API', ev)
+                        console.log('sending hello..')
+                        this.ws.send('hello from client')
+                    }
+
+                    this.ws.onmessage = (event) => {
+                        console.log('Received message:', event.data)
+                        const message = JSON.parse(event.data)
+
+                        this.handleMessage(message)
+                    }
+
+                    this.ws.onclose = (ev) => {
+                        console.log('Connection to Renderer API closed', ev)
+                    }
+
+                    this.ws.onerror = (error) => {
+                        console.error('Error in connection to Renderer API:', error)
+                    }
+
+                }
+
+
+            }
+
+            /*
+            class LayersManager {
+
+                #layers = []
+
+
+
+            }
+
+
+
 
 
             let graphicInstance = null
@@ -117,6 +182,7 @@
 
                 return graphicInstance
             }
+            */
 
 
         </script>

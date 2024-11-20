@@ -10,6 +10,12 @@ export interface GraphicInfo
     description: string
     author: string
 
+    /**
+     * true if the Graphic is a work-in-progress.
+     * The intention is that the Graphic should not be used on-air.
+     */
+    draft: boolean
+
     [vendorSpecific: VendorSpecific]: unknown
 }
 export interface GraphicManifest

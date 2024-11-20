@@ -5,6 +5,7 @@ _This is a document where we can scribble down notes while working on this defin
 ---
 
 
+* We should split the manifest into { info, manifest }
 
 ## Uploading Graphic File
 
