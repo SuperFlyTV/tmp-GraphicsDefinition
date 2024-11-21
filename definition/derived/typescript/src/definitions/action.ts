@@ -1,7 +1,7 @@
 
 export type ActionSchema = {
     label: string
-    description: string
+    description?: string
 
     schema: Record<string, any>  // TBD, JSON Schema
 }

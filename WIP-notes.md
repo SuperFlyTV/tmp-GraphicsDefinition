@@ -37,3 +37,6 @@ _This is a document where we can scribble down notes while working on this defin
     If a Renderer wants to handle transition logic and advanced composition, it can do so by communicating with the Graphics using vendor specific methods.
 
 blog post: Need to communicate between difference Graphics? - use LocalStorage!
+
+* How to handle non-realtime graphics?
+

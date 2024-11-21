@@ -1,14 +1,19 @@
-import { GraphicInvokePayload } from "../definitions/graphic"
+import { GraphicInvokeActionTarget } from "../definitions/graphic"
 import {
-    EmptyPayload,
     GraphicInstance,
+    GraphicInstanceOnTarget,
+    RendererClearGraphicPayload,
     RendererInfo,
+    RendererLoadGraphicPayload,
     RendererManifest,
     RendererStatus,
-    RenderTargetClearGraphicPayload,
-    RenderTargetLoadGraphicPayload,
     RenderTargetStatus
 } from "../definitions/renderer"
+import {
+    EmptyPayload,
+    ActionInvokePayload,
+    VendorExtend
+} from "../definitions/types"
 
 /*
  * ================================================================================================
@@ -22,6 +27,7 @@ import {
  *
  * The Server MUST accept websocket connections on the path "/rendererApi/v1"
  * The Server SHOULD accept websocket connections on the port 80 / 443 (but other ports are allowed)
+ *
  * ================================================================================================
 */
 
@@ -31,16 +37,26 @@ import {
  * The methods are invoked using JSON-RPC 2.0 over WebSocket
 */
 export interface MethodsOnRenderer {
-    getManifest: (params: EmptyPayload) => PromiseLike<RendererInfo & RendererManifest>
-    listGraphicInstances: (params: EmptyPayload) => PromiseLike<GraphicInstance[]>
-    getStatus: (params: EmptyPayload) => PromiseLike<RendererStatus>
-    getTargetStatus: (params: { renderTargetId: string } & EmptyPayload) => PromiseLike<RenderTargetStatus>
+    getManifest: (params: EmptyPayload) => PromiseLike< { rendererManifest: RendererInfo & RendererManifest } & VendorExtend>
+    // listGraphicInstances: (params: EmptyPayload) => PromiseLike<{ graphicInstances: GraphicInstance[] } & VendorExtend>
+    getStatus: (params: EmptyPayload) => PromiseLike<{ rendererStatus: RendererStatus } & VendorExtend>
+    getTargetStatus: (params: { renderTargetId: string } & VendorExtend) => PromiseLike<{ renderTargetStatus: RenderTargetStatus } & VendorExtend>
+    /** Invokes an action on the Renderer. Actions are defined by the Renderer Manifest */
+    invokeRendererAction: (params: { action: ActionInvokePayload } & VendorExtend) => PromiseLike<{ value: unknown } & VendorExtend>;
+
     /** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
-    loadGraphic: (params: { renderTargetId: string } & RenderTargetLoadGraphicPayload) => PromiseLike<void>
+    loadGraphic: (params: { renderTargetId: string } & RendererLoadGraphicPayload) => PromiseLike<{ graphicInstanceId: string } & VendorExtend>
     /** Clear/unloads a GraphicInstance on a RenderTarget */
-    clearGraphic: (params: { renderTargetId: string } & RenderTargetClearGraphicPayload) => PromiseLike<void>
-    /** Invokes an action on the graphic */
-    invokeGraphic: (params: { renderTargetId: string } & GraphicInvokePayload) => PromiseLike<void>
+    clearGraphic: (params: RendererClearGraphicPayload) => PromiseLike<{ graphicInstance: GraphicInstanceOnTarget[] } & VendorExtend>
+    /** Invokes an action on a graphicInstance. Actions are defined by the Graphic's manifest */
+    invokeGraphicAction: (params:
+        {
+            renderTargetId: string,
+            target: GraphicInvokeActionTarget
+            action: ActionInvokePayload
+
+        } & VendorExtend
+    ) => PromiseLike<{ value: unknown } & VendorExtend>
 }
 
 /**
@@ -52,12 +68,14 @@ export interface MethodsOnServer {
      * MUST be emitted when the Renderer has spawned and is ready to receive commands.
      * Payload:
      * Partial<RendererInfo>
+     * If the id is not set, the Server will pick an id
     */
-    register: (payload: { info: Partial<RendererInfo> }) => PromiseLike<void>
+    register: (params: { info: Partial<RendererInfo> } & VendorExtend) => PromiseLike<{ rendererId: string } & VendorExtend>
     /** CAN be emitted when a Renderer is about to shut down. */
-    unregister: () => PromiseLike<void>
+    unregister: (params: EmptyPayload) => PromiseLike<EmptyPayload>
     /** CAN be emitted when the status changes */
-    status: (payload: { status: RendererStatus }) => PromiseLike<void>
+    status: (params: { status: RendererStatus } & VendorExtend) => PromiseLike<EmptyPayload>
     /** CAN be emitted with debugging info (for developers) */
-    debug: (payload: { message: string }) => PromiseLike<void>
+    debug: (params: { message: string } & VendorExtend) => PromiseLike<EmptyPayload>
 }
+

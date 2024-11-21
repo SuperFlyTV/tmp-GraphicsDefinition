@@ -58,13 +58,13 @@ export interface GraphicLoadPayload {
 
     [vendorSpecific: VendorSpecific]: unknown
 }
-/** Payload when invoking an action in a GraphicInstance */
-export interface GraphicInvokePayload {
-    /** Graphic method, as defined by the Graphic manifest*/
-    method: string
-    /** Payload to send into the method */
-    payload: unknown
 
-    [vendorSpecific: VendorSpecific]: unknown
-}
-
+/**
+ * How to identify a GraphicInstance running on a RenderTarget.
+ * The GraphicInstance can be identified either by the id-version of the Graphic, or by the GraphicInstance id.
+*/
+export type GraphicInvokeActionTarget = (
+    // Address the graphicInstance either by id-version or by graphicInstance id:
+    { graphic: {id: string, version: string } }
+    | { graphicInstanceId: string }
+)

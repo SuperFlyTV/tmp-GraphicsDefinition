@@ -1,7 +1,14 @@
-import { GraphicInvokePayload, GraphicLoadPayload } from "../definitions/graphic"
+import { GraphicLoadPayload } from "../definitions/graphic"
 import { GraphicInstanceStatus } from "../definitions/graphicInstance"
-import { EmptyPayload } from "../definitions/renderer"
+import { ActionInvokePayload, EmptyPayload } from "../definitions/types"
 
+/**
+ * ================================================================================================
+ *
+ * The GraphicsAPI is a javascript interface, ie javascript methods exposed by the GraphicInstance WebComponent.
+ *
+ * ================================================================================================
+ */
 
 
 /**
@@ -26,7 +33,7 @@ export interface GraphicsApi {
     /**
      * Called by the Renderer to invoke a method on the Graphic
      */
-    invoke: (payload: GraphicInvokePayload) => Promise<unknown>
+    invoke: (payload: ActionInvokePayload) => Promise<unknown>
     /**
      * If the Graphic supports non-realtime rendering, this is called to make the graphic jump to a certain point in time.
      * @returns A Promise that resolves when the Graphic has finished rendering the requested frame.
@@ -36,24 +43,6 @@ export interface GraphicsApi {
     }) => Promise<EmptyPayload>
 }
 
-
-- load()
-- invoke(play)      time: 0
--tick()             time: 1
--takeScreenshot()
--tick()             time: 2
--takeScreenshot()
--tick()             time: 3
--takeScreenshot()
--tick()
--takeScreenshot()
-
-
-Predefined Timeline?
-0: play
-15: gotoNextPage()
-22: gotoNextPage()
-35: takeout()
 
 
 
