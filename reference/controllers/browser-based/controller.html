@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <script type="module">
+
+            /**************************************************************************************
+             *
+             * This is a basic Controller that connects to the serverAPI and displays a basic GUI
+             *
+             *************************************************************************************/
+
+            setTimeout(() => setup().catch(console.error), 1)
+
+            const serverApiUrl = 'http://localhost:8080'
+
+            async function setup() {
+                /** URL to send server requests to: */
+
+                await updateGraphics()
+                await updateRenderers()
+                for (const renderer of renderers) {
+                    await updateRendererManifest(renderer)
+                }
+
+                updateGUI()
+            }
+
+
+            let graphics = [] // GraphicInfo[]
+            let renderers = [] // RendererInfo[]
+            const renderersManifest = new Map()
+            async function updateGraphics() {
+                const response = await fetch(`${serverApiUrl}/serverApi/v1/graphics/list`)
+                if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
+
+                const responseData = await response.json()
+                if (!responseData.graphics) throw new Error(`Invalid response data: ${JSON.stringify(responseData)}`)
+                graphics = responseData.graphics
+            }
+            async function updateRenderers() {
+                const response = await fetch(`${serverApiUrl}/serverApi/v1/renderers/list`)
+                if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
+
+                const responseData = await response.json()
+                if (!responseData.renderers) throw new Error(`Invalid response data: ${JSON.stringify(responseData)}`)
+                renderers = responseData.renderers
+            }
+            async function updateRendererManifest(renderer) {
+
+                const response = await fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${renderer.id}/manifest`)
+                if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
+
+                const responseData = await response.json()
+                if (!responseData.rendererManifest) throw new Error(`Invalid response data: ${JSON.stringify(responseData)}`)
+                renderersManifest.set(renderer.id, responseData.rendererManifest)
+            }
+
+
+
+            function updateGUI() {
+
+                console.log('graphics', graphics)
+                console.log('renderers', renderers)
+                console.log('renderersManifest', renderersManifest)
+
+                const elRenderers = document.getElementById('renderers')
+                elRenderers.innerHTML = ''
+                for (const renderer of renderers) {
+                    const elRenderer = document.createElement('div')
+                    elRenderers.appendChild(elRenderer)
+
+                    elRenderer.innerHTML = `
+                        <h2>${renderer.name}</h2>
+                        <p>${renderer.description}</p>
+                    `
+
+                    const elRenderTargets = document.createElement('div')
+                    elRenderers.appendChild(elRenderTargets)
+
+                    elRenderTargets.innerHTML = `
+                        <h3>Render Targets</h3>
+                    `
+                    const rendererManifest = renderersManifest.get(renderer.id)
+
+
+                    for (const renderTarget of rendererManifest.renderTargets) {
+
+                        const elRendererTarget = document.createElement('div')
+                        elRenderTargets.appendChild(elRendererTarget)
+                        elRendererTarget.innerHTML = `
+                            <h4>${renderTarget.name}</h4>
+                            <p>${renderTarget.description || ''}</p>
+                        `
+
+                        const clearButton = document.createElement('button')
+                        clearButton.innerText = 'Clear RenderTarget'
+                        clearButton.onclick = () => {
+                            clearRenderTarget(renderer.id, renderTarget.id)
+                        }
+                        elRendererTarget.appendChild(clearButton)
+
+                        const elGraphics = document.createElement('div')
+                        elRenderTargets.appendChild(elGraphics)
+                        elGraphics.innerHTML = `
+                            <h5>Graphics</h5>
+                        `
+
+                        for (const graphic of graphics) {
+                            const elGraphic = document.createElement('div')
+                            elGraphics.appendChild(elGraphic)
+                            elGraphic.innerHTML = `
+                                <h6>${graphic.name}</h6>
+                                <p>${graphic.description||''}</p>
+                            `
+                            const loadButton = document.createElement('button')
+                            loadButton.innerText = 'Load'
+                            loadButton.onclick = () => {
+                                loadGraphic(renderer.id, renderTarget.id, graphic.id, graphic.version)
+                            }
+                            elGraphic.appendChild(loadButton)
+                        }
+
+                    }
+                }
+            }
+
+            async function loadGraphic(rendererId, renderTargetId, graphicId, graphicVersion) {
+                const response = await fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${rendererId}/target/${renderTargetId}/load`, {
+                    method: "PUT",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ graphic: { id: graphicId, version: graphicVersion } }),
+                })
+                if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
+            }
+            async function clearRenderTarget(rendererId, renderTargetId) {
+                const response = await fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${rendererId}/clear`, {
+                    method: "PUT",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ filter: { renderTargetId } }),
+                })
+                if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
+            }
+
+        </script>
+
+        <div>
+            <div id="renderers"></div>
+        </div>
+    </body>
+</html>
