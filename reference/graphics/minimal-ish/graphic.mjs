@@ -37,12 +37,12 @@ class Graphic extends HTMLElement {
       // TBD
     }
   }
-  async invoke (payload) {
+  async invoke (params) {
 
-    const method = this[`_action_${payload.method}`]
-    if (!method || typeof method !== 'function') throw new Error(`Action not found: ${payload.method}`)
+    const method = this[`_action_${params.method}`]
+    if (!method || typeof method !== 'function') throw new Error(`Action not found: ${params.method}`)
 
-    return method.call(this, payload.payload)
+    return method.call(this, params.payload)
   }
   async tick (_payload) {
     throw new Error('Non-realtime not supported!')
