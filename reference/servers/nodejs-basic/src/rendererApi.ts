@@ -26,6 +26,7 @@ export function setupRendererApi(wsRouter: Router, rendererManager: RendererMana
 
 function setupClientConnection(ws: WebSocket, rendererManager: RendererManager) {
 
+    console.log('New Renderer connected')
     const jsonRpcConnection = new JSONRPCServerAndClient(
         new JSONRPCServer(),
         new JSONRPCClient((request) => {
@@ -53,7 +54,11 @@ function setupClientConnection(ws: WebSocket, rendererManager: RendererManager) 
         const messageString = message.toString();
         // console.log('got message', messageString);
 
-        jsonRpcConnection.receiveAndSend(JSON.parse(messageString));
+        try {
+            jsonRpcConnection.receiveAndSend(JSON.parse(messageString));
+        } catch (error) {
+            console.error('Error handling message:', error);
+        }
     })
     ws.on('close', (code, reason) => {
         rendererManager.closeRenderer(rendererInstance)

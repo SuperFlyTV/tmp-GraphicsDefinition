@@ -1,4 +1,5 @@
 
+import Koa from "koa"
 import Router from "@koa/router"
 import { GraphicsStore } from "./managers/GraphicsStore"
 import { CTX, literal } from "./lib/lib"
@@ -11,52 +12,47 @@ const upload = multer({
     })
 })
 
-// type EnpointsWithContext<T extends Record<string, () => any>> = {
-//     [K in keyof T]: (ctx: CTX, ...args: Parameters<T[K]>) => ReturnType<T[K]>
-// }
 
 export function setupServerApi(router: Router, graphicsStore: GraphicsStore, rendererManager: RendererManager) {
 
 
-    // const api: ServerAPI.AllEndpoints = {
-    //     'GET /serverApi/v1/graphics/list': (body: ServerAPI.GetGraphicsListBody) => PromiseLike<ServerAPI.GetGraphicsListReturnValue>
-    //     'GET /serverApi/v1/graphics/graphic/:id/:version/manifest': (body: ServerAPI.GetGraphicManifestBody) => PromiseLike<ServerAPI.GetGraphicManifestReturnValue>
-    //     'DELETE /serverApi/v1/graphics/graphic/:id/:version': (body: ServerAPI.EmptyPayload) => PromiseLike<ServerAPI.any | ErrorReturnValue>
-    //     'GET /serverApi/v1/graphics/graphic/:id/:version/resource/:localPath': (body: ServerAPI.EmptyPayload) => PromiseLike<ServerAPI.any | ErrorReturnValue>
-    //     'POST /serverApi/v1/graphics/graphic': (body: ServerAPI.any) => PromiseLike<ServerAPI.any | ErrorReturnValue>
-    //     'GET /serverApi/v1/renderers/list': (body: ServerAPI.GetRenderersListBody) => PromiseLike<ServerAPI.GetRenderersListReturnValue>
-    //     'GET /serverApi/v1/renderers/renderer/:id/manifest': (body: ServerAPI.GetRendererManifestBody) => PromiseLike<ServerAPI.GetRendererManifestReturnValue>
-    //     'GET /serverApi/v1/renderers/renderer/:id/graphicInstances': (body: ServerAPI.GetRendererGraphicInstancesBody) => PromiseLike<ServerAPI.GetRendererGraphicInstancesReturnValue>
-    //     'GET /serverApi/v1/renderers/renderer/:id/status': (body: ServerAPI.GetRendererStatusBody) => PromiseLike<ServerAPI.GetRendererStatusReturnValue>
-    //     'GET /serverApi/v1/renderers/renderer/:id/target/:target/status': (body: ServerAPI.GetRendererTargetStatusBody) => PromiseLike<ServerAPI.GetRendererTargetStatusReturnValue>
-    //     'PUT /serverApi/v1/renderers/renderer/:id/target/:target/load': (body: ServerAPI.PutRendererTargetLoadBody) => PromiseLike<ServerAPI.PutRendererTargetLoadReturnValue>
-    //     'PUT /serverApi/v1/renderers/renderer/:id/clear': (body: ServerAPI.PutRendererTargetClearBody) => PromiseLike<ServerAPI.PutRendererTargetClearReturnValue>
-    //     'PUT /serverApi/v1/renderers/renderer/:id/target/:target/invoke': (body: ServerAPI.PutRendererTargetInvokeBody) => PromiseLike<ServerAPI.PutRendererTargetInvokeReturnValue>
-    // }
-
+    // Make strong types for the path:
+    const serverApiRouter = {
+        get: (path: ServerAPI.AnyPath, ...middleware: (Koa.Middleware | ((ctx: CTX) => Promise<void>))[]) => router.get(path, ...middleware),
+        post: (path: ServerAPI.AnyPath, ...middleware: (Koa.Middleware | ((ctx: CTX) => Promise<void>))[]) => router.post(path, ...middleware),
+        put: (path: ServerAPI.AnyPath, ...middleware: (Koa.Middleware | ((ctx: CTX) => Promise<void>))[]) => router.put(path, ...middleware),
+        delete: (path: ServerAPI.AnyPath, ...middleware: (Koa.Middleware | ((ctx: CTX) => Promise<void>))[]) => router.delete(path, ...middleware),
+    }
     // ----- Graphics related endpoints ------------------------------
-    router.get(`/serverApi/v1/graphics/list`, handleError(async (ctx) => graphicsStore.listGraphics(ctx)))
-    router.get(`/serverApi/v1/graphics/graphic/:id/:version/manifest`, handleError(async (ctx) => graphicsStore.getGraphicManifest(ctx)))
-    router.get(`/serverApi/v1/graphics/graphic/:id/:version/resource/:localPath`, handleError(async (ctx) => graphicsStore.getGraphicResource(ctx)))
-    // router.delete(`/serverApi/v1/graphics/graphic/:id/:version`, handleError(async (ctx) => graphicsStore.deleteGraphic(ctx)))
-    router.post(`/serverApi/v1/graphics/graphic`,
+    serverApiRouter.get(`/serverApi/v1/graphics/list`, handleError(async (ctx) => graphicsStore.listGraphics(ctx)))
+    serverApiRouter.delete(`/serverApi/v1/graphics/graphic/:graphicId/:graphicVersion`, handleError(async (ctx) => graphicsStore.deleteGraphic(ctx)))
+    serverApiRouter.get(`/serverApi/v1/graphics/graphic/:graphicId/:graphicVersion/manifest`, handleError(async (ctx) => graphicsStore.getGraphicManifest(ctx)))
+    serverApiRouter.get(`/serverApi/v1/graphics/graphic/:graphicId/:graphicVersion/graphic`, handleError(async (ctx) => graphicsStore.getGraphicModule(ctx)))
+    serverApiRouter.get(`/serverApi/v1/graphics/graphic/:graphicId/:graphicVersion/resources/:localPath`, handleError(async (ctx) => graphicsStore.getGraphicResource(ctx)))
+    serverApiRouter.post(`/serverApi/v1/graphics/graphic`,
         upload.single('graphic'),
         handleError(async (ctx) => graphicsStore.uploadGraphic(ctx))
     )
 
     // ----- Renderer related endpoints --------------------------------
-
-
-    router.get('/serverApi/v1/renderers/list', handleError(async (ctx) => rendererManager.listRenderers(ctx)))
-    router.get('/serverApi/v1/renderers/renderer/:id/manifest',
+    serverApiRouter.get('/serverApi/v1/renderers/list', handleError(async (ctx) => rendererManager.listRenderers(ctx)))
+    serverApiRouter.get('/serverApi/v1/renderers/renderer/:rendererId/manifest',
         handleError(async (ctx) => rendererManager.getRendererManifest(ctx))
     )
-    router.get('/serverApi/v1/renderers/renderer/:id/graphicInstances', handleError(async (ctx) => rendererManager.listGraphicInstances(ctx)))
-    // router.get('/serverApi/v1/renderers/renderer/:id/status', handleError(async (ctx) => ))
-    // router.get('/serverApi/v1/renderers/renderer/:id/target/:target/status', handleError(async (ctx) => ))
-    // router.put('/renderers/renderer/:id/target/:target/load', handleError(async (ctx) => ))
-    // router.put('/serverApi/v1/renderers/renderer/:id/clear', handleError(async (ctx) => ))
-    // router.put('/serverApi/v1/renderers/renderer/:id/target/:target/invoke', handleError(async (ctx) => ))
+    serverApiRouter.get('/serverApi/v1/renderers/renderer/:rendererId/status',
+        handleError(async (ctx) => rendererManager.getRendererStatus(ctx) ))
+    serverApiRouter.get('/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/status',
+        handleError(async (ctx) => rendererManager.getRenderTargetStatus(ctx) ))
+    serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/invoke',
+        handleError(async (ctx) => rendererManager.invokeRendererAction(ctx) ))
+
+    serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/load',
+        handleError(async (ctx) => rendererManager.loadGraphic(ctx) ))
+    serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/clear',
+        handleError(async (ctx) => rendererManager.clearGraphic(ctx) ))
+    serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/invoke',
+        handleError(async (ctx) => rendererManager.invokeGraphicAction(ctx) ))
+
 
 }
 
@@ -68,13 +64,15 @@ function handleError(fcn: (ctx: CTX) => Promise<void>) {
         try {
             await fcn(ctx)
         } catch (err) {
+            console.error(err)
             // Handle internal errors:
             ctx.status = 500
-            ctx.body = literal<ServerAPI.ErrorReturnValue>({ code: 500, message: `Internal Error: ${err}`})
+            const body = literal<ServerAPI.ErrorReturnValue>({ code: 500, message: `Internal Error: ${err}`})
+            ctx.body = body
 
             if (err && typeof err === 'object' && err instanceof Error && err.stack) {
                 // Note: This is a security risk, as it exposes the stack trace to the client (don't do this in production)
-                ctx.body.data = { stack: err.stack }
+                body.data = { stack: err.stack }
             }
         }
     }

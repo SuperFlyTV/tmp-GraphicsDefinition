@@ -7,4 +7,12 @@ export function literal<T>(o: T): T {
 }
 
 
-export type CTX =  ParameterizedContext<DefaultState, DefaultContext & Router.RouterParamContext<DefaultState, DefaultContext>,  ServerAPI.AnyReturnValue>
+export type CTX = ParameterizedContext<
+	DefaultState,
+	DefaultContext
+		& Router.RouterParamContext<DefaultState, DefaultContext>
+		& { request: { body: ServerAPI.AnyBody } },
+	ServerAPI.AnyReturnValue
+>
+
+

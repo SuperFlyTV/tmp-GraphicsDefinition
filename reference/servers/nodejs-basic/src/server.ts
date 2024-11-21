@@ -1,5 +1,6 @@
 import Koa from 'koa'
 import Router from "@koa/router"
+import cors from '@koa/cors'
 import bodyParser from 'koa-bodyparser'
 import { setupServerApi } from './serverApi';
 import { setupRendererApi } from './rendererApi';
@@ -16,6 +17,17 @@ export async function initializeServer() {
         console.error(err)
     })
     app.use(bodyParser())
+
+    app.use(async (ctx, next) => {
+        // the parsed body will store in ctx.request.body
+        // if nothing was parsed, body will be an empty object {}
+        console.log('ctx.request', ctx.request)
+
+        await next()
+      });
+
+    app.use(cors());
+
     const httpRouter = new Router()
     const wsRouter = new Router()
     const filter = new KoaWsFilter ();
