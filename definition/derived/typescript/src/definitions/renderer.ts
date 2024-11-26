@@ -1,4 +1,4 @@
-import { ActionSchema } from "./action"
+import { Action } from "./action"
 import { GraphicInfo } from "./graphic"
 import { GraphicInstanceStatus } from "./graphicInstance"
 import { VendorSpecific } from "./vendor"
@@ -15,13 +15,14 @@ export interface RendererManifest
     // Forwarded from the Renderer: -------------------------------------------------------
     actions: {[
         method: string
-    ]: ActionSchema}
+    ]: Action}
 
     renderTargets: {
-        id: string
-        name: string
-        description?: string
-    }[]
+        [id: string]: {
+            name: string
+            description?: string
+        }
+    }
 
     // Calculated by the Server: --------------------------------------------------------
 

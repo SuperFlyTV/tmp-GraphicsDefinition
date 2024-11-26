@@ -5,9 +5,11 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --build",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "generate-types": "node scripts/generate-types.js"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "json-schema-to-typescript": "^15.0.3"
   }
 }

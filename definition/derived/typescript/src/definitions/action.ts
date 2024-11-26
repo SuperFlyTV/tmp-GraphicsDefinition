@@ -1,5 +1,5 @@
 
-export type ActionSchema = {
+export type Action = {
     label: string
     description?: string
 

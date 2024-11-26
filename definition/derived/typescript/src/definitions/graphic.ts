@@ -1,4 +1,4 @@
-import { ActionSchema } from "./action"
+import { Action } from "./action"
 import { VendorSpecific } from "./vendor"
 
 export interface GraphicInfo
@@ -8,7 +8,11 @@ export interface GraphicInfo
     version: number
     name: string
     description?: string
-    author?: string
+    author?: {
+        name: string
+        email?: string
+        url?: string
+    }
 
     /**
      * true if the Graphic is a work-in-progress.
@@ -23,7 +27,7 @@ export interface GraphicManifest
     // Forwarded from the Graphic Definition: --------------------------------------------
     actions: {[
         path: string
-    ]: ActionSchema}
+    ]: Action}
 
     rendering: {
         /** If the Graphic supports RealTime Rendering. */

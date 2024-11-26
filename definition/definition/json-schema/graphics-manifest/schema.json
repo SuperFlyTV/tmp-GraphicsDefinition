@@ -1,0 +1,85 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+            "description": "Reference to the JSON-schema"
+        },
+        "id": {
+            "type": "string",
+            "description": "The id of the Graphic uniquely identifies it. It is recommended to use a reverse domain name notation. For example: com.superflytv.my-lowerthird."
+        },
+        "version": {
+            "type": "integer",
+            "description": "The version of the Graphic. The id-version combination must be globally unique and once a version has been assigned, the Graphic is considered immutable."
+        },
+        "name": {
+            "type": "string",
+            "description": "Name of the Graphic"
+        },
+        "description": {
+            "type": "string",
+            "description": "(optional) A longer description of the Graphic"
+        },
+        "author": {
+            "type": "object",
+            "description": "(optional) About the author",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the author"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "(optional) Email of the author"
+                },
+                "url": {
+                    "type": "string",
+                    "description": "(optional) URL of the author"
+                }
+            },
+            "required": ["name"],
+            "patternProperties":{
+                "^_.*": {}
+            },
+            "additionalProperties": false
+        },
+        "actions": {
+            "type": "object",
+            "description": "Custom Actions that can be invoked on the Graphic.",
+            "patternProperties": {
+                ".": {
+                    "type": "object",
+                    "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/action.json"
+                }
+            }
+        },
+        "rendering": {
+            "type": "object",
+            "description": "Properties of the Graphic related to the Renderer",
+            "properties": {
+                "supportsRealTime": {
+                    "type": "boolean",
+                    "description": "Indicates if the Graphic supports real-time rendering"
+                },
+                "supportsNonRealTime": {
+                    "type": "boolean",
+                    "description": "Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'tick()' method."
+                }
+            },
+            "patternProperties":{
+                "^_.*": {}
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": ["id", "version", "name", "actions", "rendering"],
+    "patternProperties":{
+        "^_.*": {}
+    },
+    "additionalProperties": false
+
+}

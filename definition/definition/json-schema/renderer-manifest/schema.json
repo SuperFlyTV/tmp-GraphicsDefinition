@@ -1,0 +1,56 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+            "description": "Reference to the JSON-schema"
+        },
+        "id": {
+            "type": "string",
+            "description": "The id of the Renderer."
+        },
+        "name": {
+            "type": "string",
+            "description": "Name of the Renderer. This is displayed to the User."
+        },
+        "actions": {
+            "type": "object",
+            "description": "Custom Actions that can be invoked on the Renderer.",
+            "patternProperties": {
+                ".": {
+                    "type": "object",
+                    "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/action.json"
+                }
+            }
+        },
+        "renderTargets": {
+            "type": "object",
+            "description": "The different RenterTargets this Renderer can render to.",
+            "patternProperties": {
+                ".": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the RenderTarget. This is displayed to the User."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A longer description of the RenderTarget. This is displayed to the User."
+                        }
+                    },
+                    "required": ["name"]
+                }
+            }
+        }
+    },
+    "required": ["id", "name", "actions", "renderTargets"],
+    "patternProperties":{
+        "^_.*": {}
+    },
+    "additionalProperties": false
+
+}
