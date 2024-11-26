@@ -2,35 +2,26 @@ import Koa from 'koa'
 import Router from "@koa/router"
 import cors from '@koa/cors'
 import bodyParser from 'koa-bodyparser'
-import { setupServerApi } from './serverApi';
-import { setupRendererApi } from './rendererApi';
-import { KoaWsFilter } from '@zimtsui/koa-ws-filter';
-import { GraphicsStore } from './managers/GraphicsStore';
-import { RendererManager } from './managers/RendererManager';
+import { setupServerApi } from './serverApi'
+import { setupRendererApi } from './rendererApi'
+import { KoaWsFilter } from '@zimtsui/koa-ws-filter'
+import { GraphicsStore } from './managers/GraphicsStore'
+import { RendererManager } from './managers/RendererManager'
 
 export async function initializeServer() {
 
     const app = new Koa()
-    // const app = websockify(new Koa())
 
     app.on('error', (err: unknown) => {
         console.error(err)
     })
     app.use(bodyParser())
 
-    app.use(async (ctx, next) => {
-        // the parsed body will store in ctx.request.body
-        // if nothing was parsed, body will be an empty object {}
-        console.log('ctx.request', ctx.request)
-
-        await next()
-      });
-
-    app.use(cors());
+    app.use(cors())
 
     const httpRouter = new Router()
     const wsRouter = new Router()
-    const filter = new KoaWsFilter ();
+    const filter = new KoaWsFilter ()
 
     // Initialize internal business logic
     const graphicsStore = new GraphicsStore()
@@ -52,30 +43,20 @@ export async function initializeServer() {
     </ul>
     <div>
     <form action="/serverApi/v1/graphics/graphic" method="post" enctype="multipart/form-data">
-        Upload Graphic: <br />
+        Upload Graphic (zip file): <br />
         <input type="file" id="graphic" name="graphic" accept=".zip" />
         <input type="submit" />
     </form>
     </div>
 </body>
 </html>`
-
     })
 
-    // app.ws.use(async(ctx, next) => {
-    //     console.log('ws request', ctx.method, ctx.url)
-    //     await next()
-    // })
-
-    // ;(app.ws as any).use(router.routes()).use(router.allowedMethods())
-
-    filter.http(httpRouter.routes());
-    filter.ws(wsRouter.routes());
+    filter.http(httpRouter.routes())
+    filter.ws(wsRouter.routes())
 
 
-    // app.use(router.routes()).use(router.allowedMethods())
-
-    app.use(filter.protocols());
+    app.use(filter.protocols())
 
     const PORT = 8080
 

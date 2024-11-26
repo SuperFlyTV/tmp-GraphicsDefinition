@@ -76,6 +76,12 @@ export class GraphicsStore {
 
             if (graphicManifest) {
                 ctx.status = 200
+                if (this.isImmutable(version)) {
+                    ctx.header['Cache-Control'] = 'public, max-age=31536000, immutable'
+                } else {
+                    // Never cache:
+                    ctx.header['Cache-Control'] = 'no-store'
+                }
                 ctx.body = literal<ServerAPI.Endpoints['getGraphicManifest']['returnValue']>({ graphicManifest })
                 return
             }
@@ -97,7 +103,7 @@ export class GraphicsStore {
             return
         }
 
-        await this.serveFile(ctx, path.join(this.FILE_PATH, this.toFileName(id, version), 'graphic.mjs'))
+        await this.serveFile(ctx, path.join(this.FILE_PATH, this.toFileName(id, version), 'graphic.mjs'), this.isImmutable(version))
     }
     async getGraphicResource(ctx: CTX): Promise<void> {
         const params = ctx.params as ServerAPI.Endpoints['getGraphicResource']['params']
@@ -106,7 +112,7 @@ export class GraphicsStore {
         const localPath: string = params.localPath
 
         // Note: We DO serve resources even if the Graphic is marked for removal!
-        await this.serveFile(ctx, path.join(this.FILE_PATH, this.toFileName(id, version), 'resources', localPath))
+        await this.serveFile(ctx, path.join(this.FILE_PATH, this.toFileName(id, version), 'resources', localPath), this.isImmutable(version))
     }
     async deleteGraphic(ctx: CTX): Promise<void> {
         const params = ctx.params as ServerAPI.Endpoints['deleteGraphic']['params']
@@ -144,86 +150,97 @@ export class GraphicsStore {
 
         const tempZipPath = file.path
 
-        const files = await decompress(tempZipPath, 'tmpGraphic')
-        console.log('files', files)
+        const decompressPath = path.resolve('tmpGraphic')
 
-
-
-
-        const manifest = files.find(f => f.path.endsWith('manifest.json'))
-        if (!manifest) throw new Error('No manifest.json found in zip file')
-
-        const graphicModule = files.find(f => f.path.endsWith('graphic.mjs'))
-        if (!graphicModule) throw new Error('No graphic.mjs found in zip file')
-
-        let basePath = ''
-        if (graphicModule.path.includes('/graphic.mjs')) { // basepath/graphic.mjs
-            basePath = graphicModule.path.slice(0, -'/graphic.mjs'.length)
-        }
-        console.log('basePath', basePath)
-
-        const manifestData = JSON.parse(manifest.data.toString('utf8')) as GraphicManifest & GraphicInfo
-
-        const id = manifestData.id
-        const version = `${manifestData.version}`
-        const folderPath = path.join(this.FILE_PATH, this.toFileName(id, `${version}`))
-
-        // Check if the Graphic already exists
-        let alreadyExists = false
-        if (await this.fileExists(folderPath)) {
-            alreadyExists = true
-
-            if (await this.isGraphicMarkedForRemoval(id, version)) {
-                // If a pre-existing graphic is marked for removal, we can overwrite it.
-                await this.actuallyDeleteGraphic(id, version)
-                alreadyExists = false
-            }
-        }
-        if (alreadyExists) {
-            ctx.status = 409 // conflict
-            ctx.body = literal<ServerAPI.ErrorReturnValue>({code: 409, message: 'Graphic already exists'})
-            return
-        }
-
-        // Copy the files to the right folder:
-        await fs.promises.mkdir(folderPath, { recursive: true })
-
-        const fileName = path.join(this.FILE_PATH, this.toFileName(manifestData.id, `${manifestData.version}`))
-
-
-
-        for (const innerFile of files) {
-            if (innerFile.type !== 'directory') continue
-
-            const filePath = innerFile.path.slice(basePath.length) // Remove the base path
+        const cleanup = async () => {
             try {
-                await fs.promises.mkdir(path.join(folderPath, filePath), { recursive: true })
-            } catch (err) {
-                if (!`${err}`.includes('EEXIST')) throw err // Ignore "already exists" errors
+                await fs.promises.rm(decompressPath, { recursive: true })
+            } catch (err: any) {
+                if (err.code !== 'ENOENT') throw err
+            }
+        }
+        try {
+            await cleanup()
+
+
+            const files = await decompress(tempZipPath, decompressPath)
+            console.log('files', files)
+
+
+
+
+            const manifest = files.find(f => f.path.endsWith('manifest.json'))
+            if (!manifest) throw new Error('No manifest.json found in zip file')
+
+            const graphicModule = files.find(f => f.path.endsWith('graphic.mjs'))
+            if (!graphicModule) throw new Error('No graphic.mjs found in zip file')
+
+            let basePath = ''
+            if (graphicModule.path.includes('/graphic.mjs')) { // basepath/graphic.mjs
+                basePath = graphicModule.path.slice(0, -'/graphic.mjs'.length)
+            }
+            console.log('basePath', basePath)
+
+            const manifestData = JSON.parse(manifest.data.toString('utf8')) as GraphicManifest & GraphicInfo
+
+            const id = manifestData.id
+            const version = `${manifestData.version}`
+            const folderPath = path.join(this.FILE_PATH, this.toFileName(id, `${version}`))
+
+            // Check if the Graphic already exists
+            let alreadyExists = false
+            if (await this.fileExists(folderPath)) {
+                alreadyExists = true
+
+                if (await this.isGraphicMarkedForRemoval(id, version)) {
+                    // If a pre-existing graphic is marked for removal, we can overwrite it.
+                    await this.actuallyDeleteGraphic(id, version)
+                    alreadyExists = false
+                } else if (version === '0') {
+                    // If the version is 0, it is considered mutable, so we can overwrite it.
+                    await this.actuallyDeleteGraphic(id, version)
+                    alreadyExists = false
+                }
+            }
+            if (alreadyExists) {
+                await cleanup()
+
+                ctx.status = 409 // conflict
+                ctx.body = literal<ServerAPI.ErrorReturnValue>({code: 409, message: 'Graphic already exists'})
+                return
             }
 
+            // Copy the files to the right folder:
+            await fs.promises.mkdir(folderPath, { recursive: true })
+
+            const fileName = path.join(this.FILE_PATH, this.toFileName(manifestData.id, `${manifestData.version}`))
+
+
+
+            for (const innerFile of files) {
+                if (innerFile.type !== 'directory') continue
+
+                const filePath = innerFile.path.slice(basePath.length) // Remove the base path
+                try {
+                    await fs.promises.mkdir(path.join(folderPath, filePath), { recursive: true })
+                } catch (err) {
+                    if (!`${err}`.includes('EEXIST')) throw err // Ignore "already exists" errors
+                }
+
+            }
+            for (const innerFile of files) {
+                if (innerFile.type !== 'file') continue
+
+                const filePath = innerFile.path.slice(basePath.length) // Remove the base path
+                await fs.promises.writeFile(path.join(folderPath, filePath), innerFile.data)
+            }
+
+            ctx.status = 200
+            ctx.body = literal<ServerAPI.Endpoints['uploadGraphic']['returnValue']>({})
+        } finally {
+            // clean up after ourselves:
+            await cleanup()
         }
-        for (const innerFile of files) {
-            if (innerFile.type !== 'file') continue
-
-            const filePath = innerFile.path.slice(basePath.length) // Remove the base path
-            await fs.promises.writeFile(path.join(folderPath, filePath), innerFile.data)
-        }
-
-
-
-        // TODO!
-
-
-        // Store the files in a folder named after the id and version
-        // for (const file of files) {
-
-        //     const filePath =
-
-        // }
-        // console.log('request', ctx.request)
-        // const fileExtension = mime.extension(type)
-
     }
 
 
@@ -246,6 +263,12 @@ export class GraphicsStore {
         const p = filename.split('-')
         if (p.length !== 2) throw new Error(`Invalid filename ${filename}`)
             return {id: p[0], version: p[1]}
+    }
+    private isImmutable(version: string) {
+        // If the version is 0, the graphic is considered mutable
+        // ie, it is a non-production version, in development
+        // Otherwise it is considered immutable.
+        return `${version}` !== '0'
     }
 
     private async getFileInfo(filePath: string): Promise<
@@ -277,7 +300,7 @@ export class GraphicsStore {
             lastModified: stat.mtime,
         }
     }
-    private async serveFile(ctx: CTX, fullPath: string): Promise<void> {
+    private async serveFile(ctx: CTX, fullPath: string, immutable: boolean): Promise<void> {
 
         const info = await this.getFileInfo(fullPath)
 
@@ -290,6 +313,13 @@ export class GraphicsStore {
         ctx.type = info.mimeType
         ctx.length = info.length
         ctx.lastModified = info.lastModified
+
+        if (immutable) {
+            ctx.header['Cache-Control'] = 'public, max-age=31536000, immutable'
+        } else {
+            // Never cache:
+            ctx.header['Cache-Control'] = 'no-store'
+        }
 
         const readStream = fs.createReadStream(fullPath)
         ctx.body = readStream as any

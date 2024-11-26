@@ -42,7 +42,7 @@ export interface MethodsOnRenderer {
     getStatus: (params: EmptyPayload) => PromiseLike<{ rendererStatus: RendererStatus } & VendorExtend>
     getTargetStatus: (params: { renderTargetId: string } & VendorExtend) => PromiseLike<{ renderTargetStatus: RenderTargetStatus } & VendorExtend>
     /** Invokes an action on the Renderer. Actions are defined by the Renderer Manifest */
-    invokeRendererAction: (params: { action: ActionInvokePayload } & VendorExtend) => PromiseLike<{ value: unknown } & VendorExtend>;
+    invokeRendererAction: (params: { action: ActionInvokePayload } & VendorExtend) => PromiseLike<{ value: unknown } & VendorExtend>
 
     /** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
     loadGraphic: (params: { renderTargetId: string } & RendererLoadGraphicPayload) => PromiseLike<{ graphicInstanceId: string } & VendorExtend>

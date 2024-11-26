@@ -17,11 +17,11 @@ export function setupRendererApi(wsRouter: Router, rendererManager: RendererMana
     wsRouter.all('/rendererApi/v1', async (ctx, next) => {
         // A client has connected,
         // accept the websocket upgrade request
-        const ws: WebSocket = await ctx.upgrade();
-        await next();
+        const ws: WebSocket = await ctx.upgrade()
+        await next()
 
         setupClientConnection(ws, rendererManager)
-    });
+    })
 }
 
 function setupClientConnection(ws: WebSocket, rendererManager: RendererManager) {
@@ -31,10 +31,10 @@ function setupClientConnection(ws: WebSocket, rendererManager: RendererManager) 
         new JSONRPCServer(),
         new JSONRPCClient((request) => {
             try {
-                ws.send(JSON.stringify(request));
-                return Promise.resolve();
+                ws.send(JSON.stringify(request))
+                return Promise.resolve()
             } catch (error) {
-                return Promise.reject(error);
+                return Promise.reject(error)
             }
         })
     )
@@ -51,13 +51,13 @@ function setupClientConnection(ws: WebSocket, rendererManager: RendererManager) 
 
     // Handle incoming messages
     ws.on('message', message => {
-        const messageString = message.toString();
-        // console.log('got message', messageString);
+        const messageString = message.toString()
+        // console.log('got message', messageString)
 
         try {
-            jsonRpcConnection.receiveAndSend(JSON.parse(messageString));
+            jsonRpcConnection.receiveAndSend(JSON.parse(messageString))
         } catch (error) {
-            console.error('Error handling message:', error);
+            console.error('Error handling message:', error)
         }
     })
     ws.on('close', (code, reason) => {

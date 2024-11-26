@@ -12,9 +12,16 @@
             "description": "A longer description of the action. This is displayed to the user."
         },
         "schema": {
-            "type": "object",
             "description": "The schema of the action. This is used to validate the action parameters as well as auto-generate a GUI for the action.",
-            "$ref": "https://superflytv.github.io/GraphicsDataDefinition/gdd-meta-schema/v1/lib/object.json"
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object",
+                    "$ref": "https://superflytv.github.io/GraphicsDataDefinition/gdd-meta-schema/v1/lib/object.json"
+                }
+            ]
         }
     },
     "required": ["label", "schema"],

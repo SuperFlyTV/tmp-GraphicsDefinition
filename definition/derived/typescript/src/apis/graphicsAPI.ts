@@ -92,6 +92,6 @@ export class GraphicsError extends Error {
         if (!Number.isInteger(this.code)) throw new Error("code must be an integer")
 
         // Set the prototype explicitly.
-        Object.setPrototypeOf(this, GraphicsError.prototype);
+        Object.setPrototypeOf(this, GraphicsError.prototype)
     }
 }

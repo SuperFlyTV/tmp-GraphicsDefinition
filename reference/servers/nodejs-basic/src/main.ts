@@ -1,4 +1,4 @@
-import { initializeServer } from "./server";
+import { initializeServer } from "./server"
 
 
 

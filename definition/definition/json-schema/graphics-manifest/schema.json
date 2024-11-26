@@ -14,7 +14,7 @@
         },
         "version": {
             "type": "integer",
-            "description": "The version of the Graphic. The id-version combination must be globally unique and once a version has been assigned, the Graphic is considered immutable."
+            "description": "The version of the Graphic. The id-version combination must be globally unique and once a version has been assigned, the Graphic is considered immutable (expect when version = 0)."
         },
         "name": {
             "type": "string",

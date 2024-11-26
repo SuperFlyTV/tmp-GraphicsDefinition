@@ -1,4 +1,5 @@
 {
+    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
     "name": "Minimal Test Graphic",
     "id": "minimal",
     "version": 1,

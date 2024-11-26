@@ -40,3 +40,9 @@ blog post: Need to communicate between difference Graphics? - use LocalStorage!
 
 * How to handle non-realtime graphics?
 
+* Thumbnails?
+
+* Graphic Capabilities, Renderer properties
+    dimensions, GPU acceleration
+
+* Graphics in hierarchy? paths?

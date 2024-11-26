@@ -399,7 +399,15 @@
                     this.serverApiUrl = serverApiUrl
                 }
                 async loadGraphic(id, version) {
-                    const graphicIdVersion = `${id}-${version}`
+                    let graphicIdVersion = `${id}-${version}`
+
+                    if (`${version}` === '0') {
+                        // If the version is 0, we consider the graphic to be mutable
+                        // and we should always load the latest version.
+
+                        // This makes graphicIdVersion be unique, so we'll never hit the cache:
+                        graphicIdVersion += `:${Date.now()}`
+                    }
 
                     // Check if the Graphic is already registered:
                     const cachedGraphic = customElements.get( graphicIdVersion )
@@ -417,7 +425,7 @@
                     const webComponent = await this.fetchModule(id, version)
 
                     // register the web component
-                    customElements.define( graphicIdVersion, webComponent );
+                    customElements.define( graphicIdVersion, webComponent )
 
                     return graphicIdVersion
                 }
