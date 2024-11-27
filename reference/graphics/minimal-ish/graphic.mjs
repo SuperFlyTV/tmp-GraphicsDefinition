@@ -42,7 +42,7 @@ class Graphic extends HTMLElement {
       // TBD
     }
   }
-  async invoke (params) {
+  async invokeAction (params) {
 
     const method = this[`_action_${params.method}`]
     if (!method || typeof method !== 'function') throw new Error(`Action not found: ${params.method}`)

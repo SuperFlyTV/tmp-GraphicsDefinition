@@ -4,7 +4,7 @@ import { getDefaultDataFromSchema } from './GDD/gdd/data.js'
 import { GDDGUI } from './GDD/gdd-gui.jsx'
 
 const SERVER_API_URL = 'http://localhost:8080'
-// console.log('a')
+
 export function App() {
 
     const [serverApiUrl, setServerApiUrl] = React.useState(SERVER_API_URL)
@@ -181,7 +181,6 @@ function QueuedGraphic({ serverApiUrl, serverData, renderer, graphic }) {
 
     const manifest = getGraphicManifest(serverApiUrl, graphic)
 
-    console.log('manifest', manifest)
 
     return <div>
         <h4>{graphic.name}</h4>
@@ -222,7 +221,7 @@ function QueuedGraphic({ serverApiUrl, serverData, renderer, graphic }) {
 
                             return <div key={actionId} className='card' style={{width: '30em', display: 'inline-block'}}>
                                 <div className='card-body'>
-                                    <GraphicsAction serverApiUrl={serverApiUrl} serverData={serverData} renderer={renderer} graphic={graphic} actionId={actionId} action={action} />
+                                    <GraphicsAction serverApiUrl={serverApiUrl} serverData={serverData} renderer={renderer} graphic={graphic} renderTarget={renderTarget} actionId={actionId} action={action} />
 
                                 </div>
                             </div>
@@ -267,7 +266,7 @@ function getGraphicManifest(serverApiUrl, graphic) {
 }
 
 
-function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, actionId, action }) {
+function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, renderTarget, actionId, action }) {
 
 
 
@@ -278,10 +277,11 @@ function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, actionId,
     const [data, setData] = React.useState(initialData);
 
     const onDataSave = (d) => {
-        console.log('onDataSave', d)
-        setData(d)
+        setData(
+            JSON.parse(JSON.stringify(d))
+        )
     }
-    console.log('d', data)
+
 
     return <div>
 
@@ -291,6 +291,24 @@ function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, actionId,
             }
         </div>
         <Button onClick={() => {
+            // Invoke action:
+
+            fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${renderer.id}/target/${renderTarget.id}/invoke`, {
+                method: "PUT",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    target: { graphic: {id: graphic.id, version: graphic.version } },
+                    action: {
+                        method: actionId,
+                        payload: data
+                    }
+                 }),
+            }).then((response) => {
+                if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
+            }).catch(console.error)
+
+
+
 
         }}>{action.label}</Button>
     </div>

@@ -214,7 +214,7 @@
                 /** Clear/unloads a GraphicInstance on a RenderTarget */
                 clearGraphic (params) {
                     // JSON RPC Method
-                    console.log('params', params)
+                    // console.log('params', params)
 
                     let layers = []
                     if (params.filters?.renderTargetId) {
@@ -224,7 +224,6 @@
                     } else {
                         layers = this.layersManager.getAllLayers()
                     }
-                    console.log('layers', layers)
 
                     const clearedGraphicInstancesOnLayer = []
                     for (const layer of layers) {
@@ -269,20 +268,9 @@
                     const layer = this.layersManager.getLayer(params.renderTargetId)
                     if (!layer) throw new Error(`Layer not found: ${params.renderTargetId}`)
 
-                    const graphicInstance = layer.getGraphicInstance()
-                    if (!graphicInstance) throw new Error(`No GraphicInstance on Layer ${params.renderTargetId}`)
+                    return layer.invokeAction(params)
 
-                    const targetMatch = (
-                        params.target.graphic ?
-                        (
-                            params.target.graphic.id === graphicInstance.graphicId &&
-                            params.target.graphic.version === graphicInstance.graphicVersion
-                        ) :
-                        params.target.graphicInstanceId === graphicInstance.id
-                    )
-                    if (!targetMatch) throw new Error(`No GraphicInstance found matching target: ${JSON.stringify(params.target)}`)
 
-                    return { value: await graphicInstance.invokeAction(params) }
                 }
             }
 
@@ -378,11 +366,20 @@
                     return this.graphicInstance
                 }
                 async invokeAction(params) {
-                    // TODO
                     const graphicInstance = this.getGraphicInstance()
-                    if (!graphicInstance) throw new Error('No GraphicInstance loaded')
+                    if (!graphicInstance) throw new Error(`No GraphicInstance on Layer ${params.renderTargetId}`)
 
-                    graphicInstance.element.invoke(params)
+                    const targetMatch = (
+                        params.target.graphic ?
+                        (
+                            params.target.graphic.id === graphicInstance.graphicId &&
+                            params.target.graphic.version === graphicInstance.graphicVersion
+                        ) :
+                        params.target.graphicInstanceId === graphicInstance.id
+                    )
+                    if (!targetMatch) throw new Error(`No GraphicInstance found matching target: ${JSON.stringify(params.target)}`)
+
+                    return { value: await graphicInstance.element.invokeAction(params.action) }
                 }
             }
             let graphicInstanceId = 0
@@ -411,7 +408,7 @@
                     //     // This makes graphicIdVersion be unique, so we'll never hit the cache:
                     //     graphicIdVersion += `--${Date.now()}`
                     // }
-                    console.log('graphicIdVersion', graphicIdVersion)
+                    // console.log('graphicIdVersion', graphicIdVersion)
 
                     // Check if the Graphic is already registered:
                     const cachedGraphic = customElements.get( graphicIdVersion )

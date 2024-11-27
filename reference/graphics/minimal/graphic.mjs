@@ -28,7 +28,7 @@ class Graphic extends HTMLElement {
   async getStatus (_payload) {
     return {}
   }
-  async invoke (params) {
+  async invokeAction (params) {
     // No actions are implemented in this minimal example
     // params.method, params.payload
 

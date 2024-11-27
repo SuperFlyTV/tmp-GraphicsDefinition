@@ -35,6 +35,7 @@ const getBasicType = (schemaType) => {
   return Array.isArray(schemaType) ? schemaType[0] : schemaType;
 };
 const componentAny = (props) => {
+
   if (!props.schema) return "null";
   const basicType = getBasicType(props.schema.type);
 

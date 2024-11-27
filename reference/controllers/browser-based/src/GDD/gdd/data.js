@@ -20,7 +20,7 @@ export function validateData(GDDSchema, data) {
 }
 export function getDefaultDataFromSchema(GDDSchema, prefilledData, key) {
   // Note: this function assumes that the schema provided has been validated by validateSchema()
-  console.log('GDDSchema', GDDSchema)
+
   if (GDDSchema.type === "object") {
     const dataObject = clone(prefilledData ?? GDDSchema.default ?? {});
     for (const [subKey, subSchema] of Object.entries(GDDSchema.properties)) {
