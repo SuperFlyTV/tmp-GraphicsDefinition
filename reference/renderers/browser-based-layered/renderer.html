@@ -214,15 +214,17 @@
                 /** Clear/unloads a GraphicInstance on a RenderTarget */
                 clearGraphic (params) {
                     // JSON RPC Method
+                    console.log('params', params)
 
                     let layers = []
                     if (params.filters?.renderTargetId) {
-                        const layer = this.layersManager.getLayer(params.renderTargetId)
-                        if (!layer) throw new Error(`Layer not found: ${params.renderTargetId}`)
+                        const layer = this.layersManager.getLayer(params.filters?.renderTargetId)
+                        if (!layer) throw new Error(`Layer not found: ${params.filters?.renderTargetId}`)
                         layers = [ layer ]
                     } else {
                         layers = this.layersManager.getAllLayers()
                     }
+                    console.log('layers', layers)
 
                     const clearedGraphicInstancesOnLayer = []
                     for (const layer of layers) {
@@ -401,13 +403,15 @@
                 async loadGraphic(id, version) {
                     let graphicIdVersion = `${id}-${version}`
 
-                    if (`${version}` === '0') {
-                        // If the version is 0, we consider the graphic to be mutable
-                        // and we should always load the latest version.
+                    // TODO:
+                    // if (`${version}` === '0') {
+                    //     // If the version is 0, we consider the graphic to be mutable
+                    //     // and we should always load the latest version.
 
-                        // This makes graphicIdVersion be unique, so we'll never hit the cache:
-                        graphicIdVersion += `:${Date.now()}`
-                    }
+                    //     // This makes graphicIdVersion be unique, so we'll never hit the cache:
+                    //     graphicIdVersion += `--${Date.now()}`
+                    // }
+                    console.log('graphicIdVersion', graphicIdVersion)
 
                     // Check if the Graphic is already registered:
                     const cachedGraphic = customElements.get( graphicIdVersion )

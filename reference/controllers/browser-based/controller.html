@@ -136,7 +136,7 @@
                 const response = await fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${rendererId}/clear`, {
                     method: "PUT",
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ filter: { renderTargetId } }),
+                    body: JSON.stringify({ filters: { renderTargetId } }),
                 })
                 if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
             }

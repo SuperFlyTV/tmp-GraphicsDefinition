@@ -204,7 +204,7 @@ export interface Endpoints {
         } | ErrorReturnValue,
     }
     /**
-     * Instructs a Renderer to clear Graphics (using filter in payload)
+     * Instructs a Renderer to clear Graphics (using filters in payload)
      */
     clearGraphic: {
         method: 'PUT',
