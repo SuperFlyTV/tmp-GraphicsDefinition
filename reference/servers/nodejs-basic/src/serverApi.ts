@@ -43,14 +43,14 @@ export function setupServerApi(router: Router, graphicsStore: GraphicsStore, ren
         handleError(async (ctx) => rendererManager.getRendererStatus(ctx) ))
     serverApiRouter.get('/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/status',
         handleError(async (ctx) => rendererManager.getRenderTargetStatus(ctx) ))
-    serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/invoke',
+    serverApiRouter.post('/serverApi/v1/renderers/renderer/:rendererId/invoke',
         handleError(async (ctx) => rendererManager.invokeRendererAction(ctx) ))
 
     serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/load',
         handleError(async (ctx) => rendererManager.loadGraphic(ctx) ))
-    serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/clear',
+    serverApiRouter.post('/serverApi/v1/renderers/renderer/:rendererId/clear',
         handleError(async (ctx) => rendererManager.clearGraphic(ctx) ))
-    serverApiRouter.put('/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/invoke',
+    serverApiRouter.post('/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/invoke',
         handleError(async (ctx) => rendererManager.invokeGraphicAction(ctx) ))
 
 
