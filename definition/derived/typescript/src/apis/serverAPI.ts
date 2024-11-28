@@ -177,7 +177,7 @@ export interface Endpoints {
      * Returns the result of the action, or 404 if the acton is not found.
      */
     invokeRendererAction: {
-        method: 'PUT',
+        method: 'POST',
         path:  '/serverApi/v1/renderers/renderer/:rendererId/invoke',
         params: { rendererId: string },
         body: { action: ActionInvokePayload},
@@ -207,7 +207,7 @@ export interface Endpoints {
      * Instructs a Renderer to clear Graphics (using filters in payload)
      */
     clearGraphic: {
-        method: 'PUT',
+        method: 'POST',
         path:  '/serverApi/v1/renderers/renderer/:rendererId/clear',
         params: { rendererId: string },
         body: RendererClearGraphicPayload,
@@ -223,7 +223,7 @@ export interface Endpoints {
      * Returns the result of the action, or 404 if the acton is not found.
      */
     invokeGraphicAction: {
-        method: 'PUT',
+        method: 'POST',
         path:  '/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/invoke',
         params: { rendererId: string, renderTargetId: string },
         body: {
