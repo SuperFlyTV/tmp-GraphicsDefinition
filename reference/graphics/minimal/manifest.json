@@ -1,6 +1,7 @@
 {
     "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
     "name": "Minimal Test Graphic",
+    "description": "This Graphic includes the bare minimum required to be a valid Graphic.",
     "id": "minimal",
     "version": 1,
 
