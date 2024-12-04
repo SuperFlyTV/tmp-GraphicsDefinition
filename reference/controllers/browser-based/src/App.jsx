@@ -133,7 +133,7 @@ function RenderTarget({ serverApiUrl, serverData, renderer, renderTarget }) {
             <div>
                 <Button onClick={() => {
                     fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${renderer.id}/clear`, {
-                        method: "PUT",
+                        method: "POST",
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ filters: { renderTargetId: renderTarget.id } }),
                     }).then((response) => {
@@ -206,7 +206,7 @@ function QueuedGraphic({ serverApiUrl, serverData, renderer, graphic }) {
                 <div className="mb-3">
                     <Button onClick={() => {
                         fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${renderer.id}/target/${renderTarget.id}/load`, {
-                            method: "PUT",
+                            method: "POST",
                             headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify({ graphic: { id: graphic.id, version: graphic.version } }),
                         }).then((response) => {
@@ -294,7 +294,7 @@ function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, renderTar
             // Invoke action:
 
             fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${renderer.id}/target/${renderTarget.id}/invoke`, {
-                method: "PUT",
+                method: "POST",
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     target: { graphic: {id: graphic.id, version: graphic.version } },
