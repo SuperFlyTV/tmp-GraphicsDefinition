@@ -126,7 +126,7 @@
 
             async function loadGraphic(rendererId, renderTargetId, graphicId, graphicVersion) {
                 const response = await fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${rendererId}/target/${renderTargetId}/load`, {
-                    method: "PUT",
+                    method: "POST",
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ graphic: { id: graphicId, version: graphicVersion } }),
                 })
@@ -134,7 +134,7 @@
             }
             async function clearRenderTarget(rendererId, renderTargetId) {
                 const response = await fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${rendererId}/clear`, {
-                    method: "PUT",
+                    method: "POST",
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ filters: { renderTargetId } }),
                 })

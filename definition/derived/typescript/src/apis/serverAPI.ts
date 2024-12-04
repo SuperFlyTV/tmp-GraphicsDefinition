@@ -191,7 +191,7 @@ export interface Endpoints {
      * Instructs a Renderer to load a Graphic onto a RenderTarget
      */
     loadGraphic: {
-        method: 'PUT',
+        method: 'POST',
         path:  '/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/load',
         params: { rendererId: string, renderTargetId: string },
         body: RendererLoadGraphicPayload,
