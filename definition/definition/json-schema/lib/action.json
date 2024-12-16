@@ -7,9 +7,19 @@
             "type": "string",
             "description": "The name of the action. This is displayed to the user."
         },
+        "label-localized": {
+            "type": "object",
+            "description": "Localized version of the \"label\" property. If nothing is provided, the \"label\" property is used instead.",
+            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/localizable-value.json"
+        },
         "description": {
             "type": "string",
             "description": "A longer description of the action. This is displayed to the user."
+        },
+        "description-localized": {
+            "type": "object",
+            "description": "Localized version of the \"description\" property. If nothing is provided, the \"description\" property is used instead.",
+            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/localizable-value.json"
         },
         "schema": {
             "description": "The schema of the action. This is used to validate the action parameters as well as auto-generate a GUI for the action.",
