@@ -20,9 +20,19 @@
             "type": "string",
             "description": "Name of the Graphic"
         },
+        "name-localized": {
+            "type": "object",
+            "description": "Localized version of the \"name\" property. If nothing is provided, the \"name\" property is used instead.",
+            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/localizable-value.json"
+        },
         "description": {
             "type": "string",
             "description": "(optional) A longer description of the Graphic"
+        },
+        "description-localized": {
+            "type": "object",
+            "description": "Localized version of the \"description\" property. If nothing is provided, the \"description\" property is used instead.",
+            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/localizable-value.json"
         },
         "author": {
             "type": "object",

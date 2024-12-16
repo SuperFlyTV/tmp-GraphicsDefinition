@@ -1,0 +1,20 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/localizable-value.json",
+    "type": "object",
+    "comment": "Based on https://www.w3.org/TR/localizable-manifests/#language-maps",
+
+    "patternProperties":{
+        ".*": {
+            "type": "object",
+            "description": "Language map, example: {\"en\": {\"value\": \"Hello\"}, \"fr\": {\"value\": \"Bonjour\"}}",
+            "properties": {
+                "value": {
+                    "type": "string",
+                    "description": "Localizable value"
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}
