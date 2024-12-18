@@ -1,2 +1,4 @@
 reference/renderers/browser-based-layered/node_modules/
 reference/controllers/browser-based/node_modules/
+reference/graphics-tool/node_modules/
+.vscode/
