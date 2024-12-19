@@ -46,3 +46,28 @@ blog post: Need to communicate between difference Graphics? - use LocalStorage!
     dimensions, GPU acceleration
 
 * Graphics in hierarchy? paths?
+
+
+
+export graphic - mainly used BY the Graphic itself in renderer
+
+RenderTarget - intentionally vague
+
+Renderer Status - vendor specific?
+
+Scope:
+    GraphicsInstance - OK.
+
+    
+    Should it be webComponent?
+        We'd need to explain it well, and provide examples.
+    
+    multi-threading in iFrames.
+    performance and stability
+
+
+    Davy:
+        Should we have the Renderer as a MUST
+        question of scope: Will vendors implement separate Renderers?
+
+
