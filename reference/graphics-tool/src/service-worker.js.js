@@ -6,7 +6,7 @@ const requestMap = new Map()
 const broadcast = new BroadcastChannel('intercept-channel')
 broadcast.onmessage = (event) => {
     const msg = event.data
-    console.log('received message', msg)
+    // console.log('received message', msg)
     if (msg && msg.reply !== undefined) {
 
         const waiting = requestMap.get(msg.reply)
@@ -23,7 +23,7 @@ broadcast.onmessage = (event) => {
 };
 
 self.addEventListener('fetch', function (event) {
-    console.log('onfetch 5')
+    // console.log('onfetch 5')
     // console.log(event)
 
     // file from url:
@@ -31,7 +31,7 @@ self.addEventListener('fetch', function (event) {
     let newUrl = url
     const m = url.match(/(LOCAL)(\/.*)/i)
     if (m) {
-        console.log('intercepting request', url, m)
+        // console.log('intercepting request', url, m)
 
 
 
@@ -39,12 +39,12 @@ self.addEventListener('fetch', function (event) {
         event.respondWith(
             new Promise((resolve, reject) => {
                 const id = requestId++
-                console.log('waiting for', id)
+                // console.log('waiting for', id)
                 requestMap.set(id, { resolve, reject })
 
 
 
-                console.log('send request', id, m[2])
+                // console.log('send request', id, m[2])
 
                 broadcast.postMessage({
                     type: 'fetch',
@@ -52,14 +52,18 @@ self.addEventListener('fetch', function (event) {
                     url: m[2]
                 })
             }).then((result) => {
-                console.log('responding!!')
-                return new Response(result.arrayBuffer)
+                // console.log('responding!!', result)
+                return new Response(result.arrayBuffer, {
+                    headers: {
+                        'Content-Type': result.type
+                    }
+                })
                 // result.arrayBuffer
                 // result.
                 // TODO
 
             }).catch((error) => {
-                console.log('responding with error!')
+                // console.log('responding with error!')
                 return new Response(null, {
                     status: 500,
                     statusText: `Error when intercepting request: ${error}`

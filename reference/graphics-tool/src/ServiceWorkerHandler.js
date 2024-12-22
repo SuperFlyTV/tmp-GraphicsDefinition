@@ -6,7 +6,7 @@ class ServiceWorkerHandler {
         this.broadcast = new BroadcastChannel('intercept-channel')
 
         this.broadcast.onmessage = (event) => {
-            console.log('got message', event);
+            // console.log('got message', event);
             const msg = event.data
 
             const id = msg.id
@@ -15,7 +15,7 @@ class ServiceWorkerHandler {
 
                 this.fileHandler.readFile(msg.url)
                     .then((result) => {
-                        console.log('readFile result', result)
+                        // console.log('readFile result', result)
                         this.broadcast.postMessage({
                             reply: id,
                             result: result
@@ -29,7 +29,7 @@ class ServiceWorkerHandler {
                     })
 
             } else {
-                console.log('unknown message', msg)
+                // console.log('unknown message', msg)
             }
         };
         // broadcast.postMessage({
@@ -48,13 +48,13 @@ class ServiceWorkerHandler {
         const alreadyRegistered = registrations.find((r) => r.active && r.active.scriptURL.includes(FILE_NAME))
         if (alreadyRegistered) return alreadyRegistered
 
-        console.log('registering service worker...')
+        // console.log('registering service worker...')
         return new Promise((resolve, reject) => {
 
             register(FILE_NAME, {
                 registrationOptions: { scope: './' },
                 ready(registration) {
-                    console.log('Service worker is active.', registration)
+                    // console.log('Service worker is active.', registration)
                     resolve(registration)
                 },
                 registered(registration) {

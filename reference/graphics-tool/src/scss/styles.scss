@@ -93,12 +93,41 @@ $success: #7952b3;
 
 body {
   padding: 1.5rem;
-  background-color: #897eb6;
+  background-color: #666;
   padding-bottom: 80vh;
 }
 
+.intial-hero {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  // center
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+
+  .intial-hero-content {
+    text-align: center;
+    color: #fff;
+  }
+  a {
+    color: #bbf;
+    text-decoration: underline;
+  }
+}
+
+.floating-cards {
+
+}
 // .graphic-tester {}
 .graphic-canvas {
+
+  position: relative;
+  overflow: hidden;
 
   margin: 1em;
 

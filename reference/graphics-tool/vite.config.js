@@ -1,4 +1,5 @@
 import path from 'path'
+import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { buildSync } from "esbuild"
 
@@ -28,6 +29,7 @@ export default defineConfig({
 
     plugins: [
         // ...
+        react(),
         {
           apply: "build",
           enforce: "post",
