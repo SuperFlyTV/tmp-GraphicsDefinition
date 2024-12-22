@@ -33,3 +33,15 @@ This folder contains helper projects for various languages and formats, that are
 #### Renderers
 * A basic Browser-based renderer that renders Graphics on Layers. [LINK](/reference/renderers/browser-based-layered/README.md)
 * _(More to come)_
+
+
+## For developers
+
+To install and run all the reference implementations locally:
+
+1. Install Node.js
+2. `cd to/this/directory`
+3. `node scripts\run-everything.js`
+
+This will install all dependencies and run all the reference implementations,
+for development purposes.
