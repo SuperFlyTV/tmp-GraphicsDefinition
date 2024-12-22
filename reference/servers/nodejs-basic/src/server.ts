@@ -61,5 +61,5 @@ export async function initializeServer() {
     const PORT = 8080
 
     app.listen(PORT)
-    console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on \x1b[36m http://127.0.0.1:${PORT}/\x1b[0m`)
 }
