@@ -22,7 +22,7 @@ export interface GraphicsApi {
     load: (payload: GraphicLoadPayload) => Promise<void>
     /**
      * Called by the Renderer to force the Graphic to terminate/dispose/clear any loaded resources.
-     * This is called after the Renderer has uloaded the Graphic from the DOM.
+     * This is called after the Renderer has unloaded the Graphic from the DOM.
      */
     dispose: (payload: EmptyPayload) => Promise<void>
 
