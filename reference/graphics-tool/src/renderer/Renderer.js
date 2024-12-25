@@ -7,6 +7,7 @@ export class Renderer {
 
         // This renderer has only one layer.
         this.layer = new LayerHandler(containerElement, 'default-layer', 0)
+        this.graphicState = ''
     }
 
     setGraphic (graphic) {
@@ -14,19 +15,35 @@ export class Renderer {
     }
     /** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
     async loadGraphic () {
-        this.graphicState = 'pre-load'
-        this.loadGraphicStartTime = Date.now()
-        await this.layer.loadGraphic(this.graphic.path)
-        this.graphicState = 'post-load'
-        this.loadGraphicEndTime = Date.now()
+        if (this.graphicState.includes('pre')) throw new Error('loadGraphic called too quick')
+        try {
+            this.graphicState = 'pre-load'
+            this.loadGraphicStartTime = Date.now()
+            await this.layer.loadGraphic(this.graphic.path)
+            this.graphicState = 'post-load'
+            this.loadGraphicEndTime = Date.now()
+        } catch (e) {
+            this.graphicState = 'error'
+            console.error(e)
+            throw e
+
+        }
     }
     /** Clear/unloads a GraphicInstance on a RenderTarget */
     async clearGraphic () {
-        this.graphicState = 'pre-clear'
-        this.clearGraphicStartTime = Date.now()
-        await this.layer.clearGraphic()
-        this.graphicState = 'post-clear'
-        this.clearGraphicEndTime = Date.now()
+        if (this.graphicState.includes('pre')) throw new Error('clearGraphic called too quick')
+        try {
+            this.graphicState = 'pre-clear'
+            this.clearGraphicStartTime = Date.now()
+            await this.layer.clearGraphic()
+            this.graphicState = 'post-clear'
+            this.clearGraphicEndTime = Date.now()
+        } catch (e) {
+            this.graphicState = 'error'
+            console.error(e)
+            throw e
+
+        }
     }
     /** Invokes an action on a graphicInstance. Actions are defined by the Graphic's manifest */
     async invokeGraphicAction (params) {

@@ -1,4 +1,5 @@
 import { register } from "register-service-worker"
+import { issueTracker } from "./renderer/IssueTracker"
 
 class ServiceWorkerHandler {
 
@@ -11,7 +12,6 @@ class ServiceWorkerHandler {
 
             const id = msg.id
             if (msg.type === 'fetch') {
-                msg.url
 
                 this.fileHandler.readFile(msg.url)
                     .then((result) => {
@@ -21,11 +21,20 @@ class ServiceWorkerHandler {
                             result: result
                         })
                     }).catch((error) => {
-                        console.error('readFile error', error)
-                        this.broadcast.postMessage({
-                            reply: id,
-                            error: error
-                        })
+                        if (`${error}`.includes('File not found')) {
+                            this.broadcast.postMessage({
+                                reply: id,
+                                result: 'NotFoundError'
+                            })
+                            issueTracker.add(`File "${msg.url}" was requested by the Graphic, but not found on disk.`)
+                        } else {
+                            console.error('readFile error', error)
+
+                            this.broadcast.postMessage({
+                                reply: id,
+                                error: error
+                            })
+                        }
                     })
 
             } else {

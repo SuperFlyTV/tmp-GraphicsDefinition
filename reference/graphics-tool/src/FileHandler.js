@@ -1,30 +1,18 @@
 import { verifyGraphicManifest } from './lib/graphic/verify'
+import { sleep } from './lib/lib.js'
 
 class FileHandler {
-    // initialized = false
     constructor() {
 
         this.monitoredHandles = {}
-
+        this.fileChangeListeners = []
+        this.files = {}
+        this.dirs = {}
 
     }
     async init() {
-        // console.log('file handler init')
 
-        setInterval(() => {
-            this.triggerMonitor().catch(console.error)
-        }, 1000)
-
-        // const dirHandleName = window.localStorage.getItem('dirHandleName')
-        // console.log('dirHandleName', dirHandleName)
-
-        // let dirHandle
-        // if (dirHandleName) {
-        //     // dirHandle = await window
-
-        //     dirHandle = await window.FileSystemDirectoryHandle.getDirectoryHandle(dirHandleName)
-        // } else {
-        // }
+        this.triggerMonitor().catch(console.error)
 
         const dirHandle = await window.showDirectoryPicker({
             id: "graphics-tool",
@@ -32,54 +20,13 @@ class FileHandler {
 
         })
         this.dirHandle = dirHandle
-        // console.log('dirHandle.name', dirHandle.name)
-        // window.localStorage.setItem('dirHandleName', dirHandle.name)
-        // console.log('dirHandle', dirHandle)
 
-
-        // this.initialized = true
-
-
-        // console.log('dirHandle', dirHandle)
-
-        // List all files in the directory:
-
-        const listAllFilesInDirectory = async (files, path, dirHandle) => {
-
-            for await (const [key, handle] of dirHandle.entries()) {
-                // console.log(key, handle)
-
-                const subPath = path + '/' + handle.name
-
-                if (handle.kind === 'directory') {
-                    await listAllFilesInDirectory(files, subPath, handle)
-                } else {
-
-                    files[subPath] = {
-                        dirHandle,
-                        handle
-                    }
-                    // .push(subPath)
-
-                    // const file = await handle.getFile()
-                    // console.log('file', file)
-
-                    // const arrayBuffer = await file.arrayBuffer()
-                    // console.log('arrayBuffer', arrayBuffer)
-                }
-            }
-            return files
-
-        }
-
-        const files = await listAllFilesInDirectory({}, '', dirHandle)
-        this.files = files
-        console.log('fileNames', files)
+        // discover all files in the directory:
+        await this.discoverFiles()
 
         // List all graphics in the directory:
-
         const graphics = []
-        for (const [key, file] of Object.entries(files)) {
+        for (const [key, file] of Object.entries(this.files)) {
 
             if (file.handle.name === 'manifest.json') {
                 const graphic = {
@@ -101,29 +48,62 @@ class FileHandler {
                 graphic.manifest = manifest
 
                 // Check that there is a graphics.mjs file:
-                if (!files[key.replace(/\/manifest.json$/, '/graphic.mjs')]) {
+                if (!this.files[key.replace(/\/manifest.json$/, '/graphic.mjs')]) {
                     graphic.error += '\n' + 'Missing graphic.mjs file'
                 }
 
-
                 graphic.error = graphic.error.trim()
-
             }
 
         }
-        // console.log('graphics', graphics)
+
 
         return graphics
+    }
+    async discoverFilesInDirectory(path, dirHandle) {
+        for await (const [key, handle] of dirHandle.entries()) {
+            const subPath = path + '/' + handle.name
 
+            if (handle.kind === 'directory') {
+                this.dirs[subPath] = {
+                    dirHandle: handle
+                }
+                await this.discoverFilesInDirectory(subPath, handle)
+            } else {
+                this.files[subPath] = {
+                    dirHandle,
+                    handle
+                }
+            }
+        }
+    }
+    async discoverFiles() {
+        this.dirs = {}
+        this.files = {}
+        await this.discoverFilesInDirectory('', this.dirHandle)
 
     }
+
     async readFile(path) {
+        const path2 = path.slice(1)
+        console.log('readFile', path2)
+
 
         // remove any query parameters:
         path = path.replace(/\?.*/, '')
-        // console.log('readFile', path)
 
-        const f = this.files[path]
+
+        let f = this.files[path]
+        if (!f) {
+            const dirPath = path.replace(/\/[^/]+$/, '')
+            const dir = this.dirs[dirPath]
+            if (dir) {
+                // reload files in parent directory:
+                await this.discoverFilesInDirectory(dirPath, dir.dirHandle)
+            }
+            // Try again:
+            f = this.files[path]
+        }
         if (!f) {
             throw new Error(`File not found: "${path}"`)
         }
@@ -145,17 +125,79 @@ class FileHandler {
 
         if (this.monitoredHandles[path]) return // ignore
 
+
         this.monitoredHandles[path] = {
-            handle: fileHandle
+            handle: fileHandle,
+            exists: true,
+            checked: false
         }
     }
     async triggerMonitor() {
         for (const [key, mon] of Object.entries(this.monitoredHandles)) {
 
-            const file = await mon.handle.getFile()
+            const props = {
+                exists: mon.exists,
+                size: mon.size,
+                lastModified: mon.lastModified
+            }
 
-            console.log('file', file)
+            try {
+                const file = await mon.handle.getFile()
+                props.exists = true
+                props.size = file.size
+                props.lastModified = file.lastModified
 
+            } catch (e) {
+                // if (e NotFoundError)
+                // console.log('e.name', e.name)
+                if (e.name === 'NotFoundError') {
+                    props.exists = false
+                } else {
+                    throw e
+                }
+            }
+            const changed = (
+                mon.exists !== props.exists ||
+                mon.size !== props.size ||
+                mon.lastModified !== props.lastModified
+            )
+            const checked = mon.checked
+            mon.checked = true
+            mon.exists = props.exists
+            mon.size = props.size
+            mon.lastModified = props.lastModified
+
+            if (checked && changed) {
+                // Sleep a bit, to allow for multiple files saves to settle
+                await sleep(100)
+                console.log(`File ${key} has changed`)
+                // First, reset all monitors, so that they'll not retrigger right away:
+                for (const mon of Object.values(this.monitoredHandles)) {
+                    mon.checked = false
+                }
+                this.fileHasChanged()
+                break
+
+            }
+
+        }
+        setTimeout(() => {
+            this.triggerMonitor().catch(console.error)
+        }, 1000)
+    }
+    fileHasChanged () {
+        for (const fileChangeListener of this.fileChangeListeners) {
+            fileChangeListener()
+        }
+    }
+    listenToFileChanges(cb) {
+        this.fileChangeListeners.push(cb)
+        return {
+            stop: () => {
+                const i = this.fileChangeListeners.findIndex(c => c === cb)
+                if (i === -1) throw new Error('stop: no index found for callback')
+                this.fileChangeListeners.splice(i, 1)
+            }
         }
     }
 }

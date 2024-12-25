@@ -52,12 +52,20 @@ self.addEventListener('fetch', function (event) {
                     url: m[2]
                 })
             }).then((result) => {
+                if (result === 'NotFoundError') {
+                    return new Response(null, {
+                        status: 404,
+                        statusText: `File not found`
+                    })
+                } else {
+                    return new Response(result.arrayBuffer, {
+                        headers: {
+                            'Content-Type': result.type
+                        }
+                    })
+
+                }
                 // console.log('responding!!', result)
-                return new Response(result.arrayBuffer, {
-                    headers: {
-                        'Content-Type': result.type
-                    }
-                })
                 // result.arrayBuffer
                 // result.
                 // TODO

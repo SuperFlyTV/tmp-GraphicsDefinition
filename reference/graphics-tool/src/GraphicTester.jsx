@@ -2,12 +2,15 @@ import * as React from "react";
 import { Table, Button, ButtonGroup, Form, Accordion, Row, Col } from "react-bootstrap";
 import { pathJoin, graphicResourcePath } from "./lib/lib.js";
 import { Renderer } from "./renderer/Renderer.js";
+import { fileHandler } from "./FileHandler.js";
+import { issueTracker } from "./renderer/IssueTracker.js";
 
 export function GraphicTester({ graphic, onExit }) {
   const [settings, setSettings] = React.useState(DEFAULT_SETTINGS);
 
   const [graphicManifest, setGraphicManifest] = React.useState(null);
-  const [errorMessage, setErrorMessage] = React.useState(null);
+  const [errorMessage, setErrorMessage] = React.useState('');
+
 
   const canvasRef = React.useRef(null);
   const rendererRef = React.useRef(null);
@@ -32,15 +35,38 @@ export function GraphicTester({ graphic, onExit }) {
   }, [graphic])
 
   React.useEffect(() => {
+    const listener = fileHandler.listenToFileChanges(() => {
+      // on File change
+      reloadGraphic().catch(onError)
+    })
+    return () => {
+      listener.stop()
+    }
+  },[])
+  const [issues, setIssues] = React.useState([])
+  React.useEffect(() => {
+    setIssues(issueTracker.issues)
+    const listener = issueTracker.listenToChanges(() => {
+      setIssues([...issueTracker.issues])
+    })
+    return () => {
+      listener.stop()
+    }
+  },[])
+
+  const reloadGraphic = React.useCallback(async () => {
+    await rendererRef.current.clearGraphic()
+    issueTracker.clear()
+    await rendererRef.current.loadGraphic().catch(console.error)
+  },[])
+
+  React.useEffect(() => {
 
     if (settings.autoReloadInterval > 500) {
       let active = true
       let reloadInterval = 0
       const triggerReload = () => {
-        rendererRef.current.clearGraphic()
-        .then(() => {
-          rendererRef.current.loadGraphic().catch(console.error)
-        })
+        reloadGraphic()
         .then(() => {
           if (active) {
             reloadInterval = setTimeout(() => {
@@ -51,8 +77,11 @@ export function GraphicTester({ graphic, onExit }) {
         })
         .catch(onError)
       }
-      triggerReload()
+      const initTimeout = setTimeout(() => {
+        triggerReload()
+      }, 100)
       return () => {
+        clearTimeout(initTimeout)
         if (reloadInterval) clearTimeout(reloadInterval)
         active = false
       }
@@ -69,6 +98,15 @@ export function GraphicTester({ graphic, onExit }) {
     }
   }, []);
 
+  // Init:
+  const initRef = React.useRef(true)
+  React.useEffect(() => {
+    if (initRef.current) {
+      initRef.current = false
+
+      reloadGraphic().catch(onError)
+    }
+  }, [])
 
   // console.log('settings', settings)
   // console.log("graphic", graphic);
@@ -110,9 +148,19 @@ export function GraphicTester({ graphic, onExit }) {
             <div>
               {errorMessage && (
                 <div className="alert alert-danger" role="alert">
-                  {errorMessage}
+                  Error: {errorMessage}
                 </div>
               )}
+            </div>
+            <div>
+              {issues.length ? (
+                <div className="alert alert-danger" role="alert">
+                  Issues:
+                  <ul>
+                    {issues.map((issue, index) => <li key={index}>{issue}</li>)}
+                  </ul>
+                </div>
+              ) : null}
             </div>
             <div
               ref={canvasRef}
@@ -220,7 +268,7 @@ const DEFAULT_SETTINGS = {
   realtime: true,
   width: 1280,
   height: 720,
-  autoReloadInterval: 5000
+  autoReloadInterval: 0
 };
 
 function Control({ rendererRef }) {
@@ -237,6 +285,7 @@ function Control({ rendererRef }) {
 
             <div>
               <Button onClick={() => {
+                issueTracker.clear()
                 rendererRef.current.loadGraphic().catch(console.error)
               }}>
                 Load Graphic
@@ -299,9 +348,6 @@ function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, renderTar
               if (response.status >= 300) throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
           }).catch(console.error)
 
-
-
-
       }}>{action.label}</Button>
   </div>
 }
@@ -326,15 +372,16 @@ function AutoReloadBar ({ rendererRef, settings }) {
 
         const graphicState = rendererRef.current.graphicState
         const loadGraphicEndTime = rendererRef.current.loadGraphicEndTime || 0
+        const autoReloadInterval = parseInt(settings.autoReloadInterval) || 0
 
         if (graphicState === 'pre-load') {
           setWidth(0)
           setMessage('Loading...')
         } else if (graphicState === 'post-load') {
           setMessage('Loaded')
-          if (settings.autoReloadInterval) {
+          if (autoReloadInterval) {
             setWidth(
-              (Date.now() - loadGraphicEndTime) / settings.autoReloadInterval
+              (Date.now() - loadGraphicEndTime) / autoReloadInterval
             )
           } else {
             setWidth(0)
@@ -344,7 +391,7 @@ function AutoReloadBar ({ rendererRef, settings }) {
         } else if (graphicState === 'post-clear') {
           setMessage('Cleared')
           setWidth(0)
-        } else if (graphicState === undefined) {
+        } else if (graphicState === '') {
           // nothing
         } else {
           setMessage(`Unknown state: "${graphicState}"`)
@@ -362,7 +409,7 @@ function AutoReloadBar ({ rendererRef, settings }) {
       width: `${width*100}%`
     }}></div>
     <div className="auto-reload-bar_message">
-      Status: {message}
+      {message ? `Status: ${message}` : ''}
     </div>
   </div>
 }
