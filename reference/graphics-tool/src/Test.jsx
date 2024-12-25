@@ -6,21 +6,13 @@ import { Button, Form, Dropdown } from 'react-bootstrap'
 // const SERVER_API_URL = 'http://localhost:8080'
 
 export function Test() {
+	React.useEffect(() => {
+		console.log('Starting up')
+	}, [])
 
-
-    React.useEffect(() => {
-
-        console.log('Starting up')
-
-
-
-    }, [])
-
-    return <div >
-        <div>
-         hello world!
-        </div>
-
-    </div>
+	return (
+		<div>
+			<div>hello world!</div>
+		</div>
+	)
 }
-
