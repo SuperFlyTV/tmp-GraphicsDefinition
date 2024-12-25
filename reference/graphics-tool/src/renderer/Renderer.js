@@ -14,12 +14,19 @@ export class Renderer {
     }
     /** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
     async loadGraphic () {
-
+        this.graphicState = 'pre-load'
+        this.loadGraphicStartTime = Date.now()
         await this.layer.loadGraphic(this.graphic.path)
+        this.graphicState = 'post-load'
+        this.loadGraphicEndTime = Date.now()
     }
     /** Clear/unloads a GraphicInstance on a RenderTarget */
     async clearGraphic () {
+        this.graphicState = 'pre-clear'
+        this.clearGraphicStartTime = Date.now()
         await this.layer.clearGraphic()
+        this.graphicState = 'post-clear'
+        this.clearGraphicEndTime = Date.now()
     }
     /** Invokes an action on a graphicInstance. Actions are defined by the Graphic's manifest */
     async invokeGraphicAction (params) {

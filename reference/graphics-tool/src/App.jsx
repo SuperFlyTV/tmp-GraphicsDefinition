@@ -63,7 +63,9 @@ export function App() {
 
       {
       selectedGraphic ?
-        <GraphicTester graphic={selectedGraphic} />
+        <GraphicTester graphic={selectedGraphic} onExit={() => {
+          setSelectedGraphic(null)
+        }} />
       :
       graphics ?
         <ListGraphics graphics={graphics} onSelect={onSelectGraphic} />

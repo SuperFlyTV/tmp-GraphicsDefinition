@@ -142,3 +142,24 @@ body {
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
+.auto-reload-bar {
+  width: 100%;
+  position: relative;
+  height: 2em;
+  .auto-reload-bar_bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #99f;
+    z-index: 1;
+  }
+  .auto-reload-bar_message {
+    position: absolute;
+    top: 0;
+    left: 0.5em;
+    z-index: 2;
+    color: #000;
+    text-shadow: 0 0 5px #fff;
+  }
+}

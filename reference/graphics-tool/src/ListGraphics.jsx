@@ -32,9 +32,13 @@ export function ListGraphics({ graphics, onSelect }) {
                                     <td>{graphic.path}</td>
                                     <td>{graphic.manifest.name}</td>
                                     <td>{graphic.manifest.id}-{graphic.manifest.version}</td>
-                                    <td><ul>{errorLines.map((str, i) => {
-                                        return <li key={i}>{str}</li>
-                                    })}</ul></td>
+                                    <td>{
+                                        errorLines.length ? <ul>{errorLines.map((str, i) => {
+                                            return <li key={i}>{str}</li>
+                                        })}</ul> : <span>
+                                            No issues found 👍
+                                        </span>
+                                        }</td>
                                     <td>
                                         <Button onClick={() => onSelect(graphic)}>Select</Button>
                                     </td>
