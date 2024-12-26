@@ -31,9 +31,9 @@ export interface GraphicsApi {
      */
     getStatus: (payload: EmptyPayload) => Promise<GraphicInstanceStatus>
     /**
-     * Called by the Renderer to invoke a method on the Graphic
+     * Called by the Renderer to invoke an Action on the Graphic
      */
-    invoke: (payload: ActionInvokePayload) => Promise<unknown>
+    invokeAction: (payload: ActionInvokePayload) => Promise<unknown>
     /**
      * If the Graphic supports non-realtime rendering, this is called to make the graphic jump to a certain point in time.
      * @returns A Promise that resolves when the Graphic has finished rendering the requested frame.

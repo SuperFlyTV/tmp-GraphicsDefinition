@@ -12,7 +12,7 @@ _This is a document where we can scribble down notes while working on this defin
 
 
     * Batch commands, to guarantee that they will be executed on the same frame in multiple Graphics
-        * Will it be enough to be able to batch "invoke" commands, or do we need to consider other commands?
+        * Will it be enough to be able to batch "invokeAction" commands, or do we need to consider other commands?
     Discussion: Probably not.
 
 
