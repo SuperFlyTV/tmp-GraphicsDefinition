@@ -6,8 +6,6 @@ export class ResourceProvider {
 	async loadGraphic(graphicPath) {
 		const componentId = 'graphic-component' + staticComponentId++
 
-		console.log('componentId', componentId)
-
 		const webComponent = await this.fetchModule(graphicPath, componentId)
 		customElements.define(componentId, webComponent)
 

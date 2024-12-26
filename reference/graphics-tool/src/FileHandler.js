@@ -78,7 +78,6 @@ class FileHandler {
 
 	async readFile(path) {
 		const path2 = path.slice(1)
-		console.log('readFile', path2)
 
 		// remove any query parameters:
 		path = path.replace(/\?.*/, '')
@@ -133,8 +132,6 @@ class FileHandler {
 				props.size = file.size
 				props.lastModified = file.lastModified
 			} catch (e) {
-				// if (e NotFoundError)
-				// console.log('e.name', e.name)
 				if (e.name === 'NotFoundError') {
 					props.exists = false
 				} else {

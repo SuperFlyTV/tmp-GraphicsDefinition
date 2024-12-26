@@ -57,8 +57,6 @@ export class LayerHandler {
 		})
 	}
 	async clearGraphic() {
-		// const existing = this.getGraphicInstance()
-		// console.log('Clearing GraphicInstance', existing)
 		if (!this.currentGraphic) return
 		try {
 			await this.currentGraphic.element.dispose({})
@@ -73,7 +71,6 @@ export class LayerHandler {
 	async invokeAction(actionId, payload) {
 		if (!this.currentGraphic) return
 
-		console.log('this.currentGraphic', this.currentGraphic)
 		return {
 			value: await this.currentGraphic.element.invokeAction({
 				method: actionId,

@@ -57,7 +57,6 @@ export function GraphicTester({ graphic, onExit }) {
 	}, [])
 
 	const reloadGraphic = React.useCallback(async () => {
-		console.log('reloadGraphic')
 		await rendererRef.current.clearGraphic()
 		issueTracker.clear()
 		await reloadGraphicManifest()
@@ -83,7 +82,7 @@ export function GraphicTester({ graphic, onExit }) {
 							for (const action of autoReloadActionsRef.current) {
 								setTimeout(() => {
 									if (!active) return
-									console.log('action', action)
+
 									rendererRef.current.invokeGraphicAction(action.actionId, action.data).catch(console.error)
 								}, action.delay)
 							}
@@ -122,9 +121,6 @@ export function GraphicTester({ graphic, onExit }) {
 		}
 	}, [])
 
-	// console.log('settings', settings)
-	// console.log("graphic", graphic);
-
 	return (
 		<>
 			<div className="container-md">
@@ -143,11 +139,13 @@ export function GraphicTester({ graphic, onExit }) {
 							/>
 						</div>
 						<div className="control">
-							<Control
-								rendererRef={rendererRef}
-								autoReloadActionsRef={autoReloadActionsRef}
-								manifest={graphicManifest}
-							/>
+							{graphicManifest ? (
+								<Control
+									rendererRef={rendererRef}
+									autoReloadActionsRef={autoReloadActionsRef}
+									manifest={graphicManifest}
+								/>
+							) : null}
 						</div>
 					</div>
 				</div>
@@ -197,8 +195,6 @@ function Settings({ settings, onChange }) {
 
 	const handleOnChange = React.useCallback(
 		(event, key, transform) => {
-			// console.log('handleOnChange', event.target.value, key)
-
 			const newValue = transform ? transform(event.target.value) : event.target.value
 
 			if (newValue === undefined) return
@@ -312,7 +308,6 @@ function Control({ rendererRef, autoReloadActionsRef, manifest }) {
 	)
 }
 function GraphicsActions({ manifest, rendererRef, autoReloadActionsRef }) {
-	console.log('manifest', manifest)
 	return (
 		<div className="graphics-actions">
 			{Object.entries(manifest.actions).map(([actionId, action]) => {
