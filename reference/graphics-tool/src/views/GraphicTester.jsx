@@ -6,6 +6,7 @@ import { fileHandler } from '../FileHandler.js'
 import { issueTracker } from '../renderer/IssueTracker.js'
 import { GDDGUI } from '../lib/GDD/gdd-gui.jsx'
 import { getDefaultDataFromSchema } from '../lib/GDD/gdd/data.js'
+import { PiPHandler } from '../components/PiPHandler.jsx'
 
 export function GraphicTester({ graphic, onExit }) {
 	const [settings, setSettings] = React.useState(DEFAULT_SETTINGS)
@@ -14,6 +15,7 @@ export function GraphicTester({ graphic, onExit }) {
 	const [errorMessage, setErrorMessage] = React.useState('')
 
 	const canvasRef = React.useRef(null)
+	const canvasContainerRef = React.useRef(null)
 	const rendererRef = React.useRef(null)
 
 	// const [graphicManifest, setGraphicManifest] = React.useState(null)
@@ -143,11 +145,13 @@ export function GraphicTester({ graphic, onExit }) {
 							/>
 						</div>
 						<div className="control">
-							<Control
-								rendererRef={rendererRef}
-								autoReloadActionsRef={autoReloadActionsRef}
-								manifest={graphicManifest}
-							/>
+							{graphicManifest ? (
+								<Control
+									rendererRef={rendererRef}
+									autoReloadActionsRef={autoReloadActionsRef}
+									manifest={graphicManifest}
+								/>
+							) : null}
 						</div>
 					</div>
 				</div>
@@ -159,11 +163,25 @@ export function GraphicTester({ graphic, onExit }) {
 							<AutoReloadBar rendererRef={rendererRef} settings={settings} />
 						</div>
 						<div>
-							{errorMessage && (
-								<div className="alert alert-danger" role="alert">
-									Error: {errorMessage}
-								</div>
-							)}
+							<Row>
+								<Col>
+									{errorMessage && (
+										<div className="alert alert-danger" role="alert">
+											Error: {errorMessage}
+										</div>
+									)}
+								</Col>
+								<Col>
+									{
+										<PiPHandler
+											rendererRef={rendererRef}
+											settings={settings}
+											canvasRef={canvasRef}
+											canvasContainerRef={canvasContainerRef}
+										/>
+									}
+								</Col>
+							</Row>
 						</div>
 						<div>
 							{issues.length ? (
@@ -177,6 +195,7 @@ export function GraphicTester({ graphic, onExit }) {
 								</div>
 							) : null}
 						</div>
+						<div ref={canvasContainerRef} className="graphic-canvas-container"></div>
 						<div
 							ref={canvasRef}
 							className="graphic-canvas"
