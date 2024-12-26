@@ -54,6 +54,10 @@ self.addEventListener('fetch', function (event) {
 						return new Response(result.arrayBuffer, {
 							headers: {
 								'Content-Type': result.type,
+								// Prevent any caching:
+								'Cache-Control': 'no-cache, no-store, must-revalidate',
+								Pragma: 'no-cache',
+								Expires: '0',
 							},
 						})
 					}

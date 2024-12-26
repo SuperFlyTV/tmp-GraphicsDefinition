@@ -1,11 +1,11 @@
 export function verifyGraphicManifest(manifest) {
 	// TMP!
-	// This should use the json schema to verify the manifest
+	// This should instead use the json schema to verify the manifest
 
 	let errors = []
 
-	if (!manifest.id) errors.push('Manifest is missing the "id" property')
-	if (!manifest.version) errors.push('Manifest is missing the "version" property')
+	if (manifest.id === undefined) errors.push('Manifest is missing the "id" property')
+	if (manifest.version === undefined) errors.push('Manifest is missing the "version" property')
 	if (!manifest.name) errors.push('Manifest is missing the "name" property')
 	if (!manifest.actions) errors.push('Manifest is missing the "actions" property')
 	if (!manifest.rendering) errors.push('Manifest is missing the "rendering" property')
@@ -35,7 +35,8 @@ export function verifyGraphicManifest(manifest) {
 	for (const [key, action] of Object.entries(manifest.actions)) {
 		if (typeof action !== 'object') errors.push(`Manifest "actions.${key}" property must be an object`)
 		if (!action.label) errors.push(`Manifest "actions.${key}" is missing the "label" property`)
-		if (!action.schema) errors.push(`Manifest "actions.${key}" is missing the "schema" property`)
+		if (typeof action.schema !== 'object' && action.schema !== null)
+			errors.push(`Manifest "actions.${key}" is missing the "schema" property`)
 
 		if (typeof action.label !== 'string') errors.push(`Manifest "actions.${key}.label" property must be a string`)
 		if (action.description && typeof action.description !== 'string')

@@ -1,9 +1,11 @@
 import * as React from 'react'
 import { Table, Button, ButtonGroup, Form, Accordion, Row, Col } from 'react-bootstrap'
-import { pathJoin, graphicResourcePath } from './lib/lib.js'
-import { Renderer } from './renderer/Renderer.js'
-import { fileHandler } from './FileHandler.js'
-import { issueTracker } from './renderer/IssueTracker.js'
+import { pathJoin, graphicResourcePath } from '../lib/lib.js'
+import { Renderer } from '../renderer/Renderer.js'
+import { fileHandler } from '../FileHandler.js'
+import { issueTracker } from '../renderer/IssueTracker.js'
+import { GDDGUI } from '../lib/GDD/gdd-gui.jsx'
+import { getDefaultDataFromSchema } from '../lib/GDD/gdd/data.js'
 
 export function GraphicTester({ graphic, onExit }) {
 	const [settings, setSettings] = React.useState(DEFAULT_SETTINGS)
@@ -13,6 +15,8 @@ export function GraphicTester({ graphic, onExit }) {
 
 	const canvasRef = React.useRef(null)
 	const rendererRef = React.useRef(null)
+
+	// const [graphicManifest, setGraphicManifest] = React.useState(null)
 
 	const onError = React.useCallback((e) => {
 		setErrorMessage(`${e.message || e}`)
@@ -53,11 +57,21 @@ export function GraphicTester({ graphic, onExit }) {
 	}, [])
 
 	const reloadGraphic = React.useCallback(async () => {
+		console.log('reloadGraphic')
 		await rendererRef.current.clearGraphic()
 		issueTracker.clear()
+		await reloadGraphicManifest()
 		await rendererRef.current.loadGraphic().catch(console.error)
 	}, [])
 
+	const reloadGraphicManifest = React.useCallback(async () => {
+		const r = await fetch(graphicResourcePath(graphic.path, 'manifest.json'))
+
+		const manifest = await r.json()
+		setGraphicManifest(manifest)
+	}, [graphic.path])
+
+	const autoReloadActionsRef = React.useRef([])
 	React.useEffect(() => {
 		if (settings.autoReloadInterval > 500) {
 			let active = true
@@ -66,6 +80,14 @@ export function GraphicTester({ graphic, onExit }) {
 				reloadGraphic()
 					.then(() => {
 						if (active) {
+							for (const action of autoReloadActionsRef.current) {
+								setTimeout(() => {
+									if (!active) return
+									console.log('action', action)
+									rendererRef.current.invokeGraphicAction(action.actionId, action.data).catch(console.error)
+								}, action.delay)
+							}
+
 							reloadInterval = setTimeout(() => {
 								reloadInterval = 0
 								if (active) triggerReload()
@@ -87,12 +109,7 @@ export function GraphicTester({ graphic, onExit }) {
 
 	// Load the graphic manifest:
 	React.useEffect(() => {
-		if (!graphicManifest) {
-			fetch(graphicResourcePath(graphic.path, 'manifest.json')).then(async (r) => {
-				const manifest = await r.json()
-				setGraphicManifest(manifest)
-			})
-		}
+		if (!graphicManifest) reloadGraphicManifest().catch(onError)
 	}, [])
 
 	// Init:
@@ -126,7 +143,11 @@ export function GraphicTester({ graphic, onExit }) {
 							/>
 						</div>
 						<div className="control">
-							<Control rendererRef={rendererRef} />
+							<Control
+								rendererRef={rendererRef}
+								autoReloadActionsRef={autoReloadActionsRef}
+								manifest={graphicManifest}
+							/>
 						</div>
 					</div>
 				</div>
@@ -253,10 +274,7 @@ const DEFAULT_SETTINGS = {
 	autoReloadInterval: 0,
 }
 
-function Control({ rendererRef }) {
-	// React.useEffect(() => {
-	//   rendererRef.current.loadGraphic().catch(console.error)
-	// }, [])
+function Control({ rendererRef, autoReloadActionsRef, manifest }) {
 	return (
 		<div>
 			<Accordion defaultActiveKey={['0']} alwaysOpen>
@@ -280,15 +298,38 @@ function Control({ rendererRef }) {
 								Clear Graphic
 							</Button>
 						</div>
-						<div></div>
+						<div>
+							<GraphicsActions
+								rendererRef={rendererRef}
+								autoReloadActionsRef={autoReloadActionsRef}
+								manifest={manifest}
+							/>
+						</div>
 					</Accordion.Body>
 				</Accordion.Item>
 			</Accordion>
 		</div>
 	)
 }
-
-function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, renderTarget, actionId, action }) {
+function GraphicsActions({ manifest, rendererRef, autoReloadActionsRef }) {
+	console.log('manifest', manifest)
+	return (
+		<div className="graphics-actions">
+			{Object.entries(manifest.actions).map(([actionId, action]) => {
+				return (
+					<GraphicsAction
+						key={actionId}
+						rendererRef={rendererRef}
+						autoReloadActionsRef={autoReloadActionsRef}
+						actionId={actionId}
+						action={action}
+					/>
+				)
+			})}
+		</div>
+	)
+}
+function GraphicsAction({ actionId, action, rendererRef, autoReloadActionsRef }) {
 	const initialData = action.schema ? getDefaultDataFromSchema(action.schema) : {}
 	const schema = action.schema
 
@@ -299,32 +340,30 @@ function GraphicsAction({ serverApiUrl, serverData, renderer, graphic, renderTar
 	}
 
 	return (
-		<div>
-			<div>{schema && <GDDGUI schema={schema} data={data} setData={onDataSave} />}</div>
-			<Button
-				onClick={() => {
-					// Invoke action:
+		<div className="graphics-action card">
+			<div className="card-header">
+				<h5>{action.label ?? actionId}</h5>
+			</div>
+			<div className="card-body">
+				<div>{schema && <GDDGUI schema={schema} data={data} setData={onDataSave} />}</div>
+				<Button
+					onClick={(e) => {
+						// Invoke action:
 
-					fetch(`${serverApiUrl}/serverApi/v1/renderers/renderer/${renderer.id}/target/${renderTarget.id}/invoke`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
-							target: { graphic: { id: graphic.id, version: graphic.version } },
-							action: {
-								method: actionId,
-								payload: data,
-							},
-						}),
-					})
-						.then((response) => {
-							if (response.status >= 300)
-								throw new Error(`HTTP response error: [${response.status}] ${JSON.stringify(response.body)}`)
-						})
-						.catch(console.error)
-				}}
-			>
-				{action.label}
-			</Button>
+						rendererRef.current.invokeGraphicAction(actionId, data).catch(console.error)
+						if (e.shiftKey) {
+							// Schedule action to run at next auto-reload:
+							autoReloadActionsRef.current.push({
+								actionId: actionId,
+								data: data,
+								delay: Date.now() - rendererRef.current.loadGraphicEndTime,
+							})
+						}
+					}}
+				>
+					{action.label}
+				</Button>
+			</div>
 		</div>
 	)
 }

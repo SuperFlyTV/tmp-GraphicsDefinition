@@ -59,32 +59,26 @@ export class LayerHandler {
 	async clearGraphic() {
 		// const existing = this.getGraphicInstance()
 		// console.log('Clearing GraphicInstance', existing)
-		if (this.currentGraphic) {
-			try {
-				await this.currentGraphic.element.dispose({})
-			} catch (err) {
-				console.error('Error disposing GraphicInstance:', err)
-			} finally {
-				this.element.innerHTML = ''
-				this.currentGraphic = null
-			}
+		if (!this.currentGraphic) return
+		try {
+			await this.currentGraphic.element.dispose({})
+		} catch (err) {
+			console.error('Error disposing GraphicInstance:', err)
+		} finally {
+			this.element.innerHTML = ''
+			this.currentGraphic = null
 		}
 	}
 
-	async invokeAction(params) {
-		// const graphicInstance = this.getGraphicInstance()
-		if (!this.currentGraphic) throw new Error(`No GraphicInstance on Layer ${params.renderTargetId}`)
+	async invokeAction(actionId, payload) {
+		if (!this.currentGraphic) return
 
-		// const targetMatch = (
-		//     params.target.graphic ?
-		//     (
-		//         params.target.graphic.id === graphicInstance.graphicId &&
-		//         params.target.graphic.version === graphicInstance.graphicVersion
-		//     ) :
-		//     params.target.graphicInstanceId === graphicInstance.id
-		// )
-		// if (!targetMatch) throw new Error(`No GraphicInstance found matching target: ${JSON.stringify(params.target)}`)
-
-		return { value: await this.currentGraphic.element.invokeAction(params.action) }
+		console.log('this.currentGraphic', this.currentGraphic)
+		return {
+			value: await this.currentGraphic.element.invokeAction({
+				method: actionId,
+				payload: payload,
+			}),
+		}
 	}
 }

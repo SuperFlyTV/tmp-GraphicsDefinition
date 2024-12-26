@@ -42,7 +42,7 @@ export class Renderer {
 		}
 	}
 	/** Invokes an action on a graphicInstance. Actions are defined by the Graphic's manifest */
-	async invokeGraphicAction(params) {
-		return this.layer.invokeAction(params)
+	async invokeGraphicAction(actionId, payload) {
+		return this.layer.invokeAction(actionId, payload)
 	}
 }
