@@ -154,40 +154,47 @@ async function run({title, label, cmd, cwd, args}) {
 
     runningCount++
 
-    const baseColor = runningColors[runningCount]
-    const startTime = Date.now()
+    try {
+        const baseColor = runningColors[runningCount]
+        const startTime = Date.now()
 
-    label = `${baseColor}${label}${consoleColors.Reset}`
+        label = `${baseColor}${label}${consoleColors.Reset}`
 
-    if (title) log(label, title)
-    await sleep(1)
-    if (cwd) log(label, `cd ${cwd}`)
-    log(label, `${cmd} ${args ? args.join(' ') : ''}`)
-
-    return new Promise((resolve, reject) => {
-
-        const ls = spawn(cmd, args ?? [], {
-            windowsVerbatimArguments: true,
-            shell: true,
-            cwd: cwd ? path.join(basePath, cwd) : undefined
-        })
-
-        ls.stdout.on('data', (data) => log(label, `${data}`))
-        ls.stderr.on('data', (data) => log(label, `${data}`))
-
-        ls.on('error', (error) => {
-            log(label, `${error} ${error.stack}`)
-            reject(new Error(`Process closed with error`))
-        })
-        ls.on('close', (code) => {
-            log(label, `Done in ${ (Date.now()-startTime) / 1000 }s`)
-            if (code !== 0) reject(new Error(`[${label}] "${cmd}" closed with exit code ${code}`))
-            else resolve()
-        })
-    })
-    .finally(() => {
+        // Check if the folder exists:
+        if (await (exists(path.join(basePath, cwd)))) {
+                
+            if (title) log(label, title)
+            await sleep(1)
+            if (cwd) log(label, `cd ${cwd}`)
+            log(label, `${cmd} ${args ? args.join(' ') : ''}`)
+        
+            return new Promise((resolve, reject) => {
+        
+                const ls = spawn(cmd, args ?? [], {
+                    windowsVerbatimArguments: true,
+                    shell: true,
+                    cwd: cwd ? path.join(basePath, cwd) : undefined
+                })
+        
+                ls.stdout.on('data', (data) => log(label, `${data}`))
+                ls.stderr.on('data', (data) => log(label, `${data}`))
+        
+                ls.on('error', (error) => {
+                    log(label, `${error} ${error.stack}`)
+                    reject(new Error(`Process closed with error`))
+                })
+                ls.on('close', (code) => {
+                    log(label, `Done in ${ (Date.now()-startTime) / 1000 }s`)
+                    if (code !== 0) reject(new Error(`[${label}] "${cmd}" closed with exit code ${code}`))
+                    else resolve()
+                })
+            })
+        } else {
+            log(label, `${consoleColors.FgYellow}Skipping, folder not found: ${cwd}${consoleColors.Reset}`)
+        }
+    } finally {
         runningCount--
-    })
+    }
 }
 function log(label, str)  {
     const lines = str.trim().split('\n')
@@ -198,7 +205,13 @@ function log(label, str)  {
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
-
+async function exists(path) {
+    return new Promise((resolve) => {
+        fs.access(path, fs.F_OK, (err) => {
+            resolve(!err)
+        })
+    })
+}
 
 const consoleColors = {
     Reset: "\x1b[0m",
