@@ -51,13 +51,13 @@
                 document.getElementById('controls').innerHTML = ''
                 { // Play button
                     const button = document.createElement('button')
-                    button.onclick = () => graphicInstance.invoke({ method: 'play' })
+                    button.onclick = () => graphicInstance.invokeAction({ method: 'play' })
                     button.innerText = 'Play'
                     document.getElementById('controls').appendChild(button)
                 }
                 { // Stop button
                     const button = document.createElement('button')
-                    button.onclick = () => graphicInstance.invoke({ method: 'stop' })
+                    button.onclick = () => graphicInstance.invokeAction({ method: 'stop' })
                     button.innerText = 'Stop'
                     document.getElementById('controls').appendChild(button)
                 }

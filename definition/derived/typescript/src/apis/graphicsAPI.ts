@@ -22,7 +22,7 @@ export interface GraphicsApi {
     load: (payload: GraphicLoadPayload) => Promise<void>
     /**
      * Called by the Renderer to force the Graphic to terminate/dispose/clear any loaded resources.
-     * This is called after the Renderer has unloaded the Graphic from the DOM.
+     * This is called after the Renderer has uloaded the Graphic from the DOM.
      */
     dispose: (payload: EmptyPayload) => Promise<void>
 
@@ -31,9 +31,9 @@ export interface GraphicsApi {
      */
     getStatus: (payload: EmptyPayload) => Promise<GraphicInstanceStatus>
     /**
-     * Called by the Renderer to invoke a method on the Graphic
+     * Called by the Renderer to invoke an Action on the Graphic
      */
-    invoke: (payload: ActionInvokePayload) => Promise<unknown>
+    invokeAction: (payload: ActionInvokePayload) => Promise<unknown>
     /**
      * If the Graphic supports non-realtime rendering, this is called to make the graphic jump to a certain point in time.
      * @returns A Promise that resolves when the Graphic has finished rendering the requested frame.

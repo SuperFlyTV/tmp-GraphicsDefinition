@@ -178,7 +178,7 @@ export interface Endpoints {
      */
     invokeRendererAction: {
         method: 'POST',
-        path:  '/serverApi/v1/renderers/renderer/:rendererId/invoke',
+        path:  '/serverApi/v1/renderers/renderer/:rendererId/invokeAction',
         params: { rendererId: string },
         body: { action: ActionInvokePayload},
         returnValue: {
@@ -224,7 +224,7 @@ export interface Endpoints {
      */
     invokeGraphicAction: {
         method: 'POST',
-        path:  '/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/invoke',
+        path:  '/serverApi/v1/renderers/renderer/:rendererId/target/:renderTargetId/invokeAction',
         params: { rendererId: string, renderTargetId: string },
         body: {
             target: GraphicInvokeActionTarget
