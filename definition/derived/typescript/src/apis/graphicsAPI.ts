@@ -18,11 +18,13 @@ import { ActionInvokePayload, EmptyPayload } from "../definitions/types"
 export interface GraphicsApi {
     /**
      * Called by the Renderer when the Graphic has been loaded into the DOM
+     * @returns a Promise that resolves when the Graphic has finished loading it's resources.
      */
     load: (payload: GraphicLoadPayload) => Promise<void>
+    
     /**
      * Called by the Renderer to force the Graphic to terminate/dispose/clear any loaded resources.
-     * This is called after the Renderer has uloaded the Graphic from the DOM.
+     * This is called after the Renderer has unloaded the Graphic from the DOM.
      */
     dispose: (payload: EmptyPayload) => Promise<void>
 
@@ -30,16 +32,35 @@ export interface GraphicsApi {
      * Called by the Renderer to retrieve the current status of the Graphic
      */
     getStatus: (payload: EmptyPayload) => Promise<GraphicInstanceStatus>
+
     /**
      * Called by the Renderer to invoke an Action on the Graphic
+     * @returns The return value of the invoked method (vendor-specific)
      */
     invokeAction: (payload: ActionInvokePayload) => Promise<unknown>
+
     /**
      * If the Graphic supports non-realtime rendering, this is called to make the graphic jump to a certain point in time.
      * @returns A Promise that resolves when the Graphic has finished rendering the requested frame.
      */
-    tick: (payload: {
+    goToTime: (payload: {
         timestamp: number
+    }) => Promise<EmptyPayload>
+
+    /**
+     * If the Graphic supports non-realtime rendering, this is called to schedule actions to be invoked at a certain point in time.
+     * When this is called, the Graphic is expected to store the scheduled actions and invoke them when the time comes.
+     * (A call to this replaces any previous scheduled actions.)
+     * @returns A Promise that resolves when the Graphic has stored the scheduled actions.
+     */
+    setInvokeActionsSchedule: (payload: {
+        /**
+         * A list of the scheduled actions to invoke at a certain point in time.
+         */
+        schedule: {
+            timestamp: number
+            invokeAction: ActionInvokePayload
+        }[]
     }) => Promise<EmptyPayload>
 }
 

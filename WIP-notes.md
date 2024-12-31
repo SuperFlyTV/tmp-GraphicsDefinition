@@ -58,10 +58,10 @@ Renderer Status - vendor specific?
 Scope:
     GraphicsInstance - OK.
 
-    
+
     Should it be webComponent?
         We'd need to explain it well, and provide examples.
-    
+
     multi-threading in iFrames.
     performance and stability
 
@@ -71,3 +71,11 @@ Scope:
         question of scope: Will vendors implement separate Renderers?
 
 
+  standard methods:
+    * play: "animate in"
+    * update: "update state"
+    * continue?
+    * step x?
+    * stop: "animate out"
+
+    * infer state-based data?
