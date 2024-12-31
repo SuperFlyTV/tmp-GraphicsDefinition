@@ -41,8 +41,10 @@
                     "description": "(optional) URL of the author"
                 }
             },
-            "required": ["name"],
-            "patternProperties":{
+            "required": [
+                "name"
+            ],
+            "patternProperties": {
                 "^_.*": {}
             },
             "additionalProperties": false
@@ -67,19 +69,24 @@
                 },
                 "supportsNonRealTime": {
                     "type": "boolean",
-                    "description": "Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'tick()' method."
+                    "description": "Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'goToTime()' and the 'setInvokeActionsSchedule()' methods."
                 }
             },
-            "patternProperties":{
+            "patternProperties": {
                 "^_.*": {}
             },
             "additionalProperties": false
         }
     },
-    "required": ["id", "version", "name", "actions", "rendering"],
-    "patternProperties":{
+    "required": [
+        "id",
+        "version",
+        "name",
+        "actions",
+        "rendering"
+    ],
+    "patternProperties": {
         "^_.*": {}
     },
     "additionalProperties": false
-
 }

@@ -49,7 +49,10 @@ class Graphic extends HTMLElement {
 
     return method.call(this, params.payload)
   }
-  async tick (_payload) {
+  async goToTime (_payload) {
+    throw new Error('Non-realtime not supported!')
+  }
+  async setInvokeActionsSchedule (_payload) {
     throw new Error('Non-realtime not supported!')
   }
 

@@ -32,7 +32,7 @@ export interface GraphicManifest
     rendering: {
         /** If the Graphic supports RealTime Rendering. */
         supportsRealTime: boolean
-        /** If the Graphic supports non-RealTime Rendering. If true, the Graphic MUST expose the tick() method. */
+        /** If the Graphic supports non-RealTime Rendering. If true, the Graphic MUST expose the goToTime() and the setInvokeActionsSchedule() methods. */
         supportsNonRealTime: boolean
     }
 

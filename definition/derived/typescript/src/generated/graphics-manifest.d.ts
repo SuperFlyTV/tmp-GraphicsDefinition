@@ -494,7 +494,7 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
      */
     supportsRealTime?: boolean;
     /**
-     * Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'tick()' method.
+     * Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'goToTime()' and 'setInvokeActionsSchedule' methods.
      */
     supportsNonRealTime?: boolean;
     /**
