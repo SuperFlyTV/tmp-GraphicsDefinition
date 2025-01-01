@@ -1,0 +1,30 @@
+{
+    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "name": "Lower 3rd - Name",
+    "description": "Name lower third",
+    "id": "l3rd-name",
+    "version": 0,
+    "actions": {
+        "play": {
+            "label": "Play",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "default": "John Doe"
+                    }
+                }
+            }
+        },
+        "stop": {
+            "label": "Stop",
+            "schema": null
+        }
+    },
+    "rendering": {
+        "supportsRealTime": true,
+        "supportsNonRealTime": true
+    }
+}
