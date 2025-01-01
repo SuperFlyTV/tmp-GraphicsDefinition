@@ -10,10 +10,6 @@ export function GraphicTimeline({ rendererRef, playTimeRef, realtime, schedule, 
 	const [width, setWidth] = React.useState(0)
 	const [message, setMessage] = React.useState(null)
 
-	// console.log('schedule', schedule)
-
-	// const hasTime =
-
 	const duration = settings.duration
 
 	React.useEffect(() => {
@@ -70,7 +66,6 @@ export function GraphicTimeline({ rendererRef, playTimeRef, realtime, schedule, 
 			active = false
 		}
 	}, [rendererRef, settings])
-	console.log('settings', settings)
 	return (
 		<div className="auto-reload-bar">
 			<div
@@ -91,7 +86,6 @@ export function GraphicTimeline({ rendererRef, playTimeRef, realtime, schedule, 
 									left: `${(action.timestamp / duration) * 100}%`,
 								}}
 							>
-								{console.log('action', action, action.invokeAction)}
 								{`${action.invokeAction.method}: ${JSON.stringify(action.invokeAction.payload)}`}
 								<Button variant="outline-secondary" size="sm" onClick={() => onRemoveScheduledAction(index)}>
 									🗑️

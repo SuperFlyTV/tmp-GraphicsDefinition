@@ -22,8 +22,10 @@ class IssueTracker {
 		this.onHasChanged()
 	}
 	clear = () => {
-		this._issues = []
-		this.onHasChanged()
+		if (this._issues.length !== 0) {
+			this._issues = []
+			this.onHasChanged()
+		}
 	}
 	get issues() {
 		return this._issues.map((i) => `${i.count > 1 ? `(${i.count}) ` : ''}${i.msg}`)

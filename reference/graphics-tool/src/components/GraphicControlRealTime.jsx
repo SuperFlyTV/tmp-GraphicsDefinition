@@ -11,8 +11,6 @@ export function GraphicControlRealTime({ rendererRef, setInvokeActionsSchedule, 
 	const settings = settingsContext.settings
 	const onChange = settingsContext.onChange
 
-	console.log('settings', settings)
-
 	const supportsRealTime = manifest.rendering?.supportsRealTime
 	return (
 		<div>

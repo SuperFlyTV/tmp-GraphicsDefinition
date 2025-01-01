@@ -15,7 +15,7 @@ export class ResourceProvider {
 		const modulePath = graphicResourcePath(graphicPath, `graphic.mjs?componentId=${componentId}`) // `${this.serverApiUrl}/serverApi/v1/graphics/graphic/${id}/${version}/graphic`
 
 		// Load the Graphic module:
-		const module = await import(modulePath)
+		const module = await import(/* @vite-ignore */ modulePath)
 
 		if (!module.Graphic) {
 			throw new Error('Module expected to expose a class named "Graphic" (found none)')

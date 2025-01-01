@@ -15,7 +15,7 @@ import { SettingsContext, getDefaultSettings } from '../contexts/SettingsContext
 
 export function GraphicTester({ graphic, onExit }) {
 	const [settings, setSettings] = React.useState(getDefaultSettings())
-	// console.log('settings', settings)
+
 	const onSettingsChange = React.useCallback((newSettings) => {
 		setSettings(newSettings)
 		localStorage.setItem('settings', JSON.stringify(newSettings))
@@ -82,13 +82,15 @@ export function GraphicTester({ graphic, onExit }) {
 	const reloadGraphicManifest = React.useCallback(async () => {
 		const r = await fetch(graphicResourcePath(graphic.path, 'manifest.json'))
 		const manifest = await r.json()
-		setGraphicManifest(manifest)
+		setGraphicManifest((prevValue) => {
+			if (JSON.stringify(prevValue) !== JSON.stringify(manifest)) {
+				return manifest
+			} else return prevValue
+		})
 	}, [graphic.path])
 
 	const triggerReloadGraphicRef = React.useRef({})
 	const triggerReloadGraphic = React.useCallback(() => {
-		console.log('triggerReloadGraphic')
-
 		const timeSinceLastCall = Date.now() - (triggerReloadGraphicRef.current.lastCall || 0)
 		if (timeSinceLastCall < 10) return
 		triggerReloadGraphicRef.current.lastCall = Date.now()
@@ -98,19 +100,15 @@ export function GraphicTester({ graphic, onExit }) {
 		reloadGraphic()
 			.then(async () => {
 				if (settingsRef.current.realtime) {
-					console.log('activeAutoReload', triggerReloadGraphicRef.current.activeAutoReload)
-					console.log('scheduleRef.current', scheduleRef.current)
 					let i = 0
 					for (const action of scheduleRef.current) {
 						i++
 						// If auto-reload is disabled, just execute all actions in 100ms intervals:
 						const delay = triggerReloadGraphicRef.current.autoReloadEnable ? action.timestamp : i * 100
-						console.log(action, delay)
 
 						setTimeout(() => {
 							// if (!triggerReloadGraphicRef.current.activeAutoReload) return
 
-							console.log('invokeGraphicAction', action.invokeAction)
 							rendererRef.current
 								.invokeGraphicAction(action.invokeAction.method, action.invokeAction.payload)
 								.catch(issueTracker.add)
