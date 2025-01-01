@@ -12,7 +12,7 @@ class FileHandler {
 		this.triggerMonitor().catch(console.error)
 
 		const dirHandle = await window.showDirectoryPicker({
-			id: 'graphics-tool',
+			id: 'ebu-graphics-devtool',
 			mode: 'read',
 		})
 		this.dirHandle = dirHandle

@@ -46,10 +46,10 @@ export function InitialView({ setGraphics }) {
 						Source code for this app can be found at
 						<br />
 						<a
-							href="https://github.com/SuperFlyTV/tmp-GraphicsDefinition/tree/master/reference/graphics-tool"
+							href="https://github.com/SuperFlyTV/tmp-GraphicsDefinition/tree/master/tools/graphics-devtool"
 							target="_blank"
 						>
-							https://github.com/SuperFlyTV/tmp-GraphicsDefinition/tree/master/reference/graphics-tool
+							https://github.com/SuperFlyTV/tmp-GraphicsDefinition/tree/master/tools/graphics-devtool
 						</a>
 					</p>
 				</div>

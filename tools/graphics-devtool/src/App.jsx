@@ -1,15 +1,9 @@
 import * as React from 'react'
-import { Button, Form, Dropdown } from 'react-bootstrap'
-import { Test } from './Test'
 import { fileHandler } from './FileHandler'
 import { serviceWorkerHandler } from './ServiceWorkerHandler.js'
 import { InitialView } from './views/InitialView'
 import { ListGraphics } from './views/ListGraphics'
 import { GraphicTester } from './views/GraphicTester.jsx'
-// import { getDefaultDataFromSchema } from './GDD/gdd/data.js'
-// import { GDDGUI } from './GDD/gdd-gui.jsx'
-
-// const SERVER_API_URL = 'http://localhost:8080'
 
 export function App() {
 	const [graphics, setGraphics] = React.useState(false)
@@ -17,14 +11,6 @@ export function App() {
 
 	const [serviceWorker, setServiceWorker] = React.useState(null)
 	const [serviceWorkerError, setServiceWorkerError] = React.useState(null)
-
-	// TMP!!! Auto select a graphic:
-	// React.useEffect(() => {
-	//   if (graphics && !selectedGraphic) {
-	//     const g = graphics.find((g) => !g.error);
-	//     setSelectedGraphic(g);
-	//   }
-	// }, [graphics]);
 
 	// Initialize Service Worker:
 	React.useEffect(() => {

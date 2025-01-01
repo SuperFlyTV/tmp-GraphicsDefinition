@@ -5,10 +5,10 @@ for the HTML Graphics API project.
 
 **[Work in progress notes](WIP-notes.md)**
 
-
 ## Repo organization:
 
 ### Definitions
+
 #### Definition Source
 
 Definitions in text format and JSON Schema. [Link](/definition/definition/README.md)
@@ -16,24 +16,32 @@ Definitions in text format and JSON Schema. [Link](/definition/definition/README
 The Definitions contain the actual definitions as well as motivations for various design decisions.
 
 #### Derived definitions
+
 This folder contains helper projects for various languages and formats, that are derived from the source definitions.
 
-* Definitions in Typescript format. [LINK](/definition/derived/typescript/README.md)
+- Definitions in Typescript format. [LINK](/definition/derived/typescript/README.md)
+
+### Tools
+
+- Graphics devTool - A tool for Graphics developers, to view and test Graphics.
+  [Link to online tool](https://superflytv.github.io/tmp-GraphicsDefinition/tools/graphics-devtool/dist/index.html)
 
 ### Reference Implementations
 
 #### Graphics
-* A minimal example of the most basic Graphic. [LINK](/reference/graphics/minimal/README.md)
-* _(More to come)_
+
+- A minimal example of the most basic Graphic. [LINK](/reference/graphics/minimal/README.md)
+- _(More to come)_
 
 #### Servers
-* A basic Node.js server. [LINK](/reference/servers/nodejs-basic/README.md)
-* _(More to come)_
+
+- A basic Node.js server. [LINK](/reference/servers/nodejs-basic/README.md)
+- _(More to come)_
 
 #### Renderers
-* A basic Browser-based renderer that renders Graphics on Layers. [LINK](/reference/renderers/browser-based-layered/README.md)
-* _(More to come)_
 
+- A basic Browser-based renderer that renders Graphics on Layers. [LINK](/reference/renderers/browser-based-layered/README.md)
+- _(More to come)_
 
 ## For developers
 
