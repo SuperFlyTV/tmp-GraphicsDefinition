@@ -3,9 +3,12 @@ import { issueTracker } from './renderer/IssueTracker'
 
 class ServiceWorkerHandler {
 	constructor() {
-		this.broadcast = new BroadcastChannel('intercept-channel')
+		this.previousMessageReplyId = -1
 
-		this.broadcast.onmessage = (event) => {
+		this.broadcastFromSW = new BroadcastChannel('intercept-channel-main')
+		this.broadcastToSW = new BroadcastChannel('intercept-channel-sw')
+
+		this.broadcastFromSW.onmessage = (event) => {
 			const msg = event.data
 
 			const id = msg.id
@@ -13,14 +16,14 @@ class ServiceWorkerHandler {
 				this.fileHandler
 					.readFile(msg.url)
 					.then((result) => {
-						this.broadcast.postMessage({
+						this.broadcastToSW.postMessage({
 							reply: id,
 							result: result,
 						})
 					})
 					.catch((error) => {
 						if (`${error}`.includes('File not found')) {
-							this.broadcast.postMessage({
+							this.broadcastToSW.postMessage({
 								reply: id,
 								result: 'NotFoundError',
 							})
@@ -28,7 +31,7 @@ class ServiceWorkerHandler {
 						} else {
 							console.error('readFile error', error)
 
-							this.broadcast.postMessage({
+							this.broadcastToSW.postMessage({
 								reply: id,
 								error: error,
 							})
@@ -40,7 +43,6 @@ class ServiceWorkerHandler {
 		}
 	}
 	async init(fileHandler) {
-		if (this.initialized) return
 		this.initialized = true
 		this.fileHandler = fileHandler
 
@@ -50,6 +52,8 @@ class ServiceWorkerHandler {
 
 		const alreadyRegistered = registrations.find((r) => r.active && r.active.scriptURL.includes(FILE_NAME))
 		if (alreadyRegistered) return alreadyRegistered
+
+		if (this.initialized) throw new Error('Service Worker already initialized')
 
 		return new Promise((resolve, reject) => {
 			register(FILE_NAME, {

@@ -1,16 +1,19 @@
 import * as React from 'react'
 import { Table, Button, ButtonGroup, Form, Accordion, Row, Col } from 'react-bootstrap'
-import { pathJoin, graphicResourcePath } from '../lib/lib.js'
+import { graphicResourcePath } from '../lib/lib.js'
 import { Renderer } from '../renderer/Renderer.js'
 import { fileHandler } from '../FileHandler.js'
 import { issueTracker } from '../renderer/IssueTracker.js'
-import { GDDGUI } from '../lib/GDD/gdd-gui.jsx'
-import { getDefaultDataFromSchema } from '../lib/GDD/gdd/data.js'
+import { verifyGraphicManifest } from '../lib/graphic/verify.js'
+import { GraphicSettings, DEFAULT_SETTINGS } from '../components/GraphicSettings.jsx'
+import { GraphicControlRealTime } from '../components/GraphicControlRealTime.jsx'
+import { GraphicCapabilities } from '../components/GraphicCapabilities.jsx'
 
 export function GraphicTester({ graphic, onExit }) {
 	const [settings, setSettings] = React.useState(DEFAULT_SETTINGS)
 
 	const [graphicManifest, setGraphicManifest] = React.useState(null)
+	const [graphicManifestError, setGraphicManifestError] = React.useState([])
 	const [errorMessage, setErrorMessage] = React.useState('')
 
 	const canvasRef = React.useRef(null)
@@ -111,6 +114,22 @@ export function GraphicTester({ graphic, onExit }) {
 		if (!graphicManifest) reloadGraphicManifest().catch(onError)
 	}, [])
 
+	React.useEffect(() => {
+		if (graphicManifest) {
+			const errors = verifyGraphicManifest(graphicManifest)
+
+			setGraphicManifestError((prevValue) => {
+				if (JSON.stringify(prevValue) !== JSON.stringify(errors)) {
+					return errors
+				} else {
+					return prevValue
+				}
+			})
+		} else {
+			setGraphicManifestError('No manifest loaded')
+		}
+	}, [graphicManifest])
+
 	// Init:
 	const initRef = React.useRef(true)
 	React.useEffect(() => {
@@ -131,16 +150,21 @@ export function GraphicTester({ graphic, onExit }) {
 						</div>
 
 						<div className="settings">
-							<Settings
+							<GraphicSettings
 								settings={settings}
 								onChange={(newSettings) => {
 									setSettings(newSettings)
 								}}
 							/>
 						</div>
+						<div className="capabilities">
+							{graphicManifest ? (
+								<GraphicCapabilities manifest={graphicManifest} graphicError={graphicManifestError} />
+							) : null}
+						</div>
 						<div className="control">
 							{graphicManifest ? (
-								<Control
+								<GraphicControlRealTime
 									rendererRef={rendererRef}
 									autoReloadActionsRef={autoReloadActionsRef}
 									manifest={graphicManifest}
@@ -187,179 +211,6 @@ export function GraphicTester({ graphic, onExit }) {
 				</div>
 			</div>
 		</>
-	)
-}
-
-function Settings({ settings, onChange }) {
-	settings = JSON.parse(JSON.stringify(settings))
-
-	const handleOnChange = React.useCallback(
-		(event, key, transform) => {
-			const newValue = transform ? transform(event.target.value) : event.target.value
-
-			if (newValue === undefined) return
-			settings[key] = newValue
-			onChange(settings)
-		},
-		[settings, onChange]
-	)
-
-	return (
-		<div>
-			<Accordion defaultActiveKey={['0']} alwaysOpen>
-				<Accordion.Item eventKey="0">
-					<Accordion.Header>Settings</Accordion.Header>
-					<Accordion.Body>
-						<Form>
-							<Row>
-								<Col md={6}>
-									<Form.Group className="mb-3">
-										<Form.Label>Renderer Type</Form.Label>
-										<Form.Select
-											value={`${settings.realtime ? '1' : '0'}`}
-											onChange={(e) => handleOnChange(e, 'realtime', (v) => v === '1')}
-										>
-											<option value="1">Real Time</option>
-											<option value="0">Non Real Time</option>
-										</Form.Select>
-									</Form.Group>
-									<Form.Group className="mb-3">
-										<Form.Label>Width</Form.Label>
-										<Form.Control type="number" value={settings.width} onChange={(e) => handleOnChange(e, 'width')} />
-									</Form.Group>
-									<Form.Group className="mb-3">
-										<Form.Label>Height</Form.Label>
-										<Form.Control type="number" value={settings.height} onChange={(e) => handleOnChange(e, 'height')} />
-									</Form.Group>
-								</Col>
-								<Col md={6}>
-									<Form.Group className="mb-3">
-										<Form.Label>Auto-reload interval (ms)</Form.Label>
-										<Form.Control
-											type="number"
-											value={`${settings.autoReloadInterval}`}
-											onChange={(e) =>
-												handleOnChange(e, 'autoReloadInterval', (v) => {
-													const num = parseInt(v)
-													if (Number.isNaN(num)) return undefined
-													if (`${v}`[0] === '0') return v
-													return num
-												})
-											}
-										/>
-										<Form.Text>
-											When Auto-reload is active, the graphic will be cleared and loaded on an interval. To add Actions
-											to the reload, shift-click on an action to add it.
-											<br />
-											(set to 0 to disable Auto-reload)
-										</Form.Text>
-									</Form.Group>
-								</Col>
-							</Row>
-						</Form>
-					</Accordion.Body>
-				</Accordion.Item>
-			</Accordion>
-		</div>
-	)
-}
-const DEFAULT_SETTINGS = {
-	realtime: true,
-	width: 1280,
-	height: 720,
-	autoReloadInterval: 0,
-}
-
-function Control({ rendererRef, autoReloadActionsRef, manifest }) {
-	return (
-		<div>
-			<Accordion defaultActiveKey={['0']} alwaysOpen>
-				<Accordion.Item eventKey="0">
-					<Accordion.Header>Graphics Control</Accordion.Header>
-					<Accordion.Body>
-						<div>
-							<Button
-								onClick={() => {
-									issueTracker.clear()
-									rendererRef.current.loadGraphic().catch(console.error)
-								}}
-							>
-								Load Graphic
-							</Button>
-							<Button
-								onClick={() => {
-									rendererRef.current.clearGraphic().catch(console.error)
-								}}
-							>
-								Clear Graphic
-							</Button>
-						</div>
-						<div>
-							<GraphicsActions
-								rendererRef={rendererRef}
-								autoReloadActionsRef={autoReloadActionsRef}
-								manifest={manifest}
-							/>
-						</div>
-					</Accordion.Body>
-				</Accordion.Item>
-			</Accordion>
-		</div>
-	)
-}
-function GraphicsActions({ manifest, rendererRef, autoReloadActionsRef }) {
-	return (
-		<div className="graphics-actions">
-			{Object.entries(manifest.actions).map(([actionId, action]) => {
-				return (
-					<GraphicsAction
-						key={actionId}
-						rendererRef={rendererRef}
-						autoReloadActionsRef={autoReloadActionsRef}
-						actionId={actionId}
-						action={action}
-					/>
-				)
-			})}
-		</div>
-	)
-}
-function GraphicsAction({ actionId, action, rendererRef, autoReloadActionsRef }) {
-	const initialData = action.schema ? getDefaultDataFromSchema(action.schema) : {}
-	const schema = action.schema
-
-	const [data, setData] = React.useState(initialData)
-
-	const onDataSave = (d) => {
-		setData(JSON.parse(JSON.stringify(d)))
-	}
-
-	return (
-		<div className="graphics-action card">
-			<div className="card-header">
-				<h5>{action.label ?? actionId}</h5>
-			</div>
-			<div className="card-body">
-				<div>{schema && <GDDGUI schema={schema} data={data} setData={onDataSave} />}</div>
-				<Button
-					onClick={(e) => {
-						// Invoke action:
-
-						rendererRef.current.invokeGraphicAction(actionId, data).catch(console.error)
-						if (e.shiftKey) {
-							// Schedule action to run at next auto-reload:
-							autoReloadActionsRef.current.push({
-								actionId: actionId,
-								data: data,
-								delay: Date.now() - rendererRef.current.loadGraphicEndTime,
-							})
-						}
-					}}
-				>
-					{action.label}
-				</Button>
-			</div>
-		</div>
 	)
 }
 

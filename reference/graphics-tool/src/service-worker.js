@@ -1,8 +1,9 @@
 let requestId = 0
 const requestMap = new Map()
 
-const broadcast = new BroadcastChannel('intercept-channel')
-broadcast.onmessage = (event) => {
+const broadcastToParent = new BroadcastChannel('intercept-channel-main')
+const broadcastFromParent = new BroadcastChannel('intercept-channel-sw')
+broadcastFromParent.onmessage = (event) => {
 	const msg = event.data
 
 	if (msg && msg.reply !== undefined) {
@@ -31,7 +32,7 @@ self.addEventListener('fetch', function (event) {
 
 				requestMap.set(id, { resolve, reject })
 
-				broadcast.postMessage({
+				broadcastToParent.postMessage({
 					type: 'fetch',
 					id: id,
 					url: m[2],
