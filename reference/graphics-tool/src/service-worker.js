@@ -20,13 +20,11 @@ broadcastFromParent.onmessage = (event) => {
 }
 
 self.addEventListener('fetch', function (event) {
-	console.log('fetch', event.request.url)
 	// file from url:
 	const url = event.request.url
 	let newUrl = url
 	const m = url.match(/(LOCAL)(\/.*)/i)
 	if (m) {
-		console.log('fetch intercept', m)
 		// intercept the request and serve the file from local disk:
 		event.respondWith(
 			new Promise((resolve, reject) => {
