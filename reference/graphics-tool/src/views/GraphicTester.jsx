@@ -5,12 +5,21 @@ import { Renderer } from '../renderer/Renderer.js'
 import { fileHandler } from '../FileHandler.js'
 import { issueTracker } from '../renderer/IssueTracker.js'
 import { verifyGraphicManifest } from '../lib/graphic/verify.js'
-import { GraphicSettings, DEFAULT_SETTINGS } from '../components/GraphicSettings.jsx'
+import { GraphicSettings } from '../components/GraphicSettings.jsx'
 import { GraphicControlRealTime } from '../components/GraphicControlRealTime.jsx'
+import { GraphicControlNonRealTime } from '../components/GraphicControlNonRealTime.jsx'
 import { GraphicCapabilities } from '../components/GraphicCapabilities.jsx'
+import { GraphicTimeline } from '../components/GraphicTimeline.jsx'
+
+import { SettingsContext, getDefaultSettings } from '../contexts/SettingsContext.js'
 
 export function GraphicTester({ graphic, onExit }) {
-	const [settings, setSettings] = React.useState(DEFAULT_SETTINGS)
+	const [settings, setSettings] = React.useState(getDefaultSettings())
+	// console.log('settings', settings)
+	const onSettingsChange = React.useCallback((newSettings) => {
+		setSettings(newSettings)
+		localStorage.setItem('settings', JSON.stringify(newSettings))
+	}, [])
 
 	const [graphicManifest, setGraphicManifest] = React.useState(null)
 	const [graphicManifestError, setGraphicManifestError] = React.useState([])
@@ -18,8 +27,6 @@ export function GraphicTester({ graphic, onExit }) {
 
 	const canvasRef = React.useRef(null)
 	const rendererRef = React.useRef(null)
-
-	// const [graphicManifest, setGraphicManifest] = React.useState(null)
 
 	const onError = React.useCallback((e) => {
 		setErrorMessage(`${e.message || e}`)
@@ -42,7 +49,7 @@ export function GraphicTester({ graphic, onExit }) {
 	React.useEffect(() => {
 		const listener = fileHandler.listenToFileChanges(() => {
 			// on File change
-			reloadGraphic().catch(onError)
+			triggerReloadGraphic()
 		})
 		return () => {
 			listener.stop()
@@ -59,55 +66,115 @@ export function GraphicTester({ graphic, onExit }) {
 		}
 	}, [])
 
+	const settingsRef = React.useRef(settings)
+	React.useEffect(() => {
+		settingsRef.current = settings
+		triggerReloadGraphic()
+	}, [settings])
+
 	const reloadGraphic = React.useCallback(async () => {
 		await rendererRef.current.clearGraphic()
 		issueTracker.clear()
 		await reloadGraphicManifest()
-		await rendererRef.current.loadGraphic().catch(console.error)
+		await rendererRef.current.loadGraphic(settingsRef.current).catch(issueTracker.add)
 	}, [])
 
 	const reloadGraphicManifest = React.useCallback(async () => {
 		const r = await fetch(graphicResourcePath(graphic.path, 'manifest.json'))
-
 		const manifest = await r.json()
 		setGraphicManifest(manifest)
 	}, [graphic.path])
 
-	const autoReloadActionsRef = React.useRef([])
+	const triggerReloadGraphicRef = React.useRef({})
+	const triggerReloadGraphic = React.useCallback(() => {
+		console.log('triggerReloadGraphic')
+
+		const timeSinceLastCall = Date.now() - (triggerReloadGraphicRef.current.lastCall || 0)
+		if (timeSinceLastCall < 10) return
+		triggerReloadGraphicRef.current.lastCall = Date.now()
+
+		if (triggerReloadGraphicRef.current.reloadInterval) clearTimeout(triggerReloadGraphicRef.current.reloadInterval)
+
+		reloadGraphic()
+			.then(async () => {
+				if (settingsRef.current.realtime) {
+					console.log('activeAutoReload', triggerReloadGraphicRef.current.activeAutoReload)
+					console.log('scheduleRef.current', scheduleRef.current)
+					let i = 0
+					for (const action of scheduleRef.current) {
+						i++
+						// If auto-reload is disabled, just execute all actions in 100ms intervals:
+						const delay = triggerReloadGraphicRef.current.autoReloadEnable ? action.timestamp : i * 100
+						console.log(action, delay)
+
+						setTimeout(() => {
+							// if (!triggerReloadGraphicRef.current.activeAutoReload) return
+
+							console.log('invokeGraphicAction', action.invokeAction)
+							rendererRef.current
+								.invokeGraphicAction(action.invokeAction.method, action.invokeAction.payload)
+								.catch(issueTracker.add)
+						}, delay)
+					}
+					if (triggerReloadGraphicRef.current.activeAutoReload) {
+						triggerReloadGraphicRef.current.reloadInterval = setTimeout(() => {
+							triggerReloadGraphicRef.current.reloadInterval = 0
+
+							if (triggerReloadGraphicRef.current.activeAutoReload && triggerReloadGraphicRef.current.autoReloadEnable)
+								triggerReloadGraphic()
+						}, triggerReloadGraphicRef.current.duration)
+					}
+				} else {
+					// non-realtime
+					await rendererRef.current.setInvokeActionsSchedule(scheduleRef.current).catch(issueTracker.add)
+					rendererRef.current.gotoTime(playTimeRef.current).catch(issueTracker.add)
+				}
+			})
+			.catch(onError)
+	}, [])
+
 	React.useEffect(() => {
-		if (settings.autoReloadInterval > 500) {
-			let active = true
-			let reloadInterval = 0
-			const triggerReload = () => {
-				reloadGraphic()
-					.then(() => {
-						if (active) {
-							for (const action of autoReloadActionsRef.current) {
-								setTimeout(() => {
-									if (!active) return
+		triggerReloadGraphicRef.current.autoReloadEnable = settings.autoReloadEnable
+		triggerReloadGraphicRef.current.duration = settings.duration
 
-									rendererRef.current.invokeGraphicAction(action.actionId, action.data).catch(console.error)
-								}, action.delay)
-							}
+		if (triggerReloadGraphicRef.current.autoReloadEnable) {
+			triggerReloadGraphicRef.current.activeAutoReload = true
 
-							reloadInterval = setTimeout(() => {
-								reloadInterval = 0
-								if (active) triggerReload()
-							}, settings.autoReloadInterval)
-						}
-					})
-					.catch(onError)
-			}
 			const initTimeout = setTimeout(() => {
-				triggerReload()
+				triggerReloadGraphic()
 			}, 100)
 			return () => {
 				clearTimeout(initTimeout)
-				if (reloadInterval) clearTimeout(reloadInterval)
-				active = false
+				triggerReloadGraphicRef.current.activeAutoReload = false
+				if (triggerReloadGraphicRef.current.reloadInterval) clearTimeout(triggerReloadGraphicRef.current.reloadInterval)
 			}
+		} else {
+			triggerReloadGraphicRef.current.activeAutoReload = false
 		}
 	}, [settings])
+
+	const playTimeRef = React.useRef(0)
+	const setPlayTime = React.useCallback((time) => {
+		rendererRef.current.gotoTime(time).catch(issueTracker.add)
+		playTimeRef.current = time
+	}, [])
+
+	const scheduleRef = React.useRef([])
+	const [schedule, setSchedule] = React.useState([])
+	const setInvokeActionsSchedule = React.useCallback(
+		(schedule) => {
+			scheduleRef.current = JSON.parse(JSON.stringify(schedule))
+			setSchedule(scheduleRef.current)
+			if (settings.realtime) {
+				if (!settings.autoReloadEnable) {
+					triggerReloadGraphic()
+				}
+			} else {
+				rendererRef.current.setInvokeActionsSchedule(scheduleRef.current).catch(issueTracker.add)
+			}
+		},
+		[settings]
+	)
 
 	// Load the graphic manifest:
 	React.useEffect(() => {
@@ -130,18 +197,8 @@ export function GraphicTester({ graphic, onExit }) {
 		}
 	}, [graphicManifest])
 
-	// Init:
-	const initRef = React.useRef(true)
-	React.useEffect(() => {
-		if (initRef.current) {
-			initRef.current = false
-
-			reloadGraphic().catch(onError)
-		}
-	}, [])
-
 	return (
-		<>
+		<SettingsContext.Provider value={{ settings, onChange: onSettingsChange }}>
 			<div className="container-md">
 				<div className="graphic-tester card">
 					<div className="card-body">
@@ -150,12 +207,7 @@ export function GraphicTester({ graphic, onExit }) {
 						</div>
 
 						<div className="settings">
-							<GraphicSettings
-								settings={settings}
-								onChange={(newSettings) => {
-									setSettings(newSettings)
-								}}
-							/>
+							<GraphicSettings />
 						</div>
 						<div className="capabilities">
 							{graphicManifest ? (
@@ -164,12 +216,28 @@ export function GraphicTester({ graphic, onExit }) {
 						</div>
 						<div className="control">
 							{graphicManifest ? (
-								<GraphicControlRealTime
-									rendererRef={rendererRef}
-									autoReloadActionsRef={autoReloadActionsRef}
-									manifest={graphicManifest}
-								/>
+								settings.realtime ? (
+									<GraphicControlRealTime
+										rendererRef={rendererRef}
+										schedule={schedule}
+										setInvokeActionsSchedule={setInvokeActionsSchedule}
+										manifest={graphicManifest}
+									/>
+								) : (
+									<GraphicControlNonRealTime
+										rendererRef={rendererRef}
+										schedule={schedule}
+										setInvokeActionsSchedule={setInvokeActionsSchedule}
+										manifest={graphicManifest}
+										setPlayTime={setPlayTime}
+									/>
+								)
 							) : null}
+							<div>
+								{schedule.length ? (
+									<Button onClick={() => setInvokeActionsSchedule([])}>Reset saved actions</Button>
+								) : null}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -178,7 +246,15 @@ export function GraphicTester({ graphic, onExit }) {
 				<div className="graphic-tester-render card">
 					<div className="card-body">
 						<div>
-							<AutoReloadBar rendererRef={rendererRef} settings={settings} />
+							<GraphicTimeline
+								rendererRef={rendererRef}
+								schedule={schedule}
+								playTimeRef={playTimeRef}
+								onRemoveScheduledAction={(index) => {
+									schedule.splice(index, 1)
+									setInvokeActionsSchedule([...schedule])
+								}}
+							/>
 						</div>
 						<div>
 							{errorMessage && (
@@ -190,10 +266,12 @@ export function GraphicTester({ graphic, onExit }) {
 						<div>
 							{issues.length ? (
 								<div className="alert alert-danger" role="alert">
-									Issues:
+									Graphic Errors:
 									<ul>
 										{issues.map((issue, index) => (
-											<li key={index}>{issue}</li>
+											<li key={index}>
+												<pre>{issue}</pre>
+											</li>
 										))}
 									</ul>
 								</div>
@@ -210,68 +288,6 @@ export function GraphicTester({ graphic, onExit }) {
 					</div>
 				</div>
 			</div>
-		</>
-	)
-}
-
-function AutoReloadBar({ rendererRef, settings }) {
-	// const barRef = React.useRef(null)
-
-	const [width, setWidth] = React.useState(0)
-	const [message, setMessage] = React.useState(null)
-
-	React.useEffect(() => {
-		let active = true
-		const triggerNextFrame = () => {
-			if (!active) return
-
-			// On each frame:
-			window.requestAnimationFrame(() => {
-				if (!active) return
-				triggerNextFrame()
-
-				if (!rendererRef.current) return
-
-				const graphicState = rendererRef.current.graphicState
-				const loadGraphicEndTime = rendererRef.current.loadGraphicEndTime || 0
-				const autoReloadInterval = parseInt(settings.autoReloadInterval) || 0
-
-				if (graphicState === 'pre-load') {
-					setWidth(0)
-					setMessage('Loading...')
-				} else if (graphicState === 'post-load') {
-					setMessage('Loaded')
-					if (autoReloadInterval) {
-						setWidth((Date.now() - loadGraphicEndTime) / autoReloadInterval)
-					} else {
-						setWidth(0)
-					}
-				} else if (graphicState === 'pre-clear') {
-					setMessage('Clearing...')
-				} else if (graphicState === 'post-clear') {
-					setMessage('Cleared')
-					setWidth(0)
-				} else if (graphicState === '') {
-					// nothing
-				} else {
-					setMessage(`Unknown state: "${graphicState}"`)
-				}
-			})
-		}
-		triggerNextFrame()
-		return () => {
-			active = false
-		}
-	}, [rendererRef, settings])
-	return (
-		<div className="auto-reload-bar">
-			<div
-				className="auto-reload-bar_bar"
-				style={{
-					width: `${width * 100}%`,
-				}}
-			></div>
-			<div className="auto-reload-bar_message">{message ? `Status: ${message}` : ''}</div>
-		</div>
+		</SettingsContext.Provider>
 	)
 }

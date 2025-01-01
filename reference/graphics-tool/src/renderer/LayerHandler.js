@@ -27,7 +27,7 @@ export class LayerHandler {
 		return [] // TODO
 	}
 
-	async loadGraphic(graphicPath) {
+	async loadGraphic(settings, graphicPath) {
 		// Clear any existing GraphicInstance:
 
 		if (this.currentGraphic) {
@@ -53,7 +53,7 @@ export class LayerHandler {
 		// Load the element:
 		await element.load({
 			baseUrl: baseUrl, // `${this.graphicCache.serverApiUrl}/serverApi/v1/graphics/graphic/${id}/${version}`, // /resources/:localPath
-			renderType: 'realtime',
+			renderType: settings.realtime ? 'realtime' : 'non-realtime',
 		})
 	}
 	async clearGraphic() {
@@ -77,5 +77,14 @@ export class LayerHandler {
 				payload: payload,
 			}),
 		}
+	}
+
+	async goToTime(timestamp) {
+		if (!this.currentGraphic) return
+		await this.currentGraphic.element.goToTime({ timestamp })
+	}
+	async setInvokeActionsSchedule(schedule) {
+		if (!this.currentGraphic) return
+		await this.currentGraphic.element.setInvokeActionsSchedule({ schedule })
 	}
 }

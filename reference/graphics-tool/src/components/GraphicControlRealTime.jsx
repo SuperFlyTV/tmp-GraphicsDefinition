@@ -3,12 +3,26 @@ import { Button, Accordion } from 'react-bootstrap'
 import { issueTracker } from '../renderer/IssueTracker.js'
 import { GDDGUI } from '../lib/GDD/gdd-gui.jsx'
 import { getDefaultDataFromSchema } from '../lib/GDD/gdd/data.js'
+import { SettingsContext } from '../contexts/SettingsContext.js'
+import { GraphicAction } from './GraphicAction.jsx'
 
-export function GraphicControlRealTime({ rendererRef, autoReloadActionsRef, manifest }) {
+export function GraphicControlRealTime({ rendererRef, setInvokeActionsSchedule, manifest, schedule }) {
+	const settingsContext = React.useContext(SettingsContext)
+	const settings = settingsContext.settings
+	const onChange = settingsContext.onChange
+
+	console.log('settings', settings)
+
 	const supportsRealTime = manifest.rendering?.supportsRealTime
 	return (
 		<div>
-			<Accordion defaultActiveKey={['0']} alwaysOpen>
+			<Accordion
+				defaultActiveKey={settings.viewControlAccordion}
+				alwaysOpen
+				onSelect={(selection) => {
+					onChange({ ...settings, viewControlAccordion: selection })
+				}}
+			>
 				<Accordion.Item eventKey="0">
 					<Accordion.Header>Graphic Control</Accordion.Header>
 					<Accordion.Body>
@@ -18,14 +32,14 @@ export function GraphicControlRealTime({ rendererRef, autoReloadActionsRef, mani
 									<Button
 										onClick={() => {
 											issueTracker.clear()
-											rendererRef.current.loadGraphic().catch(console.error)
+											rendererRef.current.loadGraphic(settings).catch(issueTracker.add)
 										}}
 									>
 										Load Graphic
 									</Button>
 									<Button
 										onClick={() => {
-											rendererRef.current.clearGraphic().catch(console.error)
+											rendererRef.current.clearGraphic().catch(issueTracker.add)
 										}}
 									>
 										Clear Graphic
@@ -34,7 +48,8 @@ export function GraphicControlRealTime({ rendererRef, autoReloadActionsRef, mani
 								<div>
 									<GraphicsActions
 										rendererRef={rendererRef}
-										autoReloadActionsRef={autoReloadActionsRef}
+										schedule={schedule}
+										setInvokeActionsSchedule={setInvokeActionsSchedule}
 										manifest={manifest}
 									/>
 								</div>
@@ -48,58 +63,40 @@ export function GraphicControlRealTime({ rendererRef, autoReloadActionsRef, mani
 		</div>
 	)
 }
-function GraphicsActions({ manifest, rendererRef, autoReloadActionsRef }) {
+function GraphicsActions({ manifest, rendererRef, schedule, setInvokeActionsSchedule }) {
 	return (
-		<div className="graphics-actions">
-			{Object.entries(manifest.actions || {}).map(([actionId, action]) => {
-				return (
-					<GraphicsAction
-						key={actionId}
-						rendererRef={rendererRef}
-						autoReloadActionsRef={autoReloadActionsRef}
-						actionId={actionId}
-						action={action}
-					/>
-				)
-			})}
-		</div>
-	)
-}
-function GraphicsAction({ actionId, action, rendererRef, autoReloadActionsRef }) {
-	const initialData = action.schema ? getDefaultDataFromSchema(action.schema) : {}
-	const schema = action.schema
+		<>
+			<div className="graphics-actions">
+				{Object.entries(manifest.actions || {}).map(([actionId, action]) => {
+					return (
+						<GraphicAction
+							key={actionId}
+							rendererRef={rendererRef}
+							actionId={actionId}
+							action={action}
+							onAction={(actionId, data, e) => {
+								// Invoke action:
+								rendererRef.current.invokeGraphicAction(actionId, data).catch(issueTracker.add)
+								if (e.shiftKey) {
+									// Add action to schedule, to run at next auto-reload:
 
-	const [data, setData] = React.useState(initialData)
-
-	const onDataSave = (d) => {
-		setData(JSON.parse(JSON.stringify(d)))
-	}
-
-	return (
-		<div className="graphics-action card">
-			<div className="card-header">
-				<h5>{action.label ?? actionId}</h5>
+									schedule.push({
+										timestamp: Date.now() - rendererRef.current.loadGraphicEndTime,
+										invokeAction: {
+											method: actionId,
+											payload: JSON.parse(JSON.stringify(data)),
+										},
+									})
+									setInvokeActionsSchedule(schedule)
+								}
+							}}
+						/>
+					)
+				})}
 			</div>
-			<div className="card-body">
-				<div>{schema && <GDDGUI schema={schema} data={data} setData={onDataSave} />}</div>
-				<Button
-					onClick={(e) => {
-						// Invoke action:
-
-						rendererRef.current.invokeGraphicAction(actionId, data).catch(console.error)
-						if (e.shiftKey) {
-							// Schedule action to run at next auto-reload:
-							autoReloadActionsRef.current.push({
-								actionId: actionId,
-								data: data,
-								delay: Date.now() - rendererRef.current.loadGraphicEndTime,
-							})
-						}
-					}}
-				>
-					{action.label}
-				</Button>
+			<div>
+				<i>Tip: Shift-clicking actions will make them auto-trigger after file changed or Auto-reload.</i>
 			</div>
-		</div>
+		</>
 	)
 }

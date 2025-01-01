@@ -17,6 +17,31 @@ class FileHandler {
 		})
 		this.dirHandle = dirHandle
 
+		return await this.listGraphics()
+	}
+	async discoverFilesInDirectory(path, dirHandle) {
+		for await (const [key, handle] of dirHandle.entries()) {
+			const subPath = path + '/' + handle.name
+
+			if (handle.kind === 'directory') {
+				this.dirs[subPath] = {
+					dirHandle: handle,
+				}
+				await this.discoverFilesInDirectory(subPath, handle)
+			} else {
+				this.files[subPath] = {
+					dirHandle,
+					handle,
+				}
+			}
+		}
+	}
+	async discoverFiles() {
+		this.dirs = {}
+		this.files = {}
+		await this.discoverFilesInDirectory('', this.dirHandle)
+	}
+	async listGraphics() {
 		// discover all files in the directory:
 		await this.discoverFiles()
 
@@ -52,28 +77,6 @@ class FileHandler {
 		}
 
 		return graphics
-	}
-	async discoverFilesInDirectory(path, dirHandle) {
-		for await (const [key, handle] of dirHandle.entries()) {
-			const subPath = path + '/' + handle.name
-
-			if (handle.kind === 'directory') {
-				this.dirs[subPath] = {
-					dirHandle: handle,
-				}
-				await this.discoverFilesInDirectory(subPath, handle)
-			} else {
-				this.files[subPath] = {
-					dirHandle,
-					handle,
-				}
-			}
-		}
-	}
-	async discoverFiles() {
-		this.dirs = {}
-		this.files = {}
-		await this.discoverFilesInDirectory('', this.dirHandle)
 	}
 
 	async readFile(path) {

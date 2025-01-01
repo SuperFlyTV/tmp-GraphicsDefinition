@@ -1,12 +1,19 @@
 import * as React from 'react'
 import { Table, Button } from 'react-bootstrap'
 
-export function ListGraphics({ graphics, onSelect }) {
+export function ListGraphics({ graphics, onSelect, onRefresh }) {
 	return (
 		<div className="container-md">
 			<div className="list-graphics card">
 				<div>
 					<h2>Select Graphic</h2>
+					<Button
+						onClick={() => {
+							onRefresh()
+						}}
+					>
+						Refresh
+					</Button>
 				</div>
 
 				{graphics.length > 0 ? (
@@ -16,6 +23,7 @@ export function ListGraphics({ graphics, onSelect }) {
 								<th>Path</th>
 								<th>Name</th>
 								<th>ID-Version</th>
+								<th>Capabilities</th>
 								<th>Issues</th>
 								<th></th>
 							</tr>
@@ -29,6 +37,12 @@ export function ListGraphics({ graphics, onSelect }) {
 										<td>{graphic.manifest.name}</td>
 										<td>
 											{graphic.manifest.id}-{graphic.manifest.version}
+										</td>
+										<td>
+											<ul>
+												{graphic.manifest.rendering?.supportsRealTime ? <li>🏃 Realtime rendering</li> : null}
+												{graphic.manifest.rendering?.supportsNonRealTime ? <li>🧍 Non-Realtime rendering</li> : null}
+											</ul>
 										</td>
 										<td>
 											{errorLines.length ? (

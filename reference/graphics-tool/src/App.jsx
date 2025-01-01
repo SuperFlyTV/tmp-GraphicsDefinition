@@ -45,6 +45,9 @@ export function App() {
 	const onSelectGraphic = React.useCallback((graphic) => {
 		setSelectedGraphic(graphic)
 	}, [])
+	const onRefreshGraphics = React.useCallback(() => {
+		fileHandler.listGraphics().then(setGraphics).catch(console.error)
+	}, [])
 
 	if (!serviceWorker) {
 		return (
@@ -65,7 +68,7 @@ export function App() {
 					}}
 				/>
 			) : graphics ? (
-				<ListGraphics graphics={graphics} onSelect={onSelectGraphic} />
+				<ListGraphics graphics={graphics} onSelect={onSelectGraphic} onRefresh={onRefreshGraphics} />
 			) : (
 				<InitialView setGraphics={setGraphics} />
 			)}

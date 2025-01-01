@@ -12,12 +12,12 @@ export class Renderer {
 		this.graphic = graphic
 	}
 	/** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
-	async loadGraphic() {
+	async loadGraphic(settings) {
 		if (this.graphicState.includes('pre')) throw new Error('loadGraphic called too quick')
 		try {
 			this.graphicState = 'pre-load'
 			this.loadGraphicStartTime = Date.now()
-			await this.layer.loadGraphic(this.graphic.path)
+			await this.layer.loadGraphic(settings, this.graphic.path)
 			this.graphicState = 'post-load'
 			this.loadGraphicEndTime = Date.now()
 		} catch (e) {
@@ -44,5 +44,15 @@ export class Renderer {
 	/** Invokes an action on a graphicInstance. Actions are defined by the Graphic's manifest */
 	async invokeGraphicAction(actionId, payload) {
 		return this.layer.invokeAction(actionId, payload)
+	}
+
+	/** Non-realtime graphics only. Go to a specific frame. */
+	async gotoTime(timestamp) {
+		return this.layer.goToTime(timestamp)
+	}
+
+	/** Non-realtime graphics only. Set a schedule of action invokes. */
+	async setInvokeActionsSchedule(schedule) {
+		return this.layer.setInvokeActionsSchedule(schedule)
 	}
 }

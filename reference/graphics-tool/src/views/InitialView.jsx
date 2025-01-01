@@ -4,8 +4,8 @@ import { fileHandler } from '../FileHandler'
 
 export function InitialView({ setGraphics }) {
 	return (
-		<div className="intial-hero">
-			<div className="intial-hero-content">
+		<div className="initial-hero">
+			<div className="initial-hero-content">
 				<div>
 					<h1>Graphics DevTool</h1>
 				</div>

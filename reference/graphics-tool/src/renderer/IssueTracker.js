@@ -1,15 +1,32 @@
 class IssueTracker {
 	constructor() {
-		this.issues = []
+		this._issues = []
 		this.listeners = []
 	}
-	add(msg) {
-		this.issues.push(msg)
+	add = (msg) => {
+		console.error(msg)
+		let str
+		if (typeof msg === 'object' && msg !== null) {
+			str = `${msg}`
+			if (msg.stack) str += '\n' + msg.stack
+		} else {
+			str = `${msg}`
+		}
+
+		const existing = this._issues.find((i) => i.msg === str)
+		if (!existing) {
+			this._issues.push({ msg: str, time: Date.now(), count: 1 })
+		} else {
+			existing.count++
+		}
 		this.onHasChanged()
 	}
-	clear() {
-		this.issues = []
+	clear = () => {
+		this._issues = []
 		this.onHasChanged()
+	}
+	get issues() {
+		return this._issues.map((i) => `${i.count > 1 ? `(${i.count}) ` : ''}${i.msg}`)
 	}
 	onHasChanged() {
 		if (this.hasChangedDelay) clearTimeout(this.hasChangedDelay)
