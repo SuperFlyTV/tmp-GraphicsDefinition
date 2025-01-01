@@ -23,8 +23,11 @@ This folder contains helper projects for various languages and formats, that are
 
 ### Tools
 
-- Graphics devTool - A tool for Graphics developers, to view and test Graphics.
-  [Link to online tool](https://superflytv.github.io/tmp-GraphicsDefinition/tools/graphics-devtool/dist/index.html)
+#### Graphics DevTool
+
+[Link to the Graphics DevTool](https://superflytv.github.io/tmp-GraphicsDefinition/tools/graphics-devtool/dist/index.html)
+
+A tool for Graphics developers, to view and test Graphics.
 
 ### Reference Implementations
 
