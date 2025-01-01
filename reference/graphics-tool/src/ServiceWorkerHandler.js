@@ -50,7 +50,7 @@ class ServiceWorkerHandler {
 		this.pServiceWorker = Promise.resolve().then(async () => {
 			this.fileHandler = fileHandler
 
-			const FILE_NAME = '/service-worker.js'
+			const FILE_NAME = 'service-worker.js'
 
 			const registrations = await navigator.serviceWorker.getRegistrations()
 
