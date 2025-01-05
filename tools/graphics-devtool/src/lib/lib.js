@@ -1,3 +1,5 @@
+import React from 'react'
+
 export function pathJoin(...paths) {
 	return paths.join('/').replace(/\/+/g, '/')
 }
@@ -10,4 +12,19 @@ export function graphicResourcePath(...paths) {
 }
 export async function sleep(ms) {
 	await new Promise((resolve) => setTimeout(resolve, ms))
+}
+export function usePromise(fcn, deps) {
+	const [result, setResult] = React.useState(null)
+
+	React.useEffect(() => {
+		fcn()
+			.then((value) => {
+				setResult({ value, error: null })
+			})
+			.catch((error) => {
+				setResult({ value: null, error })
+			})
+	}, deps ?? [])
+
+	return result
 }

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Table, Button } from 'react-bootstrap'
+import { GraphicIssues } from '../components/GraphicIssues'
 
 export function ListGraphics({ graphics, onSelect, onRefresh }) {
 	return (
@@ -30,7 +31,6 @@ export function ListGraphics({ graphics, onSelect, onRefresh }) {
 						</thead>
 						<tbody>
 							{graphics.map((graphic, i) => {
-								const errorLines = graphic.error ? graphic.error.split('\n') : []
 								return (
 									<tr key={graphic.path}>
 										<td>{graphic.path}</td>
@@ -45,15 +45,7 @@ export function ListGraphics({ graphics, onSelect, onRefresh }) {
 											</ul>
 										</td>
 										<td>
-											{errorLines.length ? (
-												<ul>
-													{errorLines.map((str, i) => {
-														return <li key={i}>{str}</li>
-													})}
-												</ul>
-											) : (
-												<span>No issues found 👍</span>
-											)}
+											<GraphicIssues manifest={graphic.manifest} />
 										</td>
 										<td>
 											<Button onClick={() => onSelect(graphic)}>Select</Button>

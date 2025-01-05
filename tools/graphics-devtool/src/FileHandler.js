@@ -1,4 +1,3 @@
-import { verifyGraphicManifest } from './lib/graphic/verify'
 import { sleep } from './lib/lib.js'
 
 class FileHandler {
@@ -51,28 +50,19 @@ class FileHandler {
 			if (file.handle.name === 'manifest.json') {
 				const graphic = {
 					path: key.slice(0, -'manifest.json'.length),
-					error: '',
 				}
 				graphics.push(graphic)
 
 				// Check if the manifest is correct
 				const manifestStr = await (await file.handle.getFile()).text()
-				let manifest
+				let manifest = null
 				try {
 					manifest = JSON.parse(manifestStr)
 				} catch (e) {
-					graphic.error = 'Error parsing manifest.json: ' + e
+					console.error('Error parsing manifest.json: ')
 					continue
 				}
-				graphic.error = verifyGraphicManifest(manifest)
 				graphic.manifest = manifest
-
-				// Check that there is a graphics.mjs file:
-				if (!this.files[key.replace(/\/manifest.json$/, '/graphic.mjs')]) {
-					graphic.error += '\n' + 'Missing graphic.mjs file'
-				}
-
-				graphic.error = graphic.error.trim()
 			}
 		}
 

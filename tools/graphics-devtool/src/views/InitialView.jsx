@@ -83,11 +83,12 @@ function TroubleShoot() {
 								for (const sw of registrations) {
 									await sw.unregister()
 								}
+								localStorage.clear()
 								setMessage('Service Worker unregistered. Please do a hard reload now.')
 							})
 						}}
 					>
-						Click here to unregister the Service Worker
+						Click here to clear some cached data.
 					</Button>
 				</div>
 				{message ? <div className="alert alert-success">{message}</div> : null}

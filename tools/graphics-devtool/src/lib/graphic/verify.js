@@ -1,55 +1,120 @@
-export function verifyGraphicManifest(manifest) {
-	// TMP!
-	// This should instead use the json schema to verify the manifest
+import { Validator } from 'jsonschema'
 
-	let errors = []
-
-	if (manifest.id === undefined) errors.push('Manifest is missing the "id" property')
-	else if (typeof manifest.id !== 'string') errors.push('Manifest "id" property must be a string')
-
-	if (manifest.version === undefined) errors.push('Manifest is missing the "version" property')
-	else if (typeof manifest.version !== 'number') errors.push('Manifest "version" property must be a number')
-
-	if (!manifest.name) errors.push('Manifest is missing the "name" property')
-	else if (typeof manifest.name !== 'string') errors.push('Manifest "name" property must be a string')
-
-	if (!manifest.actions) errors.push('Manifest is missing the "actions" property')
-	else if (typeof manifest.actions !== 'object') errors.push('Manifest "actions" property must be an object')
-	else {
-		for (const [key, action] of Object.entries(manifest.actions)) {
-			if (typeof action !== 'object') errors.push(`Manifest "actions.${key}" property must be an object`)
-			if (!action.label) errors.push(`Manifest "actions.${key}" is missing the "label" property`)
-			if (typeof action.schema !== 'object' && action.schema !== null)
-				errors.push(`Manifest "actions.${key}" is missing the "schema" property`)
-
-			if (typeof action.label !== 'string') errors.push(`Manifest "actions.${key}.label" property must be a string`)
-			if (action.description && typeof action.description !== 'string')
-				errors.push(`Manifest "actions.${key}.description" property must be a string`)
-		}
+let cachedCache = null
+export async function setupSchemaValidator() {
+	if (!cachedCache) {
+		const cache = localStorage.getItem('schema-cache')
+		if (cache) cachedCache = JSON.parse(cache)
 	}
 
-	if (!manifest.rendering) errors.push('Manifest is missing the "rendering" property')
-	else {
-		if (typeof manifest.rendering.supportsRealTime !== 'boolean')
-			errors.push('Manifest "rendering.supportsRealTime" property must be a boolean')
-		if (typeof manifest.rendering.supportsNonRealTime !== 'boolean')
-			errors.push('Manifest "rendering.supportsNonRealTime" property must be a boolean')
-	}
+	const v = await _setupSchemaValidator({
+		fetch: async (url) => {
+			const response = await fetch(url)
+			if (!response.ok) throw new Error(`Failed to fetch schema from "${url}"`)
+			return response.json()
+		},
+		getCache: () => {
+			return cachedCache ?? {}
+		},
+	})
 
-	if (manifest.description) {
-		if (typeof manifest.description !== 'string') errors.push('Manifest "description" property must be a string')
+	if (v.cache) {
+		localStorage.setItem('schema-cache', JSON.stringify(v.cache))
+		cachedCache = v.cache
 	}
-
-	if (manifest.author) {
-		if (typeof manifest.author !== 'object') errors.push('Manifest "author" property must be an object')
-		else {
-			if (typeof manifest.author.name !== 'string') errors.push('Manifest "author.name" property must be a string')
-			if (manifest.author.email && typeof manifest.author.email !== 'string')
-				errors.push('Manifest "author.email" property must be a string')
-			if (manifest.author.url && typeof manifest.author.url !== 'string')
-				errors.push('Manifest "author.url" property must be a string')
-		}
-	}
-
-	return errors.join('\n')
+	return v.validate
 }
+
+/**
+ * Downloads the GDD meta-schemas needed for the validator to work
+ * @returns
+ */
+async function _setupSchemaValidator(
+	options
+	/*: {
+	fetch: (url: string) => Promise<any>
+	getCache?: () => Promise<ValidatorCache>
+}): Promise<{
+	validate: SchemaValidator
+	cache: ValidatorCache | null
+}> {
+*/
+) {
+	if (cachedValidator) {
+		return {
+			validate: cachedValidator,
+			cache: null,
+		}
+	}
+
+	const cache = options.getCache ? await options.getCache() : {}
+
+	const baseURL =
+		'https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json'
+
+	const v = new Validator()
+	async function addRef(ref) {
+		// Check if it is in the local cache first:
+		if (cache[ref]) {
+			v.addSchema(cache[ref], ref)
+			return cache[ref]
+		} else {
+			const content = await options.fetch(ref)
+			if (!content) throw new Error(`Not able to resolve schema for "${ref}"`)
+			v.addSchema(content, ref)
+			cache[ref] = content
+			return content
+		}
+	}
+
+	let handledRefs = 0
+	let bailOut = false
+	const handled = new Set()
+	async function handleUnresolvedRefs() {
+		if (bailOut) return
+
+		const refsToHandle = []
+		for (let i = 0; i < v.unresolvedRefs.length; i++) {
+			const ref = v.unresolvedRefs.shift()
+			if (!ref) break
+			if (refsToHandle.length > 30) break
+			if (handled.has(ref)) continue
+
+			refsToHandle.push(ref)
+			handled.add(ref)
+		}
+		await Promise.all(
+			refsToHandle.map(async (ref) => {
+				handledRefs++
+				if (handledRefs > 100) {
+					bailOut = true
+					return
+				}
+
+				const fixedRef = ref.replace(/#.*/, '')
+
+				await addRef(fixedRef)
+				await handleUnresolvedRefs()
+			})
+		)
+	}
+	// const baseSchema = await addRef(baseURL + '/v1/schema.json')
+	const baseSchema = await addRef(baseURL + '')
+	await handleUnresolvedRefs()
+
+	if (bailOut) throw new Error(`Bailing out, more than ${handledRefs} references found!`)
+
+	cachedValidator = (schema) => {
+		const result = v.validate(schema, baseSchema)
+
+		return result.errors.map((err) => {
+			const pathStr = err.path.join('.')
+			return `${pathStr}: ${err.message}`
+		})
+	}
+	return {
+		validate: cachedValidator,
+		cache: cache,
+	}
+}
+let cachedValidator = null

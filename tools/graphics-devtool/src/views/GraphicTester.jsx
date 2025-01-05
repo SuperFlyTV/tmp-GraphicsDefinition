@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { Table, Button, ButtonGroup, Form, Accordion, Row, Col } from 'react-bootstrap'
-import { graphicResourcePath } from '../lib/lib.js'
+import { graphicResourcePath, usePromise } from '../lib/lib.js'
 import { Renderer } from '../renderer/Renderer.js'
 import { fileHandler } from '../FileHandler.js'
 import { issueTracker } from '../renderer/IssueTracker.js'
-import { verifyGraphicManifest } from '../lib/graphic/verify.js'
+
 import { GraphicSettings } from '../components/GraphicSettings.jsx'
+import { GraphicIssues } from '../components/GraphicIssues.jsx'
 import { GraphicControlRealTime } from '../components/GraphicControlRealTime.jsx'
 import { GraphicControlNonRealTime } from '../components/GraphicControlNonRealTime.jsx'
 import { GraphicCapabilities } from '../components/GraphicCapabilities.jsx'
@@ -22,7 +23,7 @@ export function GraphicTester({ graphic, onExit }) {
 	}, [])
 
 	const [graphicManifest, setGraphicManifest] = React.useState(null)
-	const [graphicManifestError, setGraphicManifestError] = React.useState([])
+
 	const [errorMessage, setErrorMessage] = React.useState('')
 
 	const canvasRef = React.useRef(null)
@@ -80,7 +81,8 @@ export function GraphicTester({ graphic, onExit }) {
 	}, [])
 
 	const reloadGraphicManifest = React.useCallback(async () => {
-		const r = await fetch(graphicResourcePath(graphic.path, 'manifest.json'))
+		const url = graphicResourcePath(graphic.path, 'manifest.json')
+		const r = await fetch(url)
 		const manifest = await r.json()
 		setGraphicManifest((prevValue) => {
 			if (JSON.stringify(prevValue) !== JSON.stringify(manifest)) {
@@ -179,22 +181,6 @@ export function GraphicTester({ graphic, onExit }) {
 		if (!graphicManifest) reloadGraphicManifest().catch(onError)
 	}, [])
 
-	React.useEffect(() => {
-		if (graphicManifest) {
-			const errors = verifyGraphicManifest(graphicManifest)
-
-			setGraphicManifestError((prevValue) => {
-				if (JSON.stringify(prevValue) !== JSON.stringify(errors)) {
-					return errors
-				} else {
-					return prevValue
-				}
-			})
-		} else {
-			setGraphicManifestError('No manifest loaded')
-		}
-	}, [graphicManifest])
-
 	return (
 		<SettingsContext.Provider value={{ settings, onChange: onSettingsChange }}>
 			<div className="container-md">
@@ -207,36 +193,39 @@ export function GraphicTester({ graphic, onExit }) {
 						<div className="settings">
 							<GraphicSettings />
 						</div>
-						<div className="capabilities">
-							{graphicManifest ? (
-								<GraphicCapabilities manifest={graphicManifest} graphicError={graphicManifestError} />
-							) : null}
-						</div>
-						<div className="control">
-							{graphicManifest ? (
-								settings.realtime ? (
-									<GraphicControlRealTime
-										rendererRef={rendererRef}
-										schedule={schedule}
-										setInvokeActionsSchedule={setInvokeActionsSchedule}
-										manifest={graphicManifest}
-									/>
-								) : (
-									<GraphicControlNonRealTime
-										rendererRef={rendererRef}
-										schedule={schedule}
-										setInvokeActionsSchedule={setInvokeActionsSchedule}
-										manifest={graphicManifest}
-										setPlayTime={setPlayTime}
-									/>
-								)
-							) : null}
-							<div>
-								{schedule.length ? (
-									<Button onClick={() => setInvokeActionsSchedule([])}>Reset saved actions</Button>
-								) : null}
-							</div>
-						</div>
+						{graphicManifest ? (
+							<>
+								<div className="issues">
+									<div className="card">{<GraphicIssues manifest={graphicManifest} />}</div>
+								</div>
+								<div className="capabilities">{<GraphicCapabilities manifest={graphicManifest} />}</div>
+								<div className="control">
+									{settings.realtime ? (
+										<GraphicControlRealTime
+											rendererRef={rendererRef}
+											schedule={schedule}
+											setInvokeActionsSchedule={setInvokeActionsSchedule}
+											manifest={graphicManifest}
+										/>
+									) : (
+										<GraphicControlNonRealTime
+											rendererRef={rendererRef}
+											schedule={schedule}
+											setInvokeActionsSchedule={setInvokeActionsSchedule}
+											manifest={graphicManifest}
+											setPlayTime={setPlayTime}
+										/>
+									)}
+									<div>
+										{schedule.length ? (
+											<Button onClick={() => setInvokeActionsSchedule([])}>Reset saved actions</Button>
+										) : null}
+									</div>
+								</div>
+							</>
+						) : (
+							<div>Loading manifest...</div>
+						)}
 					</div>
 				</div>
 			</div>
