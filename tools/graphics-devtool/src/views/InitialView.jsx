@@ -10,15 +10,14 @@ export function InitialView({ setGraphics }) {
 					<h1>Graphics DevTool</h1>
 				</div>
 				<div>
-					<p>This is a tool for developing EBU HTML graphics.</p>
 					<p>
-						It reads Graphics from your local hard drive and displays them on this web page <br /> (nothing is sent to
-						any servers).
+						This is a tool to help with developing <b>EBU HTML Graphics</b>.
 					</p>
+					<p>It has a control GUI and renders the EBU HTML Graphics, directly from your local hard drive.</p>
 
 					<p>
 						<i>
-							If you haven't already got any EBU HTML Graphics on your local hard drive,
+							If you haven't already got any EBU HTML Graphics locally,
 							<br /> you can download some examples&nbsp;
 							<a
 								href={`https://download-directory.github.io/?url=${encodeURIComponent(
