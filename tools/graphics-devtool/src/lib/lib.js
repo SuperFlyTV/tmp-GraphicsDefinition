@@ -8,7 +8,9 @@ export function graphicResourcePath(...paths) {
 
 	const prefix = window.location.href.includes('https') ? 'https://' : 'http://'
 
-	return pathJoin(`${prefix}LOCAL/`, ...paths)
+	const basePath = `${window.location.href}`.replace(/^https?:\/\//, '').replace(/\?.*/, '')
+
+	return prefix + pathJoin(basePath, `LOCAL`, ...paths)
 }
 export async function sleep(ms) {
 	await new Promise((resolve) => setTimeout(resolve, ms))

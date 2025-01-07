@@ -25,6 +25,7 @@ self.addEventListener('fetch', function (event) {
 	let newUrl = url
 	const m = url.match(/(LOCAL)(\/.*)/i)
 	if (m) {
+		console.debug('fetch intercepting', event.request.url)
 		// intercept the request and serve the file from local disk:
 		event.respondWith(
 			new Promise((resolve, reject) => {
@@ -64,6 +65,7 @@ self.addEventListener('fetch', function (event) {
 				})
 		)
 	} else {
+		console.debug('fetch (letting through)', event.request.url)
 		event.respondWith(
 			fetch(newUrl)
 			// intercept requests by handling event.request here
