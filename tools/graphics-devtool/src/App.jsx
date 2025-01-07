@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { fileHandler } from './FileHandler'
 import { serviceWorkerHandler } from './ServiceWorkerHandler.js'
-import { InitialView } from './views/InitialView'
+import { InitialView, TroubleShoot } from './views/InitialView'
 import { ListGraphics } from './views/ListGraphics'
 import { GraphicTester } from './views/GraphicTester.jsx'
 
@@ -39,7 +39,10 @@ export function App() {
 		return (
 			<div>
 				<span>Initializing, please wait..</span>
-				<div>{serviceWorkerError && <span>Error: {serviceWorkerError.message}</span>}</div>
+				<div>{serviceWorkerError && <div className="alert alert-danger">Error: {serviceWorkerError.message}</div>}</div>
+				<div>
+					<TroubleShoot />
+				</div>
 			</div>
 		)
 	}

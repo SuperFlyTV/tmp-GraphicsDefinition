@@ -1,5 +1,6 @@
 import { register } from 'register-service-worker'
 import { issueTracker } from './renderer/IssueTracker'
+import { SW_VERSION } from './lib/sw-version.js'
 
 class ServiceWorkerHandler {
 	constructor() {
@@ -7,6 +8,9 @@ class ServiceWorkerHandler {
 
 		this.broadcastFromSW = new BroadcastChannel('intercept-channel-main')
 		this.broadcastToSW = new BroadcastChannel('intercept-channel-sw')
+
+		this.messageId = 0
+		this.waitingReplies = new Map()
 
 		this.broadcastFromSW.onmessage = (event) => {
 			const msg = event.data
@@ -37,59 +41,104 @@ class ServiceWorkerHandler {
 							})
 						}
 					})
+			} else if (msg.reply !== undefined) {
+				const waiting = this.waitingReplies.get(msg.reply)
+				if (waiting) {
+					if (msg.error) waiting.reject(msg.error)
+					else waiting.resolve(msg.result)
+				} else {
+					console.error('no waiting reply for', msg)
+				}
 			} else {
 				console.error('unknown message', msg)
 			}
 		}
 	}
 	async init(fileHandler) {
-		if (this.pServiceWorker) return await this.pServiceWorker
-
 		let registeredNewServiceWorker = false
+		if (!this.pServiceWorker) {
+			// debounce:
+			this.pServiceWorker = Promise.resolve().then(async () => {
+				this.fileHandler = fileHandler
 
-		this.pServiceWorker = Promise.resolve().then(async () => {
-			this.fileHandler = fileHandler
+				const FILE_NAME = 'service-worker.js'
 
-			const FILE_NAME = 'service-worker.js'
+				const registrations = await navigator.serviceWorker.getRegistrations()
 
-			const registrations = await navigator.serviceWorker.getRegistrations()
+				const alreadyRegistered = registrations.find((r) => r.active && r.active.scriptURL.includes(FILE_NAME))
+				if (alreadyRegistered) {
+					return alreadyRegistered
+				}
 
-			const alreadyRegistered = registrations.find((r) => r.active && r.active.scriptURL.includes(FILE_NAME))
-			if (alreadyRegistered) {
-				return alreadyRegistered
-			}
-
-			registeredNewServiceWorker = true
-			return new Promise((resolve, reject) => {
-				register(FILE_NAME, {
-					registrationOptions: { scope: './' },
-					ready(registration) {
-						resolve(registration)
-					},
-					// registered(registration) {
-					// 	console.log('Service worker has been registered.')
-					// },
-					// cached(registration) {
-					// 	console.log('Content has been cached for offline use.')
-					// },
-					// updatefound(registration) {
-					// 	console.log('New content is downloading.')
-					// },
-					// updated(registration) {
-					// 	console.log('New content is available; please refresh.')
-					// },
-					// offline() {
-					// 	console.log('No internet connection found. App is running in offline mode.')
-					// },
-					error(error) {
-						console.error('Error during service worker registration:', error)
-						reject(error)
-					},
+				registeredNewServiceWorker = true
+				return new Promise((resolve, reject) => {
+					register(FILE_NAME, {
+						registrationOptions: { scope: './' },
+						ready(registration) {
+							resolve(registration)
+						},
+						registered(registration) {
+							console.debug('Service worker has been registered.', registration)
+						},
+						cached(registration) {
+							console.debug('Content has been cached for offline use.'.registration)
+						},
+						updatefound() {
+							console.debug('New content is downloading.')
+						},
+						updated() {
+							console.debug('New content is available; please refresh.')
+						},
+						offline() {
+							console.debug('No internet connection found. App is running in offline mode.')
+						},
+						error(error) {
+							console.error('Error during service worker registration:', error)
+							reject(error)
+						},
+					})
 				})
 			})
-		})
+		}
 
 		const serviceWorker = await this.pServiceWorker
+
+		// check that the service worker is the correct version
+		const swVersion = await new Promise((resolve, reject) => {
+			const id = this.messageId++
+			this.broadcastToSW.postMessage({
+				type: 'request-version',
+				id: id,
+			})
+			this.waitingReplies.set(id, { resolve, reject })
+			setTimeout(() => {
+				reject(
+					new Error(
+						'Timeout while checking the service worker version. You might need to clear the browser cache and do a hard reload of the page.'
+					)
+				)
+			}, 1000)
+		})
+
+		if (swVersion !== SW_VERSION) {
+			// Try to reload the serviceWorker
+
+			// Avoid infinite reload loop:
+			const swId = `update-service-worker-${swVersion}`
+			if (!localStorage.getItem(swId)) {
+				localStorage.setItem(swId, '1')
+
+				const registrations = await navigator.serviceWorker.getRegistrations()
+				for (const sw of registrations) {
+					await sw.unregister()
+				}
+				location.reload()
+			}
+			console.error(`Service Worker version mismatch. Expected: ${SW_VERSION}, got: ${swVersion}`)
+			throw new Error(
+				`Service Worker version mismatch. You might need to clear the browser cache and do a hard reload of the page.`
+			)
+		}
 
 		if (registeredNewServiceWorker) {
 			// If we just registered the service worker, we'll need to reload the page for it to intercept requests properly.

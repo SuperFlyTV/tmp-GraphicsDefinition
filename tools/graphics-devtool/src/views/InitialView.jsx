@@ -65,12 +65,11 @@ export function InitialView({ setGraphics }) {
 		</div>
 	)
 }
-function TroubleShoot() {
+export function TroubleShoot() {
 	const [message, setMessage] = React.useState('')
 	return (
 		<>
-			If you have issues (such as graphics not loading), <br />
-			try to do a full reload by following these steps:
+			If you have issues, try to do a full reload by following these steps:
 			<div>
 				<div>
 					<b>Step 1:</b>

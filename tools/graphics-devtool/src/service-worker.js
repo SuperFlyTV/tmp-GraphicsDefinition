@@ -1,3 +1,5 @@
+const SW_VERSION = '2025-01-07T12:14:02.295Z' // Updated at build time
+
 let requestId = 0
 const requestMap = new Map()
 
@@ -16,6 +18,12 @@ broadcastFromParent.onmessage = (event) => {
 		} else {
 			// console.error('no waiting for', msg.reply)
 		}
+	} else if (msg && msg.type === 'request-version') {
+		broadcastToParent.postMessage({
+			type: 'sw-version',
+			reply: msg.id,
+			result: SW_VERSION,
+		})
 	}
 }
 
