@@ -11,6 +11,7 @@ import { GraphicControlRealTime } from '../components/GraphicControlRealTime.jsx
 import { GraphicControlNonRealTime } from '../components/GraphicControlNonRealTime.jsx'
 import { GraphicCapabilities } from '../components/GraphicCapabilities.jsx'
 import { GraphicTimeline } from '../components/GraphicTimeline.jsx'
+import { PiPHandler } from '../components/PiPHandler.jsx'
 
 import { SettingsContext, getDefaultSettings } from '../contexts/SettingsContext.js'
 
@@ -28,6 +29,7 @@ export function GraphicTester({ graphic, onExit }) {
 
 	const canvasRef = React.useRef(null)
 	const rendererRef = React.useRef(null)
+	const canvasContainerRef = React.useRef(null)
 
 	const onError = React.useCallback((e) => {
 		setErrorMessage(`${e.message || e}`)
@@ -264,14 +266,24 @@ export function GraphicTester({ graphic, onExit }) {
 								</div>
 							) : null}
 						</div>
-						<div
-							ref={canvasRef}
-							className="graphic-canvas"
-							style={{
-								width: settings.width,
-								height: settings.height,
-							}}
-						></div>
+						<div>
+							<PiPHandler
+								rendererRef={rendererRef}
+								settings={settings}
+								canvasRef={canvasRef}
+								canvasContainerRef={canvasContainerRef}
+							/>
+						</div>
+						<div ref={canvasContainerRef} className="graphic-canvas-container">
+							<div
+								ref={canvasRef}
+								className="graphic-canvas"
+								style={{
+									width: settings.width,
+									height: settings.height,
+								}}
+							></div>
+						</div>
 					</div>
 				</div>
 			</div>
