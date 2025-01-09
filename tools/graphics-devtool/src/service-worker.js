@@ -1,4 +1,4 @@
-const SW_VERSION = '2025-01-07T12:14:02.295Z' // Updated at build time
+const SW_VERSION = '2025-01-09T15:45:17.838Z' // Updated at build time
 
 let requestId = 0
 const requestMap = new Map()
@@ -44,7 +44,7 @@ self.addEventListener('fetch', function (event) {
 				broadcastToParent.postMessage({
 					type: 'fetch',
 					id: id,
-					url: m[2],
+					url: decodeURIComponent(m[2]),
 				})
 			})
 				.then((result) => {

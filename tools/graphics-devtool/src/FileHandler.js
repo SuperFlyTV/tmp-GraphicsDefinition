@@ -70,8 +70,6 @@ class FileHandler {
 	}
 
 	async readFile(path) {
-		const path2 = path.slice(1)
-
 		// remove any query parameters:
 		path = path.replace(/\?.*/, '')
 
