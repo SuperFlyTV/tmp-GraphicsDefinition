@@ -1,13 +1,11 @@
 {
-    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json",
     "name": "Minimal Test Graphic",
     "id": "minimal",
     "version": 0,
-
     "actions": {
         "play": {
             "label": "Play",
-
             "schema": {
                 "type": "object",
                 "properties": {

@@ -1,12 +1,12 @@
 {
-    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/schema.json",
     "name": "Lower 3rd - Name",
     "description": "Name lower third",
     "id": "l3rd-name",
     "version": 0,
     "actions": {
-        "play": {
-            "label": "Play",
+        "update": {
+            "label": "Update",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -18,13 +18,42 @@
                 }
             }
         },
+        "play": {
+            "label": "Play",
+            "schema": null
+        },
         "stop": {
             "label": "Stop",
             "schema": null
+        },
+        "step": {
+            "label": "Step",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "delta": {
+                        "type": "number"
+                    },
+                    "goto": {
+                        "type": "number"
+                    },
+                    "skipAnimation": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "fire": {
+            "label": "Fire",
+            "schema": {
+                "type": "object",
+                "properties": {}
+            }
         }
     },
     "rendering": {
         "supportsRealTime": true,
-        "supportsNonRealTime": true
+        "supportsNonRealTime": true,
+        "isStandardGraphic": true
     }
 }

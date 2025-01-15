@@ -50,7 +50,7 @@ async function _setupSchemaValidator(
 	const cache = options.getCache ? await options.getCache() : {}
 
 	const baseURL =
-		'https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json'
+		'https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json'
 
 	const v = new Validator()
 	async function addRef(ref) {

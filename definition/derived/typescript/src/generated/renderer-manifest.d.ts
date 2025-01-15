@@ -19,72 +19,73 @@ export type HttpsSuperflytvGithubIoGraphicsDataDefinitionGddMetaSchemaV1LibObjec
       };
       [k: string]: unknown;
     };
-export type CoreAndValidationSpecificationsMetaSchema = CoreVocabularyMetaSchema &
-  ApplicatorVocabularyMetaSchema &
-  UnevaluatedApplicatorVocabularyMetaSchema &
-  ValidationVocabularyMetaSchema &
-  MetaDataVocabularyMetaSchema &
-  FormatVocabularyMetaSchemaForAnnotationResults &
-  ContentVocabularyMetaSchema & {
-    /**
-     * @deprecated
-     */
-    definitions?: {
-      [k: string]: {
-        [k: string]: unknown;
+export type CoreAndValidationSpecificationsMetaSchema =
+  CoreVocabularyMetaSchema &
+    ApplicatorVocabularyMetaSchema &
+    UnevaluatedApplicatorVocabularyMetaSchema &
+    ValidationVocabularyMetaSchema &
+    MetaDataVocabularyMetaSchema &
+    FormatVocabularyMetaSchemaForAnnotationResults &
+    ContentVocabularyMetaSchema & {
+      /**
+       * @deprecated
+       */
+      definitions?: {
+        [k: string]: {
+          [k: string]: unknown;
+        };
       };
-    };
-    /**
-     * @deprecated
-     */
-    dependencies?: {
-      [k: string]:
-        | {
-            [k: string]: unknown;
-          }
-        | string[];
-    };
-    /**
-     * @deprecated
-     */
-    $recursiveAnchor?: string;
-    /**
-     * @deprecated
-     */
-    $recursiveRef?: string;
-    [k: string]: unknown;
-  } & (
-    | {
-        /**
-         * @deprecated
-         */
-        definitions?: {
-          [k: string]: {
-            [k: string]: unknown;
+      /**
+       * @deprecated
+       */
+      dependencies?: {
+        [k: string]:
+          | {
+              [k: string]: unknown;
+            }
+          | string[];
+      };
+      /**
+       * @deprecated
+       */
+      $recursiveAnchor?: string;
+      /**
+       * @deprecated
+       */
+      $recursiveRef?: string;
+      [k: string]: unknown;
+    } & (
+      | {
+          /**
+           * @deprecated
+           */
+          definitions?: {
+            [k: string]: {
+              [k: string]: unknown;
+            };
           };
-        };
-        /**
-         * @deprecated
-         */
-        dependencies?: {
-          [k: string]:
-            | {
-                [k: string]: unknown;
-              }
-            | string[];
-        };
-        /**
-         * @deprecated
-         */
-        $recursiveAnchor?: string;
-        /**
-         * @deprecated
-         */
-        $recursiveRef?: string;
-        [k: string]: unknown;
-      }
-    | boolean
-  );
+          /**
+           * @deprecated
+           */
+          dependencies?: {
+            [k: string]:
+              | {
+                  [k: string]: unknown;
+                }
+              | string[];
+          };
+          /**
+           * @deprecated
+           */
+          $recursiveAnchor?: string;
+          /**
+           * @deprecated
+           */
+          $recursiveRef?: string;
+          [k: string]: unknown;
+        }
+      | boolean
+    );
 export type CoreVocabularyMetaSchema = {
   $id?: string;
   $schema?: string;
@@ -133,7 +134,7 @@ export type ApplicatorVocabularyMetaSchema = {
     },
     ...{
       [k: string]: unknown;
-    }[]
+    }[],
   ];
   items?: {
     [k: string]: unknown;
@@ -180,7 +181,7 @@ export type ApplicatorVocabularyMetaSchema = {
     },
     ...{
       [k: string]: unknown;
-    }[]
+    }[],
   ];
   /**
    * @minItems 1
@@ -191,7 +192,7 @@ export type ApplicatorVocabularyMetaSchema = {
     },
     ...{
       [k: string]: unknown;
-    }[]
+    }[],
   ];
   /**
    * @minItems 1
@@ -202,7 +203,7 @@ export type ApplicatorVocabularyMetaSchema = {
     },
     ...{
       [k: string]: unknown;
-    }[]
+    }[],
   ];
   not?: {
     [k: string]: unknown;
@@ -219,7 +220,7 @@ export type ApplicatorVocabularyMetaSchema = {
         },
         ...{
           [k: string]: unknown;
-        }[]
+        }[],
       ];
       items?: {
         [k: string]: unknown;
@@ -266,7 +267,7 @@ export type ApplicatorVocabularyMetaSchema = {
         },
         ...{
           [k: string]: unknown;
-        }[]
+        }[],
       ];
       /**
        * @minItems 1
@@ -277,7 +278,7 @@ export type ApplicatorVocabularyMetaSchema = {
         },
         ...{
           [k: string]: unknown;
-        }[]
+        }[],
       ];
       /**
        * @minItems 1
@@ -288,7 +289,7 @@ export type ApplicatorVocabularyMetaSchema = {
         },
         ...{
           [k: string]: unknown;
-        }[]
+        }[],
       ];
       not?: {
         [k: string]: unknown;
@@ -319,10 +320,34 @@ export type UnevaluatedApplicatorVocabularyMetaSchema = {
 );
 export type ValidationVocabularyMetaSchema = {
   type?:
-    | ("array" | "boolean" | "integer" | "null" | "number" | "object" | "string")
+    | (
+        | "array"
+        | "boolean"
+        | "integer"
+        | "null"
+        | "number"
+        | "object"
+        | "string"
+      )
     | [
-        "array" | "boolean" | "integer" | "null" | "number" | "object" | "string",
-        ...("array" | "boolean" | "integer" | "null" | "number" | "object" | "string")[]
+        (
+          | "array"
+          | "boolean"
+          | "integer"
+          | "null"
+          | "number"
+          | "object"
+          | "string"
+        ),
+        ...(
+          | "array"
+          | "boolean"
+          | "integer"
+          | "null"
+          | "number"
+          | "object"
+          | "string"
+        )[],
       ];
   const?: unknown;
   enum?: unknown[];
@@ -349,10 +374,34 @@ export type ValidationVocabularyMetaSchema = {
 } & (
   | {
       type?:
-        | ("array" | "boolean" | "integer" | "null" | "number" | "object" | "string")
+        | (
+            | "array"
+            | "boolean"
+            | "integer"
+            | "null"
+            | "number"
+            | "object"
+            | "string"
+          )
         | [
-            "array" | "boolean" | "integer" | "null" | "number" | "object" | "string",
-            ...("array" | "boolean" | "integer" | "null" | "number" | "object" | "string")[]
+            (
+              | "array"
+              | "boolean"
+              | "integer"
+              | "null"
+              | "number"
+              | "object"
+              | "string"
+            ),
+            ...(
+              | "array"
+              | "boolean"
+              | "integer"
+              | "null"
+              | "number"
+              | "object"
+              | "string"
+            )[],
           ];
       const?: unknown;
       enum?: unknown[];
@@ -429,18 +478,20 @@ export type ContentVocabularyMetaSchema = {
     }
   | boolean
 );
-export type HttpsSuperflytvGithubIoGraphicsDataDefinitionGddMetaSchemaV1LibGddTypesJson = {
-  [k: string]: unknown;
-};
-export type HttpsSuperflytvGithubIoGraphicsDataDefinitionGddMetaSchemaV1LibBasicTypesJson = {
-  [k: string]: unknown;
-};
+export type HttpsSuperflytvGithubIoGraphicsDataDefinitionGddMetaSchemaV1LibGddTypesJson =
+  {
+    [k: string]: unknown;
+  };
+export type HttpsSuperflytvGithubIoGraphicsDataDefinitionGddMetaSchemaV1LibBasicTypesJson =
+  {
+    [k: string]: unknown;
+  };
 
 export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitionJsonSchemaGraphicsManifestSchemaJson {
   /**
    * Reference to the JSON-schema
    */
-  $schema?: "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json";
+  $schema?: "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json";
   /**
    * The id of the Renderer.
    */
@@ -453,7 +504,9 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
    * Custom Actions that can be invoked on the Renderer.
    */
   actions: {
-    [k: string]: HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitionJsonSchemaLibActionJson;
+    [
+      k: string
+    ]: HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitionJsonSchemaLibActionJson;
   };
   /**
    * The different RenterTargets this Renderer can render to.

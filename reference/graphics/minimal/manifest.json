@@ -1,10 +1,9 @@
 {
-    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json",
     "name": "Minimal Test Graphic",
     "description": "This Graphic includes the bare minimum required to be a valid Graphic.",
     "id": "minimal",
     "version": 1,
-
     "actions": {},
     "rendering": {
         "supportsRealTime": true,

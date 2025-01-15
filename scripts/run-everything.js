@@ -48,6 +48,12 @@ async function main() {
     }),
     run({
       title: "Installing dependencies",
+      label: "renderers/browser-based-layered",
+      cmd: "npm install",
+      cwd: "reference/renderers/browser-based-layered",
+    }),
+    run({
+      title: "Installing dependencies",
       label: "graphics-devtool",
       cmd: "npm install",
       cwd: "tools/graphics-devtool",
@@ -128,6 +134,12 @@ async function main() {
       label: "servers/nodejs-basic",
       cmd: "npm run dev",
       cwd: "reference/servers/nodejs-basic",
+    }),
+    run({
+      title: "Starting up development server",
+      label: "renderers/browser-based-layered",
+      cmd: "npm run start",
+      cwd: "reference/renderers/browser-based-layered",
     }),
     run({
       title: "Starting up development server",

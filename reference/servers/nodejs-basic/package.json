@@ -4,7 +4,7 @@
   "main": "src/main.ts",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/main.ts"
+    "dev": "nodemon --watch src --verbose src/main.ts"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
