@@ -1,0 +1,135 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/schema.json",
+    "allOf": [
+        {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "object",
+                    "description": "Custom Actions that can be invoked on the Graphic.",
+                    "properties": {
+                        "update": {
+                            "description": "The 'update' action is called after the Graphic is loaded, and when new data is pushed to the Graphic.",
+                            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json"
+                        },
+                        "play": {
+                            "description": "When the 'play' action is called, the Graphic will animate in.",
+                            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action-without-payload.json"
+                        },
+                        "stop": {
+                            "description": "When the 'stop' action is called, the Graphic will animate out.",
+                            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action-without-payload.json"
+                        },
+                        "step": {
+                            "allOf": [
+                                {
+                                    "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json"
+                                },
+                                {
+                                    "type": "object",
+                                    "description": "When 'play' action is called, the Graphic will animate in",
+                                    "properties": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "const": "object"
+                                                },
+                                                "properties": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "delta": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "const": "number"
+                                                                }
+                                                            }
+                                                        },
+                                                        "goto": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "const": "number"
+                                                                }
+                                                            }
+                                                        },
+                                                        "skipAnimation": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "const": "boolean"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "delta",
+                                                        "goto",
+                                                        "skipAnimation"
+                                                    ],
+                                                    "patternProperties": {
+                                                        "^_.*": {}
+                                                    },
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "required": [
+                                                "type",
+                                                "properties"
+                                            ],
+                                            "additionalProperties": true
+                                        }
+                                    },
+                                    "required": [
+                                        "schema"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "patternProperties": {
+                        ".": {
+                            "type": "object",
+                            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json"
+                        }
+                    },
+                    "required": [
+                        "update",
+                        "play",
+                        "stop",
+                        "step"
+                    ],
+                    "additionalProperties": true
+                },
+                "rendering": {
+                    "type": "object",
+                    "description": "Properties of the Graphic related to the Renderer",
+                    "properties": {
+                        "isStandardGraphic": {
+                            "type": "boolean",
+                            "const": true
+                        },
+                        "stepCount": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "isStandardGraphic",
+                        "stepCount"
+                    ],
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": true
+        },
+        {
+            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/common-graphics-schema.json"
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/action.json",
+    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json",
     "type": "object",
     "properties": {
         "label": {
@@ -24,10 +24,12 @@
             ]
         }
     },
-    "required": ["label", "schema"],
-    "patternProperties":{
+    "required": [
+        "label",
+        "schema"
+    ],
+    "patternProperties": {
         "^_.*": {}
     },
     "additionalProperties": false
-
 }

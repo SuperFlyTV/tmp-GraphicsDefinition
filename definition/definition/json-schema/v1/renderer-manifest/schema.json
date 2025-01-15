@@ -1,11 +1,11 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json",
     "type": "object",
     "properties": {
         "$schema": {
             "type": "string",
-            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json",
             "description": "Reference to the JSON-schema"
         },
         "id": {
@@ -22,7 +22,7 @@
             "patternProperties": {
                 ".": {
                     "type": "object",
-                    "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/action.json"
+                    "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json"
                 }
             }
         },
@@ -42,15 +42,21 @@
                             "description": "A longer description of the RenderTarget. This is displayed to the User."
                         }
                     },
-                    "required": ["name"]
+                    "required": [
+                        "name"
+                    ]
                 }
             }
         }
     },
-    "required": ["id", "name", "actions", "renderTargets"],
-    "patternProperties":{
+    "required": [
+        "id",
+        "name",
+        "actions",
+        "renderTargets"
+    ],
+    "patternProperties": {
         "^_.*": {}
     },
     "additionalProperties": false
-
 }

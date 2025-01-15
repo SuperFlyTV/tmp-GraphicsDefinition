@@ -1,12 +1,12 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
+    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/common-graphics-schema.json",
     "type": "object",
     "properties": {
         "$schema": {
             "type": "string",
-            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/graphics-manifest/schema.json",
-            "description": "Reference to the JSON-schema"
+            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/schema.json",
+            "description": "Reference to the JSON-schema for this manifest"
         },
         "id": {
             "type": "string",
@@ -52,12 +52,7 @@
         "actions": {
             "type": "object",
             "description": "Custom Actions that can be invoked on the Graphic.",
-            "patternProperties": {
-                ".": {
-                    "type": "object",
-                    "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/lib/action.json"
-                }
-            }
+            "additionalProperties": true
         },
         "rendering": {
             "type": "object",
@@ -70,6 +65,10 @@
                 "supportsNonRealTime": {
                     "type": "boolean",
                     "description": "Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'goToTime()' and the 'setInvokeActionsSchedule()' methods."
+                },
+                "isStandardGraphic": {
+                    "type": "boolean",
+                    "description": "Indicates if the Graphic is a Standard Graphic, or an Extensible Graphic. A Standard Graphic must use certain Actions, see the Documentation."
                 }
             },
             "patternProperties": {
@@ -79,6 +78,7 @@
         }
     },
     "required": [
+        "$schema",
         "id",
         "version",
         "name",
