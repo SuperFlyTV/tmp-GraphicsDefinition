@@ -40,14 +40,15 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 A Graphic MUST consist of the following files:
  
-- a JSON file that MUST be named **manifest.json** containing metadata about the Graphic.
+- a JSON file containing metadata about the Graphic, referred to as the Manifest file.
   See [Manifest Model](#manifest-model) for more information.
-- a Javascript file that exports the graphics Web Component. 
+- a Javascript file that exports the graphics Web Component. The Manifest file MUST contain a reference to this Javascript file. 
   See [Web Component Interface](#web-component-interface) for more information.
 - any resources used by the Graphic, such as images, videos, fonts, etc. 
   These resources MAY be organised in a folder structure.
 
-When exchanged, the files belonging to a Graphic MUST be packaged in a ZIP file.
+The Manifest file SHOULD be considered as the representation of the Graphic, all other files are either
+directly or indirectly referenced from the Manifest file and can be seen as dependencies.
 
 ### Manifest Model
 
@@ -61,7 +62,7 @@ The **manifest.json** file is a JSON file containing metadata about the Graphic.
   * `name` `(string: <required>)`: The name of the author.
   * `email` `(string: <optional>)`: The email address of the author.
   * `url` `(string: <optional>)`: The URL representing the author.
-* `main` `(string: graphic.js)`: Reference to the Javascript file that exports the graphic Web Component.
+* `main` `(string: <required>)`: Reference to the Javascript file that exports the graphic Web Component.
 * `actions` `(object: <required>)`: An object with fields corresponding to the ids of actions that can be invoked on the Graphic. Every action is represented by an object containing the following fields:
   * `label` `(string: <required>)`: The name of the action.
   * `description` `(string: <optional>)`: A longer description of the action.
@@ -83,21 +84,30 @@ The [HTML5 Custom Elements specification](https://html.spec.whatwg.org/multipage
 requirements of such a custom HTML element. 
 
 Therefore, the contents of the `main` Javascript file of a Graphic MUST contain a `class` that extends from `HTMLElement`.
-Depending on the rendering capabilities (defined in manifest.json), a Graphic is expected to implement some functions.
+Depending on the rendering capabilities (defined in the Manifest file), a Graphic is expected to implement some functions.
 
 Every Graphic MUST implement the following functions:
 * `load()`: Called by the Renderer when the Graphic has been loaded into the DOM.
 * `dispose()`: Called by the Renderer to force the Graphic to terminate/dispose/clear any loaded resources.
 * `invokeAction(action)`: Called by the Renderer to invoke an Action on the Graphic. The schema of the Action is described in the manifest.
 
-Every non-realtime Graphic additionally MUST implement the following functions:
+Additionally, every non-realtime Graphic MUST implement the following functions:
 * `gotoTime(position)`: Called to make the Graphic jump to a certain point in time.
 
-TODO: how to export the class
+The default export MUST be used to export the `class` representing the Graphic. 
+This type of export allows you to import the Graphic using any name.
 
 ## Requirements for a Renderer
 
-TODO: steps a Renderer should take to render a Graphic
+The way a Graphic is added into a Renderer is non-normative. 
+Different examples are provided [here](TODO) that show how a Graphic can be added to the DOM tree of the Renderer.
+
+However, once a Graphic is added into the Renderer, the following steps MUST be taken:
+* call the `load()` function of the Graphic and wait for the promise to resolve
+* TODO: in case of Standard Graphic, call 'updateData()'
+
+When a Graphic is removed from the Renderer, the following steps MUST be taken:
+* call the `dispose()` function of the Graphic and wait for the promise to resolve
 
 ## JSON Schema for manifest.json
 
@@ -111,12 +121,8 @@ The informative Typescript interface for graphic.js can be found [here](/definit
 
 # To be discussed
 
-* renderer target is only relevant when standardizing the Server API
-* graphic.mjs vs graphic.js (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#aside_%E2%80%94_.mjs_versus_.js)
-* default export -> why not name the Javascript class in the Manifest (and keep the JS file fixed)?
-* ZIP file requirement
 * underscore requirement for vendor-specific properties: really needed?
+* setInvokeActionsSchedule needed?
 * authors of a manifest.json are forced to repeat the play/stop/update methods for every Graphic?
   * wouldn't it be better to specify these methods separately?
   * payload of update is still relevant though
-* setInvokeActionsSchedule?
