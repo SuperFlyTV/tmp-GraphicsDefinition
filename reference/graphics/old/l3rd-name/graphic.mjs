@@ -15,9 +15,9 @@ class Graphic extends HTMLElement {
 
     // Load the GSAP scripts ---------------------------------------------------
     const importsPromises = {
-      gsap: import(loadParams.baseUrl + "/resources/gsap-core.js"),
-      CSSPlugin: import(loadParams.baseUrl + "/resources/CSSPlugin.js"),
-      TextPlugin: import(loadParams.baseUrl + "/resources/TextPlugin.js"),
+      gsap: import(import.meta.resolve("./resources/gsap-core.js")),
+      CSSPlugin: import(import.meta.resolve("./resources/CSSPlugin.js")),
+      TextPlugin: import(import.meta.resolve("./resources/TextPlugin.js")),
     };
 
     this.g = await importsPromises.gsap;

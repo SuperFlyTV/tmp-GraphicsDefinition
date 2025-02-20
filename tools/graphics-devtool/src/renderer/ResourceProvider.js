@@ -12,10 +12,13 @@ export class ResourceProvider {
 		return componentId
 	}
 	async fetchModule(graphicPath, componentId) {
-		const modulePath = graphicResourcePath(graphicPath, `graphic.mjs?componentId=${componentId}`) // `${this.serverApiUrl}/serverApi/v1/graphics/graphic/${id}/${version}/graphic`
+		const modulePath = graphicResourcePath(graphicPath) + `?componentId=${componentId}` // `${this.serverApiUrl}/serverApi/v1/graphics/graphic/${id}/${version}/graphic`
 
+		console.log('modulePath', modulePath)
 		// Load the Graphic module:
 		const module = await import(/* @vite-ignore */ modulePath)
+
+		console.log('module', module)
 
 		if (!module.Graphic) {
 			throw new Error('Module expected to expose a class named "Graphic" (found none)')

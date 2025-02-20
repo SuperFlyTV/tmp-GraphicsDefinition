@@ -6,11 +6,17 @@ class Graphic extends HTMLElement {
 
   async load(loadParams) {
     if (loadParams.renderType !== "realtime")
-      throw new Error("Only realtime rendering is supported by this graphic");
+      throw new Error("Only realtime rendering is supported");
 
-    const elText = document.createElement("p");
-    elText.innerHTML = "Hello world!";
-    this.appendChild(elText);
+    // Display an image
+    const image = document.createElement("img");
+    image.src = loadParams.baseUrl + "/resources/thumbs-up.jpg";
+    this.appendChild(image);
+
+    const iframe = document.createElement("iframe");
+    this.elIframe = iframe;
+    iframe.src = loadParams.baseUrl + "/resources/myIframe.html";
+    this.appendChild(iframe);
 
     // When everything is loaded we can return:
     return;

@@ -1,0 +1,13 @@
+{
+    "$schema": "http://127.0.0.1:8084/json-schema/v1/graphics-manifest/schema.json",
+    "name": "Minimal Non-Realtime Test Graphic",
+    "description": "This Graphic includes the bare minimum required to be a valid non-realtime Graphic. It displays the play time.",
+    "id": "minimal-non-raeltime-example",
+    "version": 1,
+    "actions": {},
+    "rendering": {
+        "supportsRealTime": true,
+        "supportsNonRealTime": true,
+        "isExtensibleGraphic": true
+    }
+}

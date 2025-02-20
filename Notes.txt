@@ -1,0 +1,9 @@
+Notes
+
+Our aim,
+
+Graphics API definition
+    Draft in March
+    1.0 for IBC
+Server API definition
+    Draft for IBC

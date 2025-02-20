@@ -1,9 +1,9 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible.json",
+    "$id": "http://127.0.0.1:8084/json-schema/v1/graphics-manifest/extensible.json",
     "allOf": [
         {
-            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/common-graphics-schema.json"
+            "$ref": "http://127.0.0.1:8084/json-schema/v1/lib/common-graphics-schema.json"
         },
         {
             "type": "object",
@@ -12,21 +12,21 @@
                     "patternProperties": {
                         ".": {
                             "type": "object",
-                            "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json"
+                            "$ref": "http://127.0.0.1:8084/json-schema/v1/lib/action.json"
                         }
                     }
                 },
                 "rendering": {
                     "type": "object",
                     "properties": {
-                        "isStandardGraphic": {
+                        "isExtensibleGraphic": {
                             "type": "boolean",
-                            "const": false
+                            "const": true
                         }
                     },
                     "additionalProperties": true,
                     "required": [
-                        "isStandardGraphic"
+                        "isExtensibleGraphic"
                     ]
                 }
             },

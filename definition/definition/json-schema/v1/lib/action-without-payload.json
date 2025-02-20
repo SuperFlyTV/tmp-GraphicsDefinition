@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action-without-payload.json",
+    "$id": "http://127.0.0.1:8084/json-schema/v1/lib/action-without-payload.json",
     "type": "object",
     "properties": {
         "label": {
@@ -12,8 +12,10 @@
             "description": "A longer description of the action. This is displayed to the user."
         },
         "schema": {
-            "description": "This action has no schema, simply set it to null.",
-            "type": "null"
+            "description": "This action has no schema, simply set it to an empty object.",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
         }
     },
     "required": [
@@ -21,7 +23,7 @@
         "schema"
     ],
     "patternProperties": {
-        "^_.*": {}
+        "^v_.*": {}
     },
     "additionalProperties": false
 }

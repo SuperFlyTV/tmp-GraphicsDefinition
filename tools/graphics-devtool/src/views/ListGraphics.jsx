@@ -34,17 +34,23 @@ export function ListGraphics({ graphics, onSelect, onRefresh }) {
 								return (
 									<tr key={graphic.path}>
 										<td>{graphic.path}</td>
-										<td>{graphic.manifest.name}</td>
+										<td>{graphic.manifest?.name}</td>
 										<td>
-											{graphic.manifest.id}-{graphic.manifest.version}
+											{graphic.manifest?.id}-{graphic.manifest?.version}
 										</td>
 										<td>
 											<ul>
-												{graphic.manifest.rendering?.supportsRealTime ? <li>🏃 Realtime rendering</li> : null}
-												{graphic.manifest.rendering?.supportsNonRealTime ? <li>🧍 Non-Realtime rendering</li> : null}
+												{graphic.manifest?.rendering?.supportsRealTime ? <li>🏃 Realtime rendering</li> : null}
+												{graphic.manifest?.rendering?.supportsNonRealTime ? <li>🧍 Non-Realtime rendering</li> : null}
 											</ul>
 										</td>
 										<td>
+											{graphic.manifestParseError ? (
+												<div className="alert alert-danger">
+													<div>Error parsing manifest.json:</div>
+													<div>{graphic.manifestParseError.toString()}</div>
+												</div>
+											) : null}
 											<GraphicIssues manifest={graphic.manifest} />
 										</td>
 										<td>

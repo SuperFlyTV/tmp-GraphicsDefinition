@@ -1,11 +1,11 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json",
+    "$id": "http://127.0.0.1:8084/json-schema/v1/renderer-manifest/schema.json",
     "type": "object",
     "properties": {
         "$schema": {
             "type": "string",
-            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json",
+            "const": "http://127.0.0.1:8084/json-schema/v1/renderer-manifest/schema.json",
             "description": "Reference to the JSON-schema"
         },
         "id": {
@@ -22,7 +22,7 @@
             "patternProperties": {
                 ".": {
                     "type": "object",
-                    "$ref": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json"
+                    "$ref": "http://127.0.0.1:8084/json-schema/v1/lib/action.json"
                 }
             }
         },
@@ -56,7 +56,7 @@
         "renderTargets"
     ],
     "patternProperties": {
-        "^_.*": {}
+        "^v_.*": {}
     },
     "additionalProperties": false
 }

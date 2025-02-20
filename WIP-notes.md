@@ -117,7 +117,7 @@ data
                 properties: {
                     // jump to step
                     // advance x steps forward/backward
-                    //     (no anination)
+                    //     (no animation)
                     // play next step (with animation)
 
                     absoluteStep?: number
@@ -147,7 +147,7 @@ continue(nextStep) // animates out, if its on the last step
 play==in
 stop==out
 
-tuomos slides:
+Tuomos slides:
 fire-and-forget
 update+in
 stepCount=0
@@ -159,3 +159,41 @@ multi-step-template
 update+in+next+next+next+out
 update+in+next+out
 stepCount=2+
+
+---
+
+use import.meta.url instead of loadParams.baseUrl
+
+the resources folder is an unexpected limitation. might make it HARD to use in some build systems.
+
+using "main": "graphic.mjs", // optional, defaults to "graphic.mjs"
+
+2025-02-05
+
+- Name: "OGraf"
+
+Divide Work
+
+- Question about Scope
+  Graphics API definition
+  Draft in March
+  1.0 for IBC
+  Server API definition
+  Draft for IBC
+
+prefix: "v\_" for vendor specific methods
+
+non realtime rendering:
+
+- defaultDuration
+- be able to defined markers (actions)
+- stretch behavior
+
+we'll aim for realtime in the 1.0 version, then add non-realtime in the next version
+
+standard vs extended graphic
+remove the default/
+
+question:
+
+- Should we rename everything "graphic" to ograf? (including graphic.mjs -> ograf.mjs?)

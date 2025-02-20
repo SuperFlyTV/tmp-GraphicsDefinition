@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/action.json",
+    "$id": "http://127.0.0.1:8084/json-schema/v1/lib/action.json",
     "type": "object",
     "properties": {
         "label": {
@@ -15,9 +15,6 @@
             "description": "The schema of the action. This is used to validate the action parameters as well as auto-generate a GUI for the action.",
             "oneOf": [
                 {
-                    "type": "null"
-                },
-                {
                     "type": "object",
                     "$ref": "https://superflytv.github.io/GraphicsDataDefinition/gdd-meta-schema/v1/lib/object.json"
                 }
@@ -29,7 +26,7 @@
         "schema"
     ],
     "patternProperties": {
-        "^_.*": {}
+        "^v_.*": {}
     },
     "additionalProperties": false
 }

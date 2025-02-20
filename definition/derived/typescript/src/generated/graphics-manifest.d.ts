@@ -491,7 +491,7 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
   /**
    * Reference to the JSON-schema
    */
-  $schema?: "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json";
+  $schema?: "http://127.0.0.1:8084/json-schema/v1/graphics-manifest/schema.json";
   /**
    * The id of the Graphic uniquely identifies it. It is recommended to use a reverse domain name notation. For example: com.superflytv.my-lowerthird.
    */
@@ -526,7 +526,7 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
     url?: string;
     /**
      * This interface was referenced by `undefined`'s JSON-Schema definition
-     * via the `patternProperty` "^_.*".
+     * via the `patternProperty` "^v_.*".
      */
     [k: string]: unknown;
   };
@@ -552,13 +552,13 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
     supportsNonRealTime?: boolean;
     /**
      * This interface was referenced by `undefined`'s JSON-Schema definition
-     * via the `patternProperty` "^_.*".
+     * via the `patternProperty` "^v_.*".
      */
     [k: string]: unknown;
   };
   /**
    * This interface was referenced by `HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitionJsonSchemaGraphicsManifestSchemaJson`'s JSON-Schema definition
-   * via the `patternProperty` "^_.*".
+   * via the `patternProperty` "^v_.*".
    */
   [k: string]: unknown;
 }
@@ -578,7 +578,7 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
   schema: HttpsSuperflytvGithubIoGraphicsDataDefinitionGddMetaSchemaV1LibObjectJson;
   /**
    * This interface was referenced by `HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitionJsonSchemaLibActionJson`'s JSON-Schema definition
-   * via the `patternProperty` "^_.*".
+   * via the `patternProperty` "^v_.*".
    */
   [k: string]: unknown;
 }

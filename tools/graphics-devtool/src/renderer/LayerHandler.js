@@ -1,6 +1,4 @@
 import { ResourceProvider } from './ResourceProvider.js'
-import { GraphicInstance } from './GraphicInstance.js'
-import { graphicResourcePath } from '../lib/lib.js'
 
 export class LayerHandler {
 	constructor(containerElement, id, zIndex) {
@@ -30,6 +28,8 @@ export class LayerHandler {
 	async loadGraphic(settings, graphicPath) {
 		// Clear any existing GraphicInstance:
 
+		console.log('layer loadGraphic', new Error().stack)
+
 		if (this.currentGraphic) {
 			this.clearGraphic()
 		}
@@ -46,13 +46,13 @@ export class LayerHandler {
 			graphicPath,
 		}
 
-		const baseUrl = graphicResourcePath(graphicPath)
-			// Remove last "/":
-			.replace(/\/$/, '')
+		// const baseUrl = graphicResourcePath(graphicPath)
+		// 	// Remove last "/":
+		// 	.replace(/\/$/, '')
 
 		// Load the element:
 		await element.load({
-			baseUrl: baseUrl, // `${this.graphicCache.serverApiUrl}/serverApi/v1/graphics/graphic/${id}/${version}`, // /resources/:localPath
+			// baseUrl: baseUrl, // `${this.graphicCache.serverApiUrl}/serverApi/v1/graphics/graphic/${id}/${version}`, // /resources/:localPath
 			renderType: settings.realtime ? 'realtime' : 'non-realtime',
 		})
 	}

@@ -59,7 +59,8 @@ class FileHandler {
 				try {
 					manifest = JSON.parse(manifestStr)
 				} catch (e) {
-					console.error('Error parsing manifest.json: ')
+					console.error(`Error parsing manifest.json (${key}): `)
+					graphic.manifestParseError = e
 					continue
 				}
 				graphic.manifest = manifest

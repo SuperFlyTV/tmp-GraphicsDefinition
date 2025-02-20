@@ -70,7 +70,7 @@ The **manifest.json** file is a JSON file containing metadata about the Graphic.
 * `rendering` `(object: <required>)`: An object providing information about the rendering capabilities of the Graphic. The following fields are available:
   * `supportsRealTime` `(boolean: <required>)`: Indicates if the Graphic supports real-time rendering
   * `supportsNonRealTime` `(boolean: <required>)`: Indicates if the Graphic supports non-real-time rendering. If true, the Graphic MUST implement the 'goToTime()' method.
-  * `isStandardGraphic` `(boolean: true)`: Indicates if the Graphic is a Standard Graphic, or an Extensible Graphic. A Standard Graphic MUST support certain Actions, see further.
+  * `isExtensibleGraphic` `(boolean: false)`: Indicates if the Graphic is a Standard Graphic, or an Extensible Graphic. A Standard Graphic (`isExtensibleGraphic: false`) MUST support certain Actions, see further.
 
 TODO explain
 * standard vs extensible

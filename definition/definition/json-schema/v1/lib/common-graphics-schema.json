@@ -1,11 +1,11 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/lib/common-graphics-schema.json",
+    "$id": "http://127.0.0.1:8084/json-schema/v1/lib/common-graphics-schema.json",
     "type": "object",
     "properties": {
         "$schema": {
             "type": "string",
-            "const": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/schema.json",
+            "const": "http://127.0.0.1:8084/json-schema/v1/graphics-manifest/schema.json",
             "description": "Reference to the JSON-schema for this manifest"
         },
         "id": {
@@ -15,6 +15,10 @@
         "version": {
             "type": "integer",
             "description": "The version of the Graphic. The id-version combination must be globally unique and once a version has been assigned, the Graphic is considered immutable (expect when version = 0)."
+        },
+        "main": {
+            "type": "string",
+            "description": "The main entry point, ie the path to the main javascript file of the Graphic. If not set, defaults to 'graphic.mjs'."
         },
         "name": {
             "type": "string",
@@ -45,7 +49,7 @@
                 "name"
             ],
             "patternProperties": {
-                "^_.*": {}
+                "^v_.*": {}
             },
             "additionalProperties": false
         },
@@ -55,26 +59,64 @@
             "additionalProperties": true
         },
         "rendering": {
-            "type": "object",
-            "description": "Properties of the Graphic related to the Renderer",
-            "properties": {
-                "supportsRealTime": {
-                    "type": "boolean",
-                    "description": "Indicates if the Graphic supports real-time rendering"
+            "allOf": [
+                {
+                    "type": "object",
+                    "description": "Properties of the Graphic related to the Renderer",
+                    "properties": {
+                        "supportsRealTime": {
+                            "type": "boolean",
+                            "description": "Indicates if the Graphic supports real-time rendering"
+                        },
+                        "supportsNonRealTime": {
+                            "type": "boolean",
+                            "description": "Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'goToTime()' and the 'setInvokeActionsSchedule()' methods."
+                        },
+                        "isExtensibleGraphic": {
+                            "type": "boolean",
+                            "description": "Indicates if the Graphic is a Standard Graphic or an Extensible Graphic. A Standard Graphic must use certain Actions, see the Documentation."
+                        },
+                        "stepCount": {
+                            "type": "number",
+                            "description": "The number of steps in the Graphic. If the Graphic is simply triggered by a play, then a stop, this is considered a stepCount of 1."
+                        }
+                    },
+                    "patternProperties": {
+                        "^v_.*": {}
+                    },
+                    "additionalProperties": false
                 },
-                "supportsNonRealTime": {
-                    "type": "boolean",
-                    "description": "Indicates if the Graphic supports non-real-time rendering. Note: If true, the Graphic must implement the 'goToTime()' and the 'setInvokeActionsSchedule()' methods."
-                },
-                "isStandardGraphic": {
-                    "type": "boolean",
-                    "description": "Indicates if the Graphic is a Standard Graphic, or an Extensible Graphic. A Standard Graphic must use certain Actions, see the Documentation."
+                {
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "supportsRealTime": {
+                                    "const": true
+                                }
+                            },
+                            "required": [
+                                "supportsRealTime"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "supportsNonRealTime": {
+                                    "const": true
+                                }
+                            },
+                            "required": [
+                                "supportsNonRealTime"
+                            ]
+                        }
+                    ]
                 }
-            },
-            "patternProperties": {
-                "^_.*": {}
-            },
-            "additionalProperties": false
+            ]
+        },
+        "schema": {
+            "type": "object",
+            "description": "The schema is used by a Standard Graphic to define the data payload of the 'play' or 'update' action."
         }
     },
     "required": [
@@ -86,7 +128,7 @@
         "rendering"
     ],
     "patternProperties": {
-        "^_.*": {}
+        "^v_.*": {}
     },
     "additionalProperties": false
 }

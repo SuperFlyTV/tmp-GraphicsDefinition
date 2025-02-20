@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <script type="module">
+
+            /*
+             * This simulates what a Renderer would do to load a Graphic.
+             */
+
+            let graphicInstance = null
+
+            window.loadTheGraphic = () => {
+                if (graphicInstance) return // Already loaded
+
+                loadGraphic('./').catch(console.error)
+            }
+            window.unloadTheGraphic = () => {
+
+                graphicInstance?.dispose().catch(console.error).finally(() => {
+                    document.getElementById('render-target').innerHTML = ''
+
+                    document.getElementById('controls').innerHTML = ''
+                    graphicInstance = null
+                })
+            }
+
+
+            async function loadGraphic(graphicPath) {
+
+                console.log(`Loading Graphic "${graphicPath}"`)
+
+                const invalidateCache = `?a=${Math.round(Math.random()*10000).toString(16)}` // Useful for development, to avoid caching issues
+                const manifestPath = `${graphicPath}/manifest.json`+ invalidateCache
+                const entrypointPath  = `${graphicPath}/graphic.mjs`+invalidateCache
+
+                // Initial load of the manifest
+                console.log(`Loading manifest...`)
+                const manifest = await loadManifest(manifestPath)
+                // Load the Graphic:
+                console.log(`Loading Graphic...`)
+                const elementName = await loadGraphicModule(manifest, entrypointPath)
+                console.log(`Initializing Graphic...`)
+                graphicInstance = await initializeGraphic(graphicPath, manifest, elementName)
+
+                // window.graphicInstance = graphicInstance
+                console.log(`Done!`)
+
+
+                // Add controls:
+
+                document.getElementById('controls').innerHTML = ''
+                { // Play button
+                    const button = document.createElement('button')
+                    button.onclick = () => graphicInstance.invokeAction({ method: 'play' })
+                    button.innerText = 'Play'
+                    document.getElementById('controls').appendChild(button)
+                }
+                { // Stop button
+                    const button = document.createElement('button')
+                    button.onclick = () => graphicInstance.invokeAction({ method: 'stop' })
+                    button.innerText = 'Stop'
+                    document.getElementById('controls').appendChild(button)
+                }
+
+            }
+
+            async function loadManifest(url) {
+                const response = await fetch(url)
+                if (response.status === 200) {
+                    const manifest = await response.json()
+
+                    console.log('manifest', manifest)
+
+                    // minimal check of the manifest:
+                    if ( typeof manifest.id !=="string") throw new Error('Manifest expected to have an "id" property of type "string"')
+                    if ( typeof manifest.version !=="number") throw new Error('Manifest expected to have a "version" property of type "number"')
+
+
+                    return manifest
+                } else {
+                    throw new Error(`Failed to load manifest from ${url}: [${response.status}] ${JSON.stringify(response.body)}`)
+                }
+            }
+
+            async function loadGraphicModule(manifest, url) {
+                const graphicIdVersion = `${manifest.id}-${manifest.version}`
+
+                // Check if the Graphic is already registered:
+                const cachedGraphic = customElements.get( graphicIdVersion )
+                if (cachedGraphic) return graphicIdVersion
+
+
+                // Load the Graphic module:
+                const module = await import(url)
+
+                if (!module.Graphic) {
+                    throw new Error('Module expected to expose a class named "Graphic" (found none)')
+                }
+                if (typeof module.Graphic !== 'function') {
+                    throw new Error('Module expected to expose a class named "Graphic" (Graphic is not a function)')
+                }
+
+
+                // register the web component
+                customElements.define( graphicIdVersion, module.Graphic )
+                return graphicIdVersion
+            }
+
+            async function initializeGraphic(baseUrl, manifest, elementName) {
+
+                // Add element to DOM:
+                const graphicInstance = document.createElement(elementName)
+
+                document.getElementById('render-target').appendChild(graphicInstance)
+
+                // Load the element:
+                await graphicInstance.load({ baseUrl, renderType: 'realtime' })
+
+
+                return graphicInstance
+            }
+
+
+        </script>
+
+        <div>
+            <div id="render-target" style="border: 1px solid red; width: 500px; height: 500px;"></div>
+
+            <div>
+                <button onclick="loadTheGraphic()">Load Graphic</button>
+                <button onclick="unloadTheGraphic()">Clear Graphic</button>
+            </div>
+            <div id="controls">
+
+            </div>
+
+
+        </div>
+    </body>
+</html>

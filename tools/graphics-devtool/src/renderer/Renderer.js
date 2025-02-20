@@ -1,5 +1,6 @@
 import { ResourceProvider } from './ResourceProvider'
 import { LayerHandler } from './LayerHandler'
+import { pathJoin } from '../lib/lib'
 
 export class Renderer {
 	constructor(containerElement) {
@@ -14,10 +15,13 @@ export class Renderer {
 	/** Instantiate a Graphic on a RenderTarget. Returns when the load has finished. */
 	async loadGraphic(settings) {
 		if (this.graphicState.includes('pre')) throw new Error('loadGraphic called too quick')
+
+		const graphicPath = pathJoin(this.graphic.path, this.graphic.manifest.main ?? 'graphic.mjs')
+
 		try {
 			this.graphicState = 'pre-load'
 			this.loadGraphicStartTime = Date.now()
-			await this.layer.loadGraphic(settings, this.graphic.path)
+			await this.layer.loadGraphic(settings, graphicPath)
 			this.graphicState = 'post-load'
 			this.loadGraphicEndTime = Date.now()
 		} catch (e) {

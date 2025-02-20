@@ -14,7 +14,7 @@
     "rendering": {
         "supportsRealTime": true,
         "supportsNonRealTime": true,
-        "isExtensibleGraphic": false
+        "isExtensibleGraphic": false // false by default
     },
     "schema": {
         "type": "object",
@@ -25,11 +25,9 @@
                 "default": "John Doe"
             }
         }
-    },
-    "v_notes": [
-        "rendeerer:",
-        "get the schema:",
-        "manifest.actions.play.schema",
-        "manifest.standardGraphic.schema"
-    ]
+    }
 }
+// rendeerer:
+// get the schema:
+// manifest.actions.play.schema
+// manifest.standardGraphic.schema

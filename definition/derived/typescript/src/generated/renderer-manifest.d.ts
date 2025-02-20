@@ -491,7 +491,7 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
   /**
    * Reference to the JSON-schema
    */
-  $schema?: "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/extensible/schema.json";
+  $schema?: "http://127.0.0.1:8084/json-schema/v1/graphics-manifest/schema.json";
   /**
    * The id of the Renderer.
    */
@@ -530,7 +530,7 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
   };
   /**
    * This interface was referenced by `HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitionJsonSchemaGraphicsManifestSchemaJson`'s JSON-Schema definition
-   * via the `patternProperty` "^_.*".
+   * via the `patternProperty` "^v_.*".
    */
   [k: string]: unknown;
 }
@@ -550,7 +550,7 @@ export interface HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitio
   schema: HttpsSuperflytvGithubIoGraphicsDataDefinitionGddMetaSchemaV1LibObjectJson;
   /**
    * This interface was referenced by `HttpsSuperflytvGithubIoTmpGraphicsDefinitionDefinitionDefinitionJsonSchemaLibActionJson`'s JSON-Schema definition
-   * via the `patternProperty` "^_.*".
+   * via the `patternProperty` "^v_.*".
    */
   [k: string]: unknown;
 }
