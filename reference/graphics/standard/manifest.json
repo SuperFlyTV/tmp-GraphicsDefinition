@@ -5,12 +5,10 @@
     "version": 0,
     "main": "graphic.mjs",
     "actions": {},
-    "rendering": {
-        "supportsRealTime": true,
-        "supportsNonRealTime": true,
-        "isExtensibleGraphic": false,
-        "stepCount": 1
-    },
+    "supportsRealTime": true,
+    "supportsNonRealTime": true,
+    "isExtensibleGraphic": false,
+    "stepCount": 1,
     "schema": {
         "type": "object",
         "properties": {

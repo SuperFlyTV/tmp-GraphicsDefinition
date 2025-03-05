@@ -36,7 +36,32 @@ export interface GraphicsApi {
    * Called by the Renderer to invoke an Action on the Graphic
    * @returns The return value of the invoked method (vendor-specific)
    */
-  invokeAction: (payload: ActionInvokePayload) => Promise<unknown>;
+  customAction: (payload: ActionInvokePayload) => Promise<unknown>;
+
+
+  updateAction: (payload: ActionInvokePayload) => Promise<unknown>; // contain the data payload
+
+  playAction: (payload: {
+    /** How far to advance. 1 = next segment [defaults to 1] */
+    delta: number,
+    /** Jump to a specific segment [defaults to undefined] */
+    goto: number,
+    /** if true, skips animation [defaults to false] */
+    skipAnimation: boolean  } ) => Promise<unknown>;
+  stopAction: (payload: { skipAnimation: boolean }) => Promise<unknown>;
+
+
+  playAction() // play the first animation, or the next one (or the out animation, if the last one)
+
+
+  playAction({
+    delta: 1
+  }) === next({delta: 1})
+
+
+  playAction({
+    delta: 999999
+  }) === stop() // because stop plays the "last animation"
 
   /**
    * If the Graphic supports non-realtime rendering, this is called to make the graphic jump to a certain point in time.
