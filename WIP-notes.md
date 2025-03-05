@@ -194,6 +194,48 @@ we'll aim for realtime in the 1.0 version, then add non-realtime in the next ver
 standard vs extended graphic
 remove the default/
 
+## TODO 2025-03-05
+
+- Explicit play/stop/update/step functions
+
+  - playAction
+  - stopAction
+  - updateAction
+  - stepAction
+  - rename invokeAction to customAction
+
+- Only have
+
+  - `playAction({delta, goto, skipAnimation})`: can be explained as: you play any chosen step (absolute or relative), with or without animation
+  - `stopAction(skipAnimation)`: can be explained as: you stop the Graphic rendering, with or without animation
+
+- move `supportsRealTime`, `supportsNonRealTime`, `extensibleGraphic` to top level in manifest
+
+- return type of play (step number)
+
+- Be able to define a schema in manifest for customActions
+  play() : { code: number; message?: string, result: any, currentStep: number }
+  stop() : { code: number; message?: string, result: any }
+
+  also for all customActions and other methods
+
+- Error handling
+
+  - try do do best effort (example: step to 9000, then go to end)
+  -
+
+- Version:
+  change to string
+  change to optional
+
+  Remove notion of graphic being idempotent
+  We think of the version field as "short description field" / metadata
+
+  SHOULD be alphabetically sortable
+
+- Remove the extensible graphic?
+  everything is a "standard graphic", can CAN have custom actions
+
 question:
 
 - Should we rename everything "graphic" to ograf? (including graphic.mjs -> ograf.mjs?)
