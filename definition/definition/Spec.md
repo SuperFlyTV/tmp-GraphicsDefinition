@@ -54,21 +54,19 @@ directly or indirectly referenced from the Manifest file and can be seen as depe
 
 The manifest file is a JSON file containing metadata about the Graphic. It consists of the following fields:  
 
-| Field               | Type               | Required | Default | Description                                                                                                                                                                                                              |
-|---------------------|--------------------|:--------:|:-------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| id                  | string             |    X     |         | A unique identifier for the Graphic.                                                                                                                                                                                     |
-| version             | integer            |          |    0    | The version of the Graphic. The id-version combination must be globally unique and once a version has been assigned, the Graphic is considered immutable (except when version = 0).                                      |
-| name                | string             |    X     |         | The name of the Graphic.                                                                                                                                                                                                 |
-| description         | string             |          |         | A longer description of the Graphic.                                                                                                                                                                                     |
-| author              | Author             |          |         | An object providing information about the author of the Graphic. When provided, the object MUST contain a `name` field and MAY contain an `email` and `url` field.                                                       |
-| main                | string             |    X     |         | Reference to the Javascript file that exports the graphic Web Component.                                                                                                                                                 |
-| actions             | Map<string,Action> |          |         | An object with fields corresponding to the ids of custom actions that can be invoked on the Graphic. See below for details about the fields inside an `Action`.                                                          |
-| supportsRealTime    | boolean            |    X     |         | Indicates whether the Graphic supports real-time rendering.                                                                                                                                                              |
-| supportsNonRealTime | boolean            |    X     |         | Indicates whether the Graphic supports non-real-time rendering. If true, the Graphic MUST implement the non-real-time functions `goToTime()` and `setInvokeActionsSchedule()`.                                           |
-| extensibleGraphic   | boolean            |    X     |  false  | Indicates whether the Graphic is a Standard Graphic or an Extensible Graphic. A Standard Graphic MUST support the actions `play`, `update`, `stop` and `step`, while an Extensible Graphic only supports custom actions. |
-| schema              | object             |          |         | The JSON schema definition for the payload of the `update` action.                                                                                                                                                       |
-| duration            | number             |          |         | Default duration of the Graphic, in seconds. Depending on the context where the Graphic is used, this duration might be accurate or indicative.                                                                          |
-| steps               | integer            |          |    1    | The number of steps a Graphic consists of.                                                                                                                                                                               |
+| Field               | Type               | Required | Default | Description                                                                                                                                                                    |
+|---------------------|--------------------|:--------:|:-------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| id                  | string             |    X     |         | A unique identifier for the Graphic.                                                                                                                                           |
+| version             | string             |          |         | A version descriptor of the Graphic. The versioning scheme is beyond the scope of this specification.                                                                          |
+| name                | string             |    X     |         | The name of the Graphic.                                                                                                                                                       |
+| description         | string             |          |         | A longer description of the Graphic.                                                                                                                                           |
+| author              | Author             |          |         | An object providing information about the author of the Graphic. When provided, the object MUST contain a `name` field and MAY contain an `email` and `url` field.             |
+| main                | string             |    X     |         | Reference to the Javascript file that exports the graphic Web Component.                                                                                                       |
+| actions             | Map<string,Action> |          |         | An object with fields corresponding to the ids of custom actions that can be invoked on the Graphic. See below for details about the fields inside an `Action`.                |
+| supportsRealTime    | boolean            |    X     |         | Indicates whether the Graphic supports real-time rendering.                                                                                                                    |
+| supportsNonRealTime | boolean            |    X     |         | Indicates whether the Graphic supports non-real-time rendering. If true, the Graphic MUST implement the non-real-time functions `goToTime()` and `setInvokeActionsSchedule()`. |
+| schema              | object             |          |         | The JSON schema definition for the payload of the `update()` function. This schema can be seen as the (public) state model of the Graphic.                                     |
+| stepCount           | integer            |          |    1    | The number of steps a Graphic consists of.                                                                                                                                     |
 
 #### Real-time vs. non-real-time
 
@@ -77,46 +75,31 @@ Non-real-time rendering has no requirement on the speed of rendering, it can be 
 typically used in post-production scenarios. A Graphic MUST be either marked as real-time, non-real-time or both, 
 by means of the `supportsRealTime` and `supportsNonRealTime` fields.
 
-In case of a non-real-time Graphic, there are two additional functions that need to be implemented by the Graphic: 
-`goToTime()` and `setInvokeActionsSchedule()` (see [Web Component Interface](#web-component-interface) for their definition). 
-
-#### Standard vs. extensible Graphic
-
-Standard Graphics MUST support the standard actions `play()`, `update()`, `stop()`, and `step()` (see 
-[Web Component Interface](#web-component-interface) for their exact definition).
-The `play()` action is used to animate the Graphic in, while the `stop()` action will animate the Graphic out. 
-The `update()` action is used to update potential data necessary to render the Graphic. The `step()` action is used to 
-play the transition to the next step (see [Step model](#step-model)).
-
-An Extensible Graphic has a generic interaction model and is used to support more complex Graphics in terms of operations. 
-They are typically used when they rely on complex data-driven use cases and/or multiple parts need to be animated in and out, 
-independent of each other. In contrast to Standard Graphics, Extensible Graphics don't need to implement the standard actions 
-and solely rely on custom actions defined in the Manifest file. Therefore, the fields `duration` and `steps` in the Manifest 
-file are irrelevant in case of Extensible Graphics.
+In case of a non-real-time Graphic, there is an additional function that need to be implemented by the Graphic: 
+`goToTime()` (see [Web Component Interface](#web-component-interface) for their definition). 
 
 #### Step model
 
-A Standard Graphic MAY contain zero or more steps. A step can be defined as a 'paused' state of the Graphic.
+A Graphic contains zero or more steps. A step can be defined as a 'paused' state of the Graphic.
 Going from one step to another is done via a transition (with or without animation). The figure below shows three example
 step models. Every model has a start and an end node. The start node represents the start of a Graphic rendering, where
 typically nothing is visible in the rendered output. Similarly, the end node represents the end of the Graphic rendering,
 also typically nothing visible in the rendered output at that moment. The arrows between the nodes represent the transitions.
 
-The first model represents a Standard Graphic containing zero steps. When `play()` is called on this Graphic, it will
+The first model represents a Graphic containing zero steps. When `playAction()` is called on this Graphic, it will
 animate the Graphic in and after some predefined time the Graphic will animate out automatically.
 
-The second model represents a Standard Graphic containing one step. When `play()` is called on this Graphic, it will 
+The second model represents a Graphic containing one step. When `playAction()` is called on this Graphic, it will 
 animate the Graphic in and will pause at step 1. Pausing here doesn't mean that the Graphic is not moving, it refers to 
 the fact that there is an interaction necessary with the Graphic to move to the next step (in this case the end).
-The `stop()` action SHOULD be used to go to the end of the Graphic.
+The `stopAction()` function SHOULD be used to go to the end of the Graphic.
 
-The third model represents a multi-step Standard Graphic containing two steps. It is similar to the one-step model,
-but now the `step()` action MUST be used to transition between different steps, except for the end node, where the `stop()`
-action should be used. The normal flow is to go to step 1, then to step 2 and finally to the end node. However, it is 
+The third model represents a multi-step Graphic containing two steps. It is similar to the one-step model,
+but now the `playAction()` function MUST be used again to transition between different steps, except for the end node, where the `stopAction()`
+function SHOULD be used. The normal flow is to go to step 1, then to step 2 and finally to the end node. However, it is 
 possible that you transition to any step or directly to the end node (indicated by the dotted lines in the figure).
 
 <img src="images/step-model.svg" alt="Step model" style="width:500px; height:auto;">
-
 
 #### Custom actions
 
@@ -131,11 +114,10 @@ supports the following fields:
 | description | string |          |         | A longer description of the action.                       |
 | schema      | object |          |         | The JSON schema definition for the payload of the action. |
 
-
 #### Vendor-specific fields
 
 Vendor-specific fields are fields in the Manifest that are not part of this specification. Every vendor-specific
-field MUST use the prefix `v_`. For example, `v_editor` is a valid vendor-specific field, `editor` is not a valid field. 
+field MUST use the prefix `v_`. For example, `v_editor` is a valid vendor-specific field, `editor` is not a valid field.
 
 ### Web Component Interface
 
@@ -146,29 +128,41 @@ requirements for such a custom HTML element.
 Therefore, the contents of the `main` Javascript file of a Graphic MUST contain a `class` that extends from `HTMLElement`.
 Depending on the rendering capabilities (defined in the Manifest file), a Graphic is expected to implement some functions.
 
+To describe the functions, the Typescript interface notation is used. For simplicity, we omit the indication that vendor-specific fields
+can be included in both request and response payloads. 
+For the 'action' methods (`playAction()`, `stopAction()`, `updateAction()` and `customAction()`), a Promise MUST be returned that resolves to an `ActionResult` object containing the following fields:
+* `code`: a number that corresponds to an HTTP status code (2xx indicates a successful result, 4xx and 5xx indicate an error).
+* `message`: an optional human-readable message that corresponds to the `code`.
+* `result`: an optional Graphics-specific response object.
+
+Similarly, for simplicity reasons, we omit these three fields in the description of the functions below. In [Typescript interface](#typescript-interface), the full interface is provided.
+
 Every Graphic MUST implement the following functions:
-* `load()`: Called by the Renderer when the Graphic has been loaded into the DOM. A Promise is returned that resolves
-  when everything is loaded by the Graphic.
-* `dispose()`: Called by the Renderer to force the Graphic to terminate/dispose/clear any loaded resources. A Promise
+* `load: () => Promise<void>`: Called by the Renderer when the Graphic has been loaded into the DOM. 
+  A Promise is returned that resolves when everything is loaded by the Graphic.
+* `dispose: () => Promise<void>`: Called by the Renderer to force the Graphic to terminate/dispose/clear any loaded resources. A Promise
   is returned that resolves when the Graphic completed the necessary cleanup.
-* `invokeAction({method, payload})`: Called by the Renderer to invoke an Action on the Graphic.
+* `playAction: (payload: {delta: number, goto: number, skipAnimation: boolean}) => Promise<PlayResult>`: 
+  Called by the Renderer to play a given step. The `skipAnimation` field indicates whether the Graphic should transition with or without animation. 
+  The `delta` and `goto` fields indicate the target step, `delta` is used for relative steps, `goto` for an absolute step number. When the target
+  step number is higher or equal to the `stepCount` defined in the Manifest, the Graphic MUST transition to the last step. The returned Promise
+  resolves to an `ActionResult` object with an additional `currentStep` field which indicates the current step after the execution of the `play()` method.
+* `stopAction: (payload: {skipAnimation: boolean}) => Promise<ActionResult>`: Called by the Renderer to stop the Graphic from being displayed. This can be with or without
+  animation, depending on the value of the `skipAnimation` field. The returned Promise resolves to an `ActionResult` object.
+* `updateAction: (payload) => Promise<{}>`: Called by the Renderer to update one or more fields of the internal state of the Graphic. The schema of the 
+  payload of this function is described in the Manifest using the `schema` field. The returned Promise resolves to an `ActionResult` object.
+* `customAction: ({method: string, payload: any}) => Promise<ActionResult>`: Called by the Renderer to invoke a custom action on the Graphic.
   The `method` field MUST correspond to an id of an Action that is defined in the Manifest file, inside the `actions` field. 
   The schema for the `payload` field is the described in the corresponding Action inside the Manifest file. A Promise
-  is returned that resolves when the action is executed.
+  is returned that resolves to an `ActionResult` object when the action is executed.
 
 Additionally, every non-real-time Graphic MUST implement the following functions:
-* `gotoTime(timestamp)`: Called to make the Graphic jump to a certain `timestamp`, expressed in milliseconds. A Promise 
-  is returned that resolves when the frame is rendered at the requested position.
-* `setInvokeActionsSchedule(schedule[])`: Called to schedule actions to be invoked at a certain point in time.
-  When this is called, the Graphic is expected to store the scheduled actions and invoke them when the time comes.
-  A call to this replaces any previous scheduled actions. The `schedule` argument is a list of objects containing the fields
-  `timestamp` (i.e. the time when to perform the action, in milliseconds) and `invokeAction` (i.e. the action to perform at that time).
-  The schema for the value of the `invokeAction` field corresponds to the schema of the argument for the `invokeAction` method.  
+* `goToTime: (payload: {timestamp: number}) => Promise<ActionResult>`: Called to make the Graphic jump to a certain `timestamp`, expressed in milliseconds. A Promise 
+  is returned with an `ActionResult` that resolves when the frame is rendered at the requested position.
 
 The default export MUST be used to export the `class` representing the Graphic. 
 This type of export allows you to import the Graphic using any name.
 
-TODO: expected actions in case of standard graphic vs add them as explicit methods
 
 ## Requirements for a Renderer
 
@@ -176,27 +170,20 @@ The way a Graphic is added into a Renderer is non-normative.
 Different examples are provided [here](TODO) that show how a Graphic can be added to the DOM tree of the Renderer.
 
 However, once a Graphic is added into the Renderer, the following steps MUST be taken:
-* call the `load()` function of the Graphic and wait for the promise to resolve
-* in case of Standard Graphic, call the `update()` action.
+* Call the `load()` function of the Graphic and wait for the promise to resolve.
+* Call the `updateAction()` function of the Graphic.
 
 When a Graphic is removed from the Renderer, the following steps MUST be taken:
-* call the `dispose()` function of the Graphic and wait for the promise to resolve
+* Call the `dispose()` function of the Graphic and wait for the promise to resolve.
 
-## JSON Schema for manifest.json
+## JSON Schema for Manifest file
 
-The normative JSON Schema for manifest.json can be found [here](/definition/definition/json-schema/v1/graphics-manifest/schema.json).
+The normative JSON Schema for Manifest file can be found [here](/definition/definition/json-schema/v1/graphics-manifest/schema.json).
 
-## Typescript interface for graphic.js
+## Typescript interface for Graphic
 
-The informative Typescript interface for graphic.js can be found [here](/definition/derived/typescript/src/apis/graphicsAPI.ts).
+The informative Typescript interface for the Graphic Web Component can be found [here](/definition/derived/typescript/src/apis/graphicsAPI.ts).
 
+## Examples
 
-# TBD
-
-* explicit play/stop/step/update functions?
-* play vs step
-* rendering object?
-* duration field definition is (too?) vague
-* nr of steps
-* version: integer vs semantic versioning?
-* custom action -> return schema as well?
+TODO: provide some basic examples to make it more tangible.
