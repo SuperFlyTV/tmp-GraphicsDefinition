@@ -186,4 +186,63 @@ The informative Typescript interface for the Graphic Web Component can be found 
 
 ## Examples
 
-TODO: provide some basic examples to make it more tangible.
+### Lower Third
+
+The following manifest describes a Lower Third Graphic. It does not contain any custom actions and has one state property: `name`.
+
+```json
+{
+  "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/schema.json",
+  "id": "l3rd-name",
+  "version": "1.0.0",
+  "name": "Lower 3rd - Name",
+  "description": "Name lower third",
+  "author": {
+    "name": "John Doe",
+    "email": "john.doe@foo.com"
+  },
+  "main": "lower-third.mjs",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Name",
+        "default": "John Doe"
+      }
+    }
+  },
+  "supportsRealTime": true,
+  "supportsNonRealTime": false
+}
+```
+
+The above manifest refers to the Javascript file `lower-third.mjs`, which is the Web Component implementing this Graphic:
+
+```typescript
+class Graphic extends HTMLElement {
+  async load(loadParams) {
+    // Load resources and initialize
+  }
+  async dispose() {
+    // Dispose the necessary resources, if any
+  }
+  async playAction({ delta: number, goto: number, skipAnimation: boolean }) {
+    // Play the Graphic according to the incoming params
+    return {code: 200, message: 'OK', currentStep}
+  }
+  async stopAction({ skipAnimation: boolean }) {
+    // Stop the Graphic, with or without animation
+    return {code: 200, message: 'OK'}
+  }
+  async updateAction({ name: string }) {
+    // Update the state of the Graphic  
+    return {code: 200, message: 'OK'}
+  }
+  async customAction({ method: string, payload: any}) {
+    return {code: 400, message: 'No custom actions supported'}    
+  }
+}
+
+export default Graphic;
+```
