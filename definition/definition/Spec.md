@@ -135,7 +135,7 @@ For the 'action' methods (`playAction()`, `stopAction()`, `updateAction()` and `
 * `message`: an optional human-readable message that corresponds to the `code`.
 * `result`: an optional Graphics-specific response object.
 
-Similarly, for simplicity reasons, we omit these three fields in the description of the functions below. In [Typescript interface](#typescript-interface), the full interface is provided.
+Similarly, for simplicity reasons, we omit these three fields in the description of the functions below. In [Typescript interface](#typescript-interface-for-graphic), the full interface is provided.
 
 Every Graphic MUST implement the following functions:
 * `load: () => Promise<void>`: Called by the Renderer when the Graphic has been loaded into the DOM. 
@@ -178,11 +178,11 @@ When a Graphic is removed from the Renderer, the following steps MUST be taken:
 
 ## JSON Schema for Manifest file
 
-The normative JSON Schema for Manifest file can be found [here](/definition/definition/json-schema/v1/graphics-manifest/schema.json).
+The normative JSON Schema for Manifest file can be found [here](json-schema/v1/graphics-manifest/schema.json).
 
 ## Typescript interface for Graphic
 
-The informative Typescript interface for the Graphic Web Component can be found [here](/definition/derived/typescript/src/apis/graphicsAPI.ts).
+The informative Typescript interface for the Graphic Web Component can be found [here](../derived/typescript/src/apis/graphicsAPI.ts).
 
 ## Examples
 
