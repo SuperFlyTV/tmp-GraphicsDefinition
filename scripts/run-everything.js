@@ -62,6 +62,12 @@ async function main() {
   console.log("");
 
   await run({
+    title: "Generate typescript library",
+    label: "derived/typescript",
+    cmd: "npm run generate-types",
+    cwd: "definition/derived/typescript",
+  });
+  await run({
     title: "Building typescript library",
     label: "derived/typescript",
     cmd: "npm run build",

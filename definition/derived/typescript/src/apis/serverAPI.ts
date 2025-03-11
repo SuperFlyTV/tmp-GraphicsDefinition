@@ -13,7 +13,7 @@ import {
   RendererClearGraphicPayload,
   GraphicInstanceOnTarget,
 } from "../definitions/renderer";
-import { ActionInvokePayload, EmptyPayload } from "../definitions/types";
+import { ActionInvokeParams, EmptyPayload } from "../definitions/types";
 import { VendorSpecific } from "../definitions/vendor";
 
 /*
@@ -192,7 +192,7 @@ export interface Endpoints {
     method: "POST";
     path: "/serverApi/v1/renderers/renderer/:rendererId/invokeAction";
     params: { rendererId: string };
-    body: { action: ActionInvokePayload };
+    body: { action: ActionInvokeParams };
     returnValue:
       | {
           /** Value returned by the action */
@@ -246,7 +246,7 @@ export interface Endpoints {
     params: { rendererId: string; renderTargetId: string };
     body: {
       target: GraphicInvokeActionTarget;
-      action: ActionInvokePayload;
+      action: ActionInvokeParams;
       [vendorSpecific: VendorSpecific]: unknown;
     };
     returnValue:

@@ -3,8 +3,8 @@ class IssueTracker {
 		this._issues = []
 		this.listeners = []
 	}
-	add = (msg) => {
-		console.error(msg)
+	add = (msg, dontTrace) => {
+		if (!dontTrace) console.error(msg)
 		let str
 		if (typeof msg === 'object' && msg !== null) {
 			str = `${msg}`
@@ -23,7 +23,7 @@ class IssueTracker {
 	}
 	clear = () => {
 		if (this._issues.length !== 0) {
-			this._issues = []
+			this._issues.splice(0, 99999)
 			this.onHasChanged()
 		}
 	}

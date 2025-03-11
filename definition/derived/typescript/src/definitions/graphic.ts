@@ -47,14 +47,6 @@ export interface GraphicManifest {
   [vendorSpecific: VendorSpecific]: unknown;
 }
 
-/** Payload when invoking an action in a GraphicInstance */
-export interface GraphicLoadPayload {
-  /** Whether the rendering is done in realtime or non-realtime */
-  renderType: "realtime" | "non-realtime";
-
-  [vendorSpecific: VendorSpecific]: unknown;
-}
-
 /**
  * How to identify a GraphicInstance running on a RenderTarget.
  * The GraphicInstance can be identified either by the id-version of the Graphic, or by the GraphicInstance id.

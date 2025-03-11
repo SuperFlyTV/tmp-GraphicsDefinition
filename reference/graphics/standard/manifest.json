@@ -1,13 +1,27 @@
 {
-    "$schema": "http://127.0.0.1:8084/json-schema/v1/graphics-manifest/schema.json",
+    "$schema": "https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/schema.json",
     "name": "Simple Standard Graphic",
     "id": "standard",
-    "version": 0,
+    "version": "0",
     "main": "graphic.mjs",
-    "actions": {},
+    "customActions": {
+        "highlight": {
+            "label": "Highlight",
+            "description": "Highlight the text",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "type": "string",
+                        "title": "Color",
+                        "default": "red"
+                    }
+                }
+            }
+        }
+    },
     "supportsRealTime": true,
     "supportsNonRealTime": true,
-    "isExtensibleGraphic": false,
     "stepCount": 1,
     "schema": {
         "type": "object",

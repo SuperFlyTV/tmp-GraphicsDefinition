@@ -1,9 +1,8 @@
 import { ResourceProvider } from './ResourceProvider.js'
+import { issueTracker } from './IssueTracker.js'
 
 export class LayerHandler {
 	constructor(containerElement, id, zIndex) {
-		this.resourceProvider = new ResourceProvider()
-
 		this.id = id
 		this.currentGraphic = null
 
@@ -28,13 +27,11 @@ export class LayerHandler {
 	async loadGraphic(settings, graphicPath) {
 		// Clear any existing GraphicInstance:
 
-		console.log('layer loadGraphic', new Error().stack)
-
 		if (this.currentGraphic) {
 			this.clearGraphic()
 		}
 
-		const elementName = await this.resourceProvider.loadGraphic(graphicPath)
+		const elementName = await ResourceProvider.loadGraphic(graphicPath)
 
 		// Add element to DOM:
 		const element = document.createElement(elementName)
@@ -68,23 +65,58 @@ export class LayerHandler {
 		}
 	}
 
-	async invokeAction(actionId, payload) {
-		if (!this.currentGraphic) return
+	async getStatus() {
+		return this._handleError('getStatus', () => this.currentGraphic.element.getStatus(params))
+	}
+	async updateAction(params) {
+		return this._handleError('updateAction', () => this.currentGraphic.element.updateAction(params))
+	}
+	async playAction(params) {
+		return this._handleError('playAction', () => this.currentGraphic.element.playAction(params))
+	}
+	async stopAction(params) {
+		return this._handleError('stopAction', () => this.currentGraphic.element.stopAction(params))
+	}
 
-		return {
-			value: await this.currentGraphic.element.invokeAction({
+	async customAction(actionId, payload) {
+		return this._handleError('customAction', () =>
+			this.currentGraphic.element.customAction({
 				method: actionId,
 				payload: payload,
-			}),
-		}
+			})
+		)
 	}
 
 	async goToTime(timestamp) {
-		if (!this.currentGraphic) return
-		await this.currentGraphic.element.goToTime({ timestamp })
+		return this._handleError('goToTime', () => this.currentGraphic.element.goToTime({ timestamp }))
 	}
-	async setInvokeActionsSchedule(schedule) {
+	async setActionsSchedule(schedule) {
+		return this._handleError('setActionsSchedule', () => this.currentGraphic.element.setActionsSchedule({ schedule }))
+	}
+
+	async _handleError(methodName, cb) {
 		if (!this.currentGraphic) return
-		await this.currentGraphic.element.setInvokeActionsSchedule({ schedule })
+
+		// Catch any uncaught errors that may happen:
+		const orgConsoleError = console.error
+		console.error = (...args) => {
+			issueTracker.add(
+				`Uncaught error in Graphic when calling ${methodName}(): ${args.map((a) => `${a}`).join(', ')}`,
+				true
+			)
+			orgConsoleError(...args)
+		}
+		try {
+			const r = { value: await cb() }
+
+			return r
+		} catch (err) {
+			issueTracker.add(`Error in Graphic when calling ${methodName}(): ${err}`)
+			console.error(err)
+			return
+		} finally {
+			// Restore console.error:
+			console.error = orgConsoleError
+		}
 	}
 }

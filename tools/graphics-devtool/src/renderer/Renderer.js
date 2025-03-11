@@ -1,6 +1,5 @@
-import { ResourceProvider } from './ResourceProvider'
 import { LayerHandler } from './LayerHandler'
-import { pathJoin } from '../lib/lib'
+import { ResourceProvider } from './ResourceProvider'
 
 export class Renderer {
 	constructor(containerElement) {
@@ -16,7 +15,7 @@ export class Renderer {
 	async loadGraphic(settings) {
 		if (this.graphicState.includes('pre')) throw new Error('loadGraphic called too quick')
 
-		const graphicPath = pathJoin(this.graphic.path, this.graphic.manifest.main ?? 'graphic.mjs')
+		const graphicPath = ResourceProvider.graphicPath(this.graphic.path, this.graphic.manifest.main)
 
 		try {
 			this.graphicState = 'pre-load'
@@ -45,9 +44,20 @@ export class Renderer {
 			throw e
 		}
 	}
+
+	async updateAction(params) {
+		return this.layer.updateAction(params)
+	}
+	async playAction(params) {
+		return this.layer.playAction(params)
+	}
+	async stopAction(params) {
+		return this.layer.stopAction(params)
+	}
+
 	/** Invokes an action on a graphicInstance. Actions are defined by the Graphic's manifest */
-	async invokeGraphicAction(actionId, payload) {
-		return this.layer.invokeAction(actionId, payload)
+	async customAction(actionId, payload) {
+		return this.layer.customAction(actionId, payload)
 	}
 
 	/** Non-realtime graphics only. Go to a specific frame. */

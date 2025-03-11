@@ -51,7 +51,7 @@ export function ListGraphics({ graphics, onSelect, onRefresh }) {
 													<div>{graphic.manifestParseError.toString()}</div>
 												</div>
 											) : null}
-											<GraphicIssues manifest={graphic.manifest} />
+											<GraphicIssues manifest={graphic.manifest} graphic={graphic} />
 										</td>
 										<td>
 											<Button onClick={() => onSelect(graphic)}>Select</Button>

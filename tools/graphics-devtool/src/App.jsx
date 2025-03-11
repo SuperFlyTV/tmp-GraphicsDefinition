@@ -32,6 +32,7 @@ export function App() {
 		setSelectedGraphic(graphic)
 	}, [])
 	const onRefreshGraphics = React.useCallback(() => {
+		setGraphics(false)
 		fileHandler.listGraphics().then(setGraphics).catch(console.error)
 	}, [])
 

@@ -4,12 +4,12 @@ import { issueTracker } from '../renderer/IssueTracker.js'
 import { SettingsContext } from '../contexts/SettingsContext.js'
 import { GraphicAction } from './GraphicAction.jsx'
 
-export function GraphicControlNonRealTime({ rendererRef, manifest, setPlayTime, schedule, setInvokeActionsSchedule }) {
+export function GraphicControlNonRealTime({ rendererRef, manifest, setPlayTime, schedule, setActionsSchedule }) {
 	const settingsContext = React.useContext(SettingsContext)
 	const settings = JSON.parse(JSON.stringify(settingsContext.settings))
 	const onChange = settingsContext.onChange
 
-	const supportsNonRealTime = manifest.rendering?.supportsNonRealTime
+	const supportsNonRealTime = manifest.supportsNonRealTime
 
 	const [playTimeLocal, setPlayTimeLocal] = React.useState(0)
 	const [playTimeLocalStr, setPlayTimeLocalStr] = React.useState(playTimeLocal)
@@ -40,12 +40,12 @@ export function GraphicControlNonRealTime({ rendererRef, manifest, setPlayTime, 
 					invokeAction: JSON.parse(JSON.stringify(invokeAction)),
 				},
 			]
-			setInvokeActionsSchedule(newSchedule)
+			setActionsSchedule(newSchedule)
 		},
 		[schedule]
 	)
 	const clearSchedule = React.useCallback(() => {
-		setInvokeActionsSchedule([])
+		setActionsSchedule([])
 	}, [schedule])
 
 	return (
@@ -125,7 +125,7 @@ function GraphicsActions({ manifest, rendererRef, onAction }) {
 	return (
 		<>
 			<div className="graphics-actions">
-				{Object.entries(manifest.actions || {}).map(([actionId, action]) => {
+				{Object.entries(manifest.customActions || {}).map(([actionId, action]) => {
 					return (
 						<GraphicAction
 							key={actionId}

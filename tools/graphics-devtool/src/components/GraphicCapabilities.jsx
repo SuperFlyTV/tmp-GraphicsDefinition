@@ -41,11 +41,11 @@ export function GraphicCapabilities({ manifest }) {
 							<Col md={6}>
 								<Form.Group className="mb-3">
 									<Form.Label>Supports Real Time Rendering</Form.Label>
-									<Form.Control disabled value={manifest.rendering?.supportsRealTime ? 'Yes' : 'No'} />
+									<Form.Control disabled value={manifest.supportsRealTime ? 'Yes' : 'No'} />
 								</Form.Group>
 								<Form.Group className="mb-3">
 									<Form.Label>Supports Non-Real Time Rendering</Form.Label>
-									<Form.Control disabled value={manifest.rendering?.supportsNonRealTime ? 'Yes' : 'No'} />
+									<Form.Control disabled value={manifest.supportsNonRealTime ? 'Yes' : 'No'} />
 								</Form.Group>
 							</Col>
 						</Row>

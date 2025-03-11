@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Button, Accordion } from 'react-bootstrap'
+import { Button, Accordion, ButtonGroup } from 'react-bootstrap'
 import { issueTracker } from '../renderer/IssueTracker.js'
 import { GDDGUI } from '../lib/GDD/gdd-gui.jsx'
 import { getDefaultDataFromSchema } from '../lib/GDD/gdd/data.js'
@@ -11,7 +11,13 @@ export function GraphicControlRealTime({ rendererRef, setInvokeActionsSchedule, 
 	const settings = settingsContext.settings
 	const onChange = settingsContext.onChange
 
-	const supportsRealTime = manifest.rendering?.supportsRealTime
+	const initialData = manifest.schema ? getDefaultDataFromSchema(manifest.schema) : {}
+	const [data, setData] = React.useState(initialData)
+	const onDataSave = (d) => {
+		setData(JSON.parse(JSON.stringify(d)))
+	}
+
+	const supportsRealTime = manifest.supportsRealTime
 	return (
 		<div>
 			<Accordion
@@ -44,6 +50,37 @@ export function GraphicControlRealTime({ rendererRef, setInvokeActionsSchedule, 
 									</Button>
 								</div>
 								<div>
+									<div>{manifest.schema && <GDDGUI schema={manifest.schema} data={data} setData={onDataSave} />}</div>
+								</div>
+								<div>
+									<ButtonGroup>
+										<Button
+											onClick={() => {
+												issueTracker.clear()
+												rendererRef.current.updateAction({ data }).catch(issueTracker.add)
+											}}
+										>
+											Update
+										</Button>
+										<Button
+											onClick={() => {
+												issueTracker.clear()
+												rendererRef.current.playAction({}).catch(issueTracker.add)
+											}}
+										>
+											Play
+										</Button>
+										<Button
+											onClick={() => {
+												issueTracker.clear()
+												rendererRef.current.stopAction({}).catch(issueTracker.add)
+											}}
+										>
+											Stop
+										</Button>
+									</ButtonGroup>
+								</div>
+								<div>
 									<GraphicsActions
 										rendererRef={rendererRef}
 										schedule={schedule}
@@ -65,7 +102,7 @@ function GraphicsActions({ manifest, rendererRef, schedule, setInvokeActionsSche
 	return (
 		<>
 			<div className="graphics-actions">
-				{Object.entries(manifest.actions || {}).map(([actionId, action]) => {
+				{Object.entries(manifest.customActions || {}).map(([actionId, action]) => {
 					return (
 						<GraphicAction
 							key={actionId}

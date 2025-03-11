@@ -1,9 +1,31 @@
 import * as React from 'react'
-import { setupSchemaValidator } from '../lib/graphic/verify.js'
+import { setupSchemaValidator, validateGraphicModule } from '../lib/graphic/verify.js'
 import { usePromise } from '../lib/lib.js'
+import { ResourceProvider } from '../renderer/ResourceProvider.js'
 
-export function GraphicIssues({ manifest }) {
+export function GraphicIssues({ manifest, graphic }) {
 	const [graphicManifestErrors, setGraphicManifestErrors] = React.useState([])
+	const [graphicModuleErrors, setGraphicModuleErrors] = React.useState([])
+
+	console.log('graphic', graphic)
+
+	React.useEffect(() => {
+		const graphicPath = ResourceProvider.graphicPath(graphic.path, manifest?.main)
+
+		ResourceProvider.loadGraphic(graphicPath)
+			.then((elementName) => {
+				// Add element to DOM:
+				const element = document.createElement(elementName)
+
+				console.log('element', element)
+
+				setGraphicModuleErrors(validateGraphicModule(element))
+			})
+			.catch((e) => {
+				console.error(e)
+				setGraphicModuleErrors([`Error loading graphic: ${e.message || e}`])
+			})
+	}, [graphic.path, manifest?.main])
 
 	const validator = usePromise(async () => {
 		return setupSchemaValidator()
@@ -19,7 +41,7 @@ export function GraphicIssues({ manifest }) {
 			return
 		}
 		if (validator.error) {
-			setGraphicManifestErrors([`${validator.error}`])
+			setGraphicManifestErrors([`Validator Error: ${validator.error}`])
 			return
 		}
 		const errors = validator.value(manifest)
@@ -36,6 +58,7 @@ export function GraphicIssues({ manifest }) {
 	if (!validator) {
 		return <div>Loading schema validator...</div>
 	}
+
 	return (
 		<>
 			{graphicManifestErrors.length ? (
@@ -49,9 +72,23 @@ export function GraphicIssues({ manifest }) {
 						</ul>
 					</div>
 				</div>
-			) : (
-				<span>No issues found in manifest 👍</span>
-			)}
+			) : null}
+			{graphicModuleErrors.length ? (
+				<div className="alert alert-danger">
+					<div>Found a few issues with the Graphic module:</div>
+					<div>
+						<ul>
+							{graphicModuleErrors.map((str, i) => {
+								return <li key={i}>{str}</li>
+							})}
+						</ul>
+					</div>
+				</div>
+			) : null}
+
+			{graphicManifestErrors.length === 0 && graphicModuleErrors.length === 0 ? (
+				<span>No issues found in graphic 👍</span>
+			) : null}
 		</>
 	)
 }

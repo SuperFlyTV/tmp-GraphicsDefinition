@@ -4,8 +4,8 @@ class Graphic extends HTMLElement {
     // Note: Don't paint any pixels at this point, wait for load() to be called
   }
 
-  async load(loadParams) {
-    if (loadParams.renderType !== "realtime")
+  async load(params) {
+    if (params.renderType !== "realtime")
       throw new Error("Only realtime rendering is supported by this graphic");
 
     const elText = document.createElement("p");
@@ -13,25 +13,37 @@ class Graphic extends HTMLElement {
     this.appendChild(elText);
 
     // When everything is loaded we can return:
-    return;
+    return {
+      statusCode: 200,
+    };
   }
-  async dispose(_payload) {
+  async dispose(_params) {
     this.innerHTML = "";
   }
-  async getStatus(_payload) {
-    return {};
+  async getStatus(_params) {
+    return {
+      statusCode: 200,
+      status: {
+        // nothing
+      },
+    };
   }
-  async invokeAction(params) {
+  async updateAction(_params) {
     // No actions are implemented in this minimal example
-    // params.method, params.payload
-    // if (params.method === 'play') this.elIframe.contentWindow.play()
-
-    this.elIframe.contentWindow[params.method](params.payload);
+  }
+  async playAction(_params) {
+    // No actions are implemented in this minimal example
+  }
+  async stopAction(_params) {
+    // No actions are implemented in this minimal example
+  }
+  async customAction(params) {
+    // No actions are implemented in this minimal example
   }
   async goToTime(_payload) {
     throw new Error("Non-realtime not supported!");
   }
-  async setInvokeActionsSchedule(_payload) {
+  async setActionsSchedule(_payload) {
     throw new Error("Non-realtime not supported!");
   }
 }

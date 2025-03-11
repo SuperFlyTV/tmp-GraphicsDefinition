@@ -233,7 +233,7 @@ remove the default/
 
   SHOULD be alphabetically sortable
 
-- Remove the extensible graphic?
+- Remove the "Extensible graphic"
   everything is a "standard graphic", can CAN have custom actions
 
 question:

@@ -1,6 +1,9 @@
-import { GraphicLoadPayload } from "../definitions/graphic";
-import { GraphicInstanceStatus } from "../definitions/graphicInstance";
-import { ActionInvokePayload, EmptyPayload } from "../definitions/types";
+import {
+  ActionInvokeParams,
+  ReturnPayload,
+  EmptyPayload,
+  VendorExtend,
+} from "../definitions/types";
 
 /**
  * ================================================================================================
@@ -19,55 +22,67 @@ export interface GraphicsApi {
    * Called by the Renderer when the Graphic has been loaded into the DOM
    * @returns a Promise that resolves when the Graphic has finished loading it's resources.
    */
-  load: (payload: GraphicLoadPayload) => Promise<void>;
+  load: (
+    params: {
+      /** Whether the rendering is done in realtime or non-realtime */
+      renderType: "realtime" | "non-realtime";
+    } & VendorExtend
+  ) => Promise<ReturnPayload>;
 
   /**
    * Called by the Renderer to force the Graphic to terminate/dispose/clear any loaded resources.
    * This is called after the Renderer has unloaded the Graphic from the DOM.
    */
-  dispose: (payload: EmptyPayload) => Promise<void>;
+  dispose: (params: EmptyPayload) => Promise<void>;
 
   /**
    * Called by the Renderer to retrieve the current status of the Graphic
    */
-  getStatus: (payload: EmptyPayload) => Promise<GraphicInstanceStatus>;
+  getStatus: (params: EmptyPayload) => Promise<
+    {
+      /** The status status of the graphic (vendor-specific) */
+      status: EmptyPayload;
+    } & VendorExtend
+  >;
+
+  /** This is called whenever user send a new data payload. */
+  updateAction: (
+    params: {
+      /** The data send here is defined in the manifest "schema". */
+      data: unknown;
+    } & VendorExtend
+  ) => Promise<ReturnPayload>;
+
+  /** This is called when user calls the "play" action. */
+  playAction: (
+    params: {
+      /** How far to advance. 1 = next step/segment. (defaults to 1) */
+      delta: number;
+      /** Jump to a specific step/segment (defaults to undefined) */
+      goto: number;
+      /** If true, skips animation (defaults to false) */
+      skipAnimation: boolean;
+    } & VendorExtend
+  ) => Promise<ReturnPayload>;
+
+  /** This is called when user calls the "stop" action. */
+  stopAction: (
+    params: { skipAnimation: boolean } & VendorExtend
+  ) => Promise<ReturnPayload>;
 
   /**
    * Called by the Renderer to invoke an Action on the Graphic
    * @returns The return value of the invoked method (vendor-specific)
    */
-  customAction: (payload: ActionInvokePayload) => Promise<unknown>;
-
-
-  updateAction: (payload: ActionInvokePayload) => Promise<unknown>; // contain the data payload
-
-  playAction: (payload: {
-    /** How far to advance. 1 = next segment [defaults to 1] */
-    delta: number,
-    /** Jump to a specific segment [defaults to undefined] */
-    goto: number,
-    /** if true, skips animation [defaults to false] */
-    skipAnimation: boolean  } ) => Promise<unknown>;
-  stopAction: (payload: { skipAnimation: boolean }) => Promise<unknown>;
-
-
-  playAction() // play the first animation, or the next one (or the out animation, if the last one)
-
-
-  playAction({
-    delta: 1
-  }) === next({delta: 1})
-
-
-  playAction({
-    delta: 999999
-  }) === stop() // because stop plays the "last animation"
+  customAction: (params: ActionInvokeParams) => Promise<ReturnPayload>;
 
   /**
    * If the Graphic supports non-realtime rendering, this is called to make the graphic jump to a certain point in time.
    * @returns A Promise that resolves when the Graphic has finished rendering the requested frame.
    */
-  goToTime: (payload: { timestamp: number }) => Promise<EmptyPayload>;
+  goToTime: (
+    params: { timestamp: number } & VendorExtend
+  ) => Promise<EmptyPayload>;
 
   /**
    * If the Graphic supports non-realtime rendering, this is called to schedule actions to be invoked at a certain point in time.
@@ -75,30 +90,56 @@ export interface GraphicsApi {
    * (A call to this replaces any previous scheduled actions.)
    * @returns A Promise that resolves when the Graphic has stored the scheduled actions.
    */
-  setInvokeActionsSchedule: (payload: {
-    /**
-     * A list of the scheduled actions to invoke at a certain point in time.
-     */
-    schedule: {
-      timestamp: number;
-      invokeAction: ActionInvokePayload;
-    }[];
-  }) => Promise<EmptyPayload>;
+  setActionsSchedule: (
+    params: {
+      /**
+       * A list of the scheduled actions to call at certain points in time.
+       */
+      schedule: {
+        timestamp: number;
+        action:
+          | ({
+              type: "updateAction";
+              params: Parameters<GraphicsApi["updateAction"]>[0];
+            } & VendorExtend)
+          | ({
+              type: "playAction";
+              params: Parameters<GraphicsApi["playAction"]>[0];
+            } & VendorExtend)
+          | ({
+              type: "stopAction";
+              params: Parameters<GraphicsApi["stopAction"]>[0];
+            } & VendorExtend)
+          | ({
+              type: "customAction";
+              params: Parameters<GraphicsApi["customAction"]>[0];
+            } & VendorExtend);
+      }[];
+    } & VendorExtend
+  ) => Promise<EmptyPayload>;
 }
-
 /**
  * Methods called on a Renderer by the GraphicInstance
  * @throws GraphicsError
  */
 export interface GraphicsRendererApi {
   /** Called when the GI has loaded all its resources and is ready to receive commands  */
-  loaded: () => void;
+  loaded: (payload?: EmptyPayload) => void;
   /** Request to the Renderer to unload/kill the GraphicInstance */
-  unload: () => void;
+  unload: (payload?: EmptyPayload) => void;
   /** Inform the Renderer that the GraphicInstance status has changed */
-  status: (status: GraphicInstanceStatus) => void;
+  status: (
+    payload: {
+      /** The status status of the graphic (vendor-specific) */
+      status: EmptyPayload;
+    } & VendorExtend
+  ) => void;
   /** Debugging information (for developers) */
-  debug: (debugMessage: string) => void;
+  debug: (
+    payload: {
+      message: string;
+    } & VendorExtend
+  ) => void;
 }
 
 /**

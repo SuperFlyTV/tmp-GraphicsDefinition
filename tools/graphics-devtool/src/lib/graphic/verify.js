@@ -6,10 +6,10 @@ export async function setupSchemaValidator() {
 		const cache = localStorage.getItem('schema-cache')
 		if (cache) cachedCache = JSON.parse(cache)
 	}
-
 	const v = await _setupSchemaValidator({
 		fetch: async (url) => {
 			const response = await fetch(url)
+
 			if (!response.ok) throw new Error(`Failed to fetch schema from "${url}"`)
 			return response.json()
 		},
@@ -22,6 +22,7 @@ export async function setupSchemaValidator() {
 		localStorage.setItem('schema-cache', JSON.stringify(v.cache))
 		cachedCache = v.cache
 	}
+	console.log('setupSchemaValidator', v)
 	return v.validate
 }
 
@@ -49,7 +50,8 @@ async function _setupSchemaValidator(
 
 	const cache = options.getCache ? await options.getCache() : {}
 
-	const baseURL = 'http://127.0.0.1:8084/json-schema/v1/graphics-manifest/schema.json'
+	const baseURL =
+		'https://superflytv.github.io/tmp-GraphicsDefinition/definition/definition/json-schema/v1/graphics-manifest/schema.json'
 
 	const v = new Validator()
 	async function addRef(ref) {
@@ -106,10 +108,14 @@ async function _setupSchemaValidator(
 	cachedValidator = (schema) => {
 		const result = v.validate(schema, baseSchema)
 
-		return result.errors.map((err) => {
+		const schemaErrors = result.errors.map((err) => {
 			const pathStr = err.path.join('.')
 			return `${pathStr}: ${err.message}`
 		})
+
+		const customErrors = validateGraphicManifest(schema)
+
+		return [...customErrors, ...schemaErrors]
 	}
 	return {
 		validate: cachedValidator,
@@ -117,3 +123,38 @@ async function _setupSchemaValidator(
 	}
 }
 let cachedValidator = null
+
+export function validateGraphicManifest(graphicManifest) {
+	const errors = []
+
+	// Find helpful issues that is not covered by the JSON schema
+
+	// As of
+	if (graphicManifest.rendering !== undefined)
+		errors.push(
+			`The manifest has a "rendering" property. The properties in this has been moved to the top level of the manifest.`
+		)
+
+	if (graphicManifest.actions !== undefined)
+		errors.push(`The manifest has an "actions" property. This has been renamed to "customActions".`)
+
+	return errors
+}
+export function validateGraphicModule(graphicModule) {
+	const errors = []
+
+	if (!graphicModule) return [`No graphic exported`]
+
+	if (typeof graphicModule.load !== 'function') errors.push('Graphic does not expose a load() method')
+	if (typeof graphicModule.dispose !== 'function') errors.push('Graphic does not expose a dispose() method')
+	if (typeof graphicModule.getStatus !== 'function') errors.push('Graphic does not expose a getStatus() method')
+	if (typeof graphicModule.updateAction !== 'function') errors.push('Graphic does not expose a updateAction() method')
+	if (typeof graphicModule.playAction !== 'function') errors.push('Graphic does not expose a playAction() method')
+	if (typeof graphicModule.stopAction !== 'function') errors.push('Graphic does not expose a stopAction() method')
+	if (typeof graphicModule.customAction !== 'function') errors.push('Graphic does not expose a customAction() method')
+	if (typeof graphicModule.goToTime !== 'function') errors.push('Graphic does not expose a goToTime() method')
+	if (typeof graphicModule.setActionsSchedule !== 'function')
+		errors.push('Graphic does not expose a setActionsSchedule() method')
+
+	return errors
+}

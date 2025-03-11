@@ -73,11 +73,21 @@ export function GraphicTester({ graphic, onExit }) {
 		triggerReloadGraphic()
 	}, [settings])
 
+	const [isReloading, setIsReloading] = React.useState(false)
+	React.useEffect(() => {
+		if (isReloading) {
+			const timeout = setTimeout(() => setIsReloading(false), 100)
+			return () => clearTimeout(timeout)
+		}
+	}, [isReloading])
+
 	const reloadGraphic = React.useCallback(async () => {
 		await rendererRef.current.clearGraphic()
 		issueTracker.clear()
 		await reloadGraphicManifest()
 		await rendererRef.current.loadGraphic(settingsRef.current).catch(issueTracker.add)
+
+		setIsReloading(true)
 	}, [])
 
 	const reloadGraphicManifest = React.useCallback(async () => {
@@ -180,6 +190,7 @@ export function GraphicTester({ graphic, onExit }) {
 	React.useEffect(() => {
 		if (!graphicManifest) reloadGraphicManifest().catch(onError)
 	}, [])
+	console.log('isReloading', isReloading)
 
 	return (
 		<SettingsContext.Provider value={{ settings, onChange: onSettingsChange }}>
@@ -195,9 +206,6 @@ export function GraphicTester({ graphic, onExit }) {
 						</div>
 						{graphicManifest ? (
 							<>
-								<div className="issues">
-									<div className="card">{<GraphicIssues manifest={graphicManifest} />}</div>
-								</div>
 								<div className="capabilities">{<GraphicCapabilities manifest={graphicManifest} />}</div>
 								<div className="control">
 									{settings.realtime ? (
@@ -220,6 +228,11 @@ export function GraphicTester({ graphic, onExit }) {
 										{schedule.length ? (
 											<Button onClick={() => setInvokeActionsSchedule([])}>Reset saved actions</Button>
 										) : null}
+									</div>
+								</div>
+								<div className="issues">
+									<div className="card">
+										{!isReloading ? <GraphicIssues manifest={graphicManifest} graphic={graphic} /> : null}
 									</div>
 								</div>
 							</>
