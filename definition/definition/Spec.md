@@ -19,7 +19,7 @@ A Web-based Graphics workflow typically consists of the following components (se
   sending/receiving commands to/from the Renderer.
 * Renderer: is able to render one or more Web-based graphic instances. Based on incoming commands from the Server, a 
   Graphic is animated in, updated or animated out. In order to achieve this, communication between the Renderer and the 
-  Graphic is necessary.
+  Graphic instance is necessary.
 
 <img src="images/components.svg" alt="Components" style="width:800px; height:auto;">
 
@@ -30,7 +30,7 @@ Server, and Renderer) coming from different vendors.
 The scope of this specification is the format definition of a Graphic and how a Renderer should interpret this format 
 in order to render the Graphic. Graphic creators (developers and tools) producing Graphics compatible with this format 
 are guaranteed that these Graphics can be rendered in compliant Renderers. This enables more straightforward 
-exchanges between different Web-based graphic engine solutions and can support marketplaces for Web-based Graphics.
+exchanges between different Web-based graphic engine solutions and can support use cases such as marketplaces for Web-based Graphics.
 
 ## Use of Normative Language
 
@@ -54,19 +54,19 @@ directly or indirectly referenced from the Manifest file and can be seen as depe
 
 The manifest file is a JSON file containing metadata about the Graphic. It consists of the following fields:  
 
-| Field               | Type               | Required | Default | Description                                                                                                                                                                    |
-|---------------------|--------------------|:--------:|:-------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| id                  | string             |    X     |         | A unique identifier for the Graphic.                                                                                                                                           |
-| version             | string             |          |         | A version descriptor of the Graphic. The versioning scheme is beyond the scope of this specification.                                                                          |
-| name                | string             |    X     |         | The name of the Graphic.                                                                                                                                                       |
-| description         | string             |          |         | A longer description of the Graphic.                                                                                                                                           |
-| author              | Author             |          |         | An object providing information about the author of the Graphic. When provided, the object MUST contain a `name` field and MAY contain an `email` and `url` field.             |
-| main                | string             |    X     |         | Reference to the Javascript file that exports the graphic Web Component.                                                                                                       |
-| actions             | Map<string,Action> |          |         | An object with fields corresponding to the ids of custom actions that can be invoked on the Graphic. See below for details about the fields inside an `Action`.                |
-| supportsRealTime    | boolean            |    X     |         | Indicates whether the Graphic supports real-time rendering.                                                                                                                    |
-| supportsNonRealTime | boolean            |    X     |         | Indicates whether the Graphic supports non-real-time rendering. If true, the Graphic MUST implement the non-real-time functions `goToTime()` and `setInvokeActionsSchedule()`. |
-| schema              | object             |          |         | The JSON schema definition for the payload of the `update()` function. This schema can be seen as the (public) state model of the Graphic.                                     |
-| stepCount           | integer            |          |    1    | The number of steps a Graphic consists of.                                                                                                                                     |
+| Field               | Type               | Required | Default | Description                                                                                                                                                        |
+|---------------------|--------------------|:--------:|:-------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| id                  | string             |    X     |         | A unique identifier for the Graphic.                                                                                                                               |
+| version             | string             |          |         | A version descriptor of the Graphic. The versioning scheme is beyond the scope of this specification.                                                              |
+| name                | string             |    X     |         | The name of the Graphic.                                                                                                                                           |
+| description         | string             |          |         | A longer description of the Graphic.                                                                                                                               |
+| author              | Author             |          |         | An object providing information about the author of the Graphic. When provided, the object MUST contain a `name` field and MAY contain an `email` and `url` field. |
+| main                | string             |    X     |         | Reference to the Javascript file that exports the Graphic Web Component.                                                                                           |
+| actions             | Map<string,Action> |          |         | An object with fields corresponding to the ids of custom actions that can be invoked on the Graphic. See below for details about the fields inside an `Action`.    |
+| supportsRealTime    | boolean            |    X     |         | Indicates whether the Graphic supports real-time rendering.                                                                                                        |
+| supportsNonRealTime | boolean            |    X     |         | Indicates whether the Graphic supports non-real-time rendering. If true, the Graphic MUST implement the non-real-time function `goToTimeAction()`.                 |
+| schema              | object             |          |         | The JSON schema definition for the payload of the `updateAction()` function. This schema can be seen as the (public) state model of the Graphic.                   |
+| stepCount           | integer            |          |    1    | The number of steps a Graphic consists of.                                                                                                                         |
 
 #### Real-time vs. non-real-time
 
@@ -76,7 +76,7 @@ typically used in post-production scenarios. A Graphic MUST be either marked as 
 by means of the `supportsRealTime` and `supportsNonRealTime` fields.
 
 In case of a non-real-time Graphic, there is an additional function that need to be implemented by the Graphic: 
-`goToTime()` (see [Web Component Interface](#web-component-interface) for their definition). 
+`goToTimeAction()` (see [Web Component Interface](#web-component-interface) for its definition). 
 
 #### Step model
 
@@ -110,13 +110,14 @@ supports the following fields:
 
 | Field       | Type   | Required | Default | Description                                               |
 |-------------|--------|:--------:|:-------:|-----------------------------------------------------------|
-| label       | string |    X     |         | The name of the action.                                   |
+| name        | string |    X     |         | The name of the action.                                   |
 | description | string |          |         | A longer description of the action.                       |
 | schema      | object |          |         | The JSON schema definition for the payload of the action. |
 
 #### Vendor-specific fields
 
-Vendor-specific fields are fields in the Manifest that are not part of this specification. Every vendor-specific
+Vendor-specific fields are fields that are not part of this specification. They can occur in the Manifest file or
+in the payload of the request/responses for each of the functions in the Web Component. Every vendor-specific
 field MUST use the prefix `v_`. For example, `v_editor` is a valid vendor-specific field, `editor` is not a valid field.
 
 ### Web Component Interface
@@ -126,16 +127,18 @@ The [HTML5 Custom Elements specification](https://html.spec.whatwg.org/multipage
 requirements for such a custom HTML element. 
 
 Therefore, the contents of the `main` Javascript file of a Graphic MUST contain a `class` that extends from `HTMLElement`.
-Depending on the rendering capabilities (defined in the Manifest file), a Graphic is expected to implement some functions.
+Depending on the rendering capabilities (defined in the Manifest file), a Graphic is expected to implement a number of functions.
 
-To describe the functions, the Typescript interface notation is used. For simplicity, we omit the indication that vendor-specific fields
-can be included in both request and response payloads. 
-For the 'action' methods (`playAction()`, `stopAction()`, `updateAction()` and `customAction()`), a Promise MUST be returned that resolves to an `ActionResult` object containing the following fields:
+To describe the functions in this document, the Typescript interface notation is used. For simplicity, we omit the indication 
+that vendor-specific fields can be included in both request and response payloads. 
+For the 'action' methods (`playAction()`, `stopAction()`, `updateAction()` and `customAction()`), a Promise MUST be returned that 
+resolves to an `ActionResult` object containing the following fields:
 * `code`: a number that corresponds to an HTTP status code (2xx indicates a successful result, 4xx and 5xx indicate an error).
 * `message`: an optional human-readable message that corresponds to the `code`.
 * `result`: an optional Graphics-specific response object.
 
-Similarly, for simplicity reasons, we omit these three fields in the description of the functions below. In [Typescript interface](#typescript-interface-for-graphic), the full interface is provided.
+Similarly, for simplicity reasons, we omit these three fields in the description of the functions below. 
+In [Typescript interface](#typescript-interface-for-graphic), the full interface is provided.
 
 Every Graphic MUST implement the following functions:
 * `load: () => Promise<void>`: Called by the Renderer when the Graphic has been loaded into the DOM. 
@@ -144,11 +147,12 @@ Every Graphic MUST implement the following functions:
   is returned that resolves when the Graphic completed the necessary cleanup.
 * `playAction: (payload: {delta: number, goto: number, skipAnimation: boolean}) => Promise<PlayResult>`: 
   Called by the Renderer to play a given step. The `skipAnimation` field indicates whether the Graphic should transition with or without animation. 
-  The `delta` and `goto` fields indicate the target step, `delta` is used for relative steps, `goto` for an absolute step number. When the target
-  step number is higher or equal to the `stepCount` defined in the Manifest, the Graphic MUST transition to the last step. The returned Promise
-  resolves to an `ActionResult` object with an additional `currentStep` field which indicates the current step after the execution of the `play()` method.
-* `stopAction: (payload: {skipAnimation: boolean}) => Promise<ActionResult>`: Called by the Renderer to stop the Graphic from being displayed. This can be with or without
-  animation, depending on the value of the `skipAnimation` field. The returned Promise resolves to an `ActionResult` object.
+  The `delta` and `goto` fields indicate the target step; `delta` is used for relative steps, `goto` for an absolute step number. When the target
+  step number is higher or equal to the `stepCount` defined in the Manifest, the Graphic MUST transition to the end. The returned Promise
+  resolves to an `ActionResult` object with an additional `currentStep` field which indicates the current step after the execution of the `playAction()` function.
+  In case `stepCount` is equal to zero or the `playAction()` function is used to transition to the end, the `currentStep` field in the response is `undefined`.
+* `stopAction: (payload: {skipAnimation: boolean}) => Promise<ActionResult>`: Called by the Renderer to stop the Graphic from being displayed. 
+  This can be with or without animation, depending on the value of the `skipAnimation` field. The returned Promise resolves to an `ActionResult` object.
 * `updateAction: (payload) => Promise<{}>`: Called by the Renderer to update one or more fields of the internal state of the Graphic. The schema of the 
   payload of this function is described in the Manifest using the `schema` field. The returned Promise resolves to an `ActionResult` object.
 * `customAction: ({method: string, payload: any}) => Promise<ActionResult>`: Called by the Renderer to invoke a custom action on the Graphic.
@@ -157,7 +161,7 @@ Every Graphic MUST implement the following functions:
   is returned that resolves to an `ActionResult` object when the action is executed.
 
 Additionally, every non-real-time Graphic MUST implement the following functions:
-* `goToTime: (payload: {timestamp: number}) => Promise<ActionResult>`: Called to make the Graphic jump to a certain `timestamp`, expressed in milliseconds. A Promise 
+* `goToTimeAction: (payload: {timestamp: number}) => Promise<ActionResult>`: Called to make the Graphic jump to a certain `timestamp`, expressed in milliseconds. A Promise 
   is returned with an `ActionResult` that resolves when the frame is rendered at the requested position.
 
 The default export MUST be used to export the `class` representing the Graphic. 
@@ -167,18 +171,18 @@ This type of export allows you to import the Graphic using any name.
 ## Requirements for a Renderer
 
 The way a Graphic is added into a Renderer is non-normative. 
-Different examples are provided [here](TODO) that show how a Graphic can be added to the DOM tree of the Renderer.
+Different examples are provided [here](TODO) showing how a Graphic can be added to the DOM tree of the Renderer.
 
-However, once a Graphic is added into the Renderer, the following steps MUST be taken:
+However, once a Graphic is added into the Renderer, the following steps MUST be executed by the Renderer:
 * Call the `load()` function of the Graphic and wait for the promise to resolve.
 * Call the `updateAction()` function of the Graphic.
 
-When a Graphic is removed from the Renderer, the following steps MUST be taken:
+When a Graphic is removed from the Renderer, the following steps MUST be executed by the Renderer:
 * Call the `dispose()` function of the Graphic and wait for the promise to resolve.
 
 ## JSON Schema for Manifest file
 
-The normative JSON Schema for Manifest file can be found [here](json-schema/v1/graphics-manifest/schema.json).
+The normative JSON Schema for the Manifest file can be found [here](json-schema/v1/graphics-manifest/schema.json).
 
 ## Typescript interface for Graphic
 
@@ -188,7 +192,7 @@ The informative Typescript interface for the Graphic Web Component can be found 
 
 ### Lower Third
 
-The following manifest describes a Lower Third Graphic. It does not contain any custom actions and has one state property: `name`.
+The following manifest describes a simple Lower Third Graphic. It does not contain any custom actions and has one state property: `name`.
 
 ```json
 {
