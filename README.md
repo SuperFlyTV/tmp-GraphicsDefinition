@@ -1,11 +1,15 @@
+# Deprecation notice
+
+_**This repo is archived, the OGraf project can now be found at [https://github.com/ebu/ograf](https://github.com/ebu/ograf)**_
+
 # Temporary HTML Graphics Definition
+
+## Repo organization:
 
 This is a _Work-in-progress_ repo, intended to be a temporary place to collaborate on and store documents, definitions and reference implementations
 for the HTML Graphics API project.
 
 **[Work in progress notes](WIP-notes.md)**
-
-## Repo organization:
 
 ### Definitions
 
